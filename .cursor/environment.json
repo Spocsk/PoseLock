@@ -1,0 +1,8 @@
+{
+  "name": "poselock",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "install": "git --version && echo 'PoseLock cloud environment ready'"
+}
