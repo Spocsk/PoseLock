@@ -1,0 +1,96 @@
+{
+  "identifier" : "Products",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "PoseLockPro",
+      "localizations" : [
+        {
+          "description" : "Locks illimités, trois packs, journal J-30.",
+          "displayName" : "PoseLock Pro",
+          "locale" : "fr_FR"
+        },
+        {
+          "description" : "Unlimited locks, all packs, 30-day journal.",
+          "displayName" : "PoseLock Pro",
+          "locale" : "en_US"
+        }
+      ],
+      "name" : "PoseLock Pro",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "9.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "A0000001",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Locks illimités, 3 packs, J-30, carte share sans mention.",
+              "displayName" : "PoseLock Pro mensuel",
+              "locale" : "fr_FR"
+            },
+            {
+              "description" : "Unlimited locks, 3 packs, 30-day compare, unmarked share card.",
+              "displayName" : "PoseLock Pro monthly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "poselock.pro.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Pro Monthly",
+          "subscriptionGroupID" : "PoseLockPro",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "49.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "A0000002",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Un cycle de prep. 16 semaines. Même accès Pro.",
+              "displayName" : "PoseLock Pro 16 semaines",
+              "locale" : "fr_FR"
+            },
+            {
+              "description" : "One prep cycle. 16 weeks. Same Pro access.",
+              "displayName" : "PoseLock Pro 16 weeks",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "poselock.pro.prep",
+          "recurringSubscriptionPeriod" : "P16W",
+          "referenceName" : "Pro Prep",
+          "subscriptionGroupID" : "PoseLockPro",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}
