@@ -12,6 +12,8 @@
 	<string>PoseLock utilise la caméra pour noter ta pose sur l’appareil. La vidéo de session ne quitte pas l’iPhone.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>PoseLock peut enregistrer une copie des photos lockées dans l’album Photos, uniquement si tu l’actives dans Réglages.</string>
+	<key>RCPublicAPIKey</key>
+	<string></string>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>

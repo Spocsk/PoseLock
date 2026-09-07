@@ -6,6 +6,10 @@ struct PoseLockApp: App {
     @State private var store = StoreManager()
     @State private var session = AppSession()
 
+    init() {
+        StoreManager.configure()
+    }
+
     var body: some Scene {
         WindowGroup {
             RootView()

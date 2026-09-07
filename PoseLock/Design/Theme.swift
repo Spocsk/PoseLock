@@ -20,11 +20,22 @@ enum Theme {
     static let lockGreen = Color(red: 0.55, green: 0.78, blue: 0.58)
     static let frameRed = Color(red: 0.78, green: 0.28, blue: 0.28)
 
+    /// Réservé au splash : le seul gras de l'app.
+    static let wordmarkFont: Font = .system(size: 42, weight: .bold).width(.condensed)
     static let scoreFont: Font = .system(size: 64, weight: .light, design: .default)
     static let titleFont: Font = .system(size: 22, weight: .regular, design: .default)
     static let bodyFont: Font = .system(size: 15, weight: .regular, design: .default)
+    /// Texte d'appui : sous-titres d'options, arguments, lignes de réassurance.
+    /// Le saut direct du corps à la légende était trop brutal pour de la prose.
+    static let supportFont: Font = .system(size: 13, weight: .regular, design: .default)
+    /// Réservée aux micro-libellés : badges, unités, mentions légales.
     static let captionFont: Font = .system(size: 11, weight: .regular, design: .default)
     static let bubbleNameFont: Font = .system(size: 11, weight: .regular, design: .default)
+
+    static let continuousCorner: CGFloat = 12
+    static let skeletonLine: CGFloat = 5
+    static let skeletonLineLocked: CGFloat = 8
+    static let skeletonJoint: CGFloat = 8
 }
 
 enum PoseLockHaptics {

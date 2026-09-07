@@ -16,6 +16,7 @@ final class CameraViewModel {
     var cameraDenied = false
     var lastClean: UIImage?
     var lastOverlay: UIImage?
+    var lastSkeleton: SkeletonSnapshot?
     var lastScore: Float = 0
     var durationToLock: TimeInterval = 0
     var poseID: PoseID = Pack.scene.defaultPoseID
@@ -48,18 +49,19 @@ final class CameraViewModel {
     func stop() {
         capture.onFrame = nil
         capture.stop()
-        if let old = latestPixelBuffer {
-            CVPixelBufferRelease(old)
-            latestPixelBuffer = nil
-        }
+        latestPixelBuffer = nil
     }
 
-    func flip() {
-        capture.flip()
-        isFront = capture.isFront
+    func setCamera(front: Bool) {
+        guard front != isFront else { return }
         smoother.reset()
         holdStart = nil
-        attachFrameHandler()
+        evaluation = .hidden
+        capture.setCamera(front: front) { [weak self] nowFront in
+            guard let self else { return }
+            self.isFront = nowFront
+            self.attachFrameHandler()
+        }
     }
 
     func requestPermissionAgain() {
@@ -70,6 +72,7 @@ final class CameraViewModel {
         didLock = false
         lastClean = nil
         lastOverlay = nil
+        lastSkeleton = nil
         locking = false
         holdStart = nil
         smoother.reset()
@@ -84,28 +87,22 @@ final class CameraViewModel {
 
     private func beginSession(front: Bool) {
         sessionStartedAt = Date()
-        capture.configure(front: front)
-        isFront = capture.isFront
         attachFrameHandler()
-        capture.start()
+        capture.start(front: front) { [weak self] nowFront in
+            self?.isFront = nowFront
+        }
     }
 
     private func attachFrameHandler() {
         let detector = detector
-        capture.onFrame = { [weak self] buffer in
-            guard let pixel = CMSampleBufferGetImageBuffer(buffer) else { return }
-            CVPixelBufferRetain(pixel)
-            let front = self?.capture.isFront ?? false
+        capture.onFrame = { [weak self] buffer, front in
+            guard CMSampleBufferGetImageBuffer(buffer) != nil else { return }
             let frame = detector.detect(sampleBuffer: buffer, isFront: front)
             Task { @MainActor in
-                guard let self else {
-                    CVPixelBufferRelease(pixel)
-                    return
+                guard let self else { return }
+                if let pixel = CMSampleBufferGetImageBuffer(buffer) {
+                    self.latestPixelBuffer = pixel
                 }
-                if let old = self.latestPixelBuffer {
-                    CVPixelBufferRelease(old)
-                }
-                self.latestPixelBuffer = pixel
                 self.apply(frame)
             }
         }
@@ -141,12 +138,15 @@ final class CameraViewModel {
         }
     }
 
-    private func lockNow() async {
+    /// `standIn` ne sert qu'au lock forcé de debug, quand il n'y a pas de flux
+    /// caméra à photographier. Nil en production, donc comportement inchangé.
+    private func lockNow(standIn: UIImage? = nil) async {
         guard !locking, !didLock else { return }
         locking = true
         durationToLock = Date().timeIntervalSince(sessionStartedAt)
         lastScore = smoothedScore
-        let image = latestPixelBuffer.flatMap { FrameImage.uiImage(pixelBuffer: $0, isFront: isFront) }
+        lastSkeleton = SkeletonSnapshot(frame: bodyFrame, evaluation: evaluation)
+        let image = latestPixelBuffer.flatMap { FrameImage.uiImage(pixelBuffer: $0, isFront: isFront) } ?? standIn
         lastClean = image
         if let image {
             lastOverlay = SkeletonRenderer.overlayImage(
@@ -161,6 +161,43 @@ final class CameraViewModel {
         didLock = true
         locking = false
     }
+
+    #if DEBUG
+    /// Lock forcé, réservé au debug : traverse lock → journal dans le simulateur,
+    /// qui n'a ni caméra ni pose à tenir.
+    ///
+    /// Le score est estampillé, pas mesuré. Injecter la silhouette cible ne suffit
+    /// pas : reconstruite depuis les cibles du template, elle ne repasse pas la
+    /// mesure pour les poses tournées ou de dos — de 0 à 70 selon la pose. Le
+    /// squelette stocké reste donc la pose cible, mais la note qui l'accompagne est
+    /// posée d'autorité. Compilé hors release, jamais dans un build distribué.
+    func debugForceLock() async {
+        guard !locking, !didLock else { return }
+        let frame = BodyFrame.preview(for: poseID)
+        var forced = ScoringEngine.evaluate(frame: frame, template: TemplateLibrary.template(for: poseID))
+        forced.gate = .ok
+        forced.rawScore = ScoringConstants.lockScore + 7
+        forced.greenRegions = Set(SkeletonRegion.allCases)
+        forced.missingJoints = []
+        forced.worstCue = "Lock forcé (dev)"
+        // Pas de lissage : sur une frame unique l'EMA ramènerait le score vers zéro.
+        smoother.reset()
+        smoothedScore = forced.rawScore
+        bodyFrame = frame
+        evaluation = forced
+        await lockNow(standIn: Self.debugBackdrop())
+    }
+
+    /// Sans image, `persistLock` abandonne et rien n'atteint le journal. Ce fond
+    /// uni tient la place du flux caméra absent en simulateur.
+    private static func debugBackdrop() -> UIImage {
+        let size = CGSize(width: 1080, height: 1440)
+        return UIGraphicsImageRenderer(size: size).image { context in
+            UIColor(Theme.background).setFill()
+            context.fill(CGRect(origin: .zero, size: size))
+        }
+    }
+    #endif
 }
 
 enum FrameImage {
@@ -184,6 +221,7 @@ enum SkeletonRenderer {
             let cg = ctx.cgContext
             cg.setLineCap(.round)
             cg.setLineJoin(.round)
+            var joints: Set<Joint> = []
             for bone in Bone.all {
                 guard let a = frame.imagePoint(bone.from), let b = frame.imagePoint(bone.to) else { continue }
                 if evaluation.missingJoints.contains(bone.from) || evaluation.missingJoints.contains(bone.to) {
@@ -192,10 +230,19 @@ enum SkeletonRenderer {
                 let green = evaluation.isGloballyGreen || region(for: bone).map { evaluation.greenRegions.contains($0) } == true
                 let color = (green ? UIColor(Theme.lockGreen) : UIColor(Theme.ivory).withAlphaComponent(0.45))
                 cg.setStrokeColor(color.cgColor)
-                cg.setLineWidth(green ? 3.2 : 2.0)
+                cg.setLineWidth(green ? Theme.skeletonLineLocked : Theme.skeletonLine)
                 cg.move(to: CGPoint(x: CGFloat(a.x) * size.width, y: CGFloat(a.y) * size.height))
                 cg.addLine(to: CGPoint(x: CGFloat(b.x) * size.width, y: CGFloat(b.y) * size.height))
                 cg.strokePath()
+                joints.insert(bone.from)
+                joints.insert(bone.to)
+            }
+            cg.setFillColor(UIColor(Theme.ivory).withAlphaComponent(0.9).cgColor)
+            let radius = Theme.skeletonJoint / 2
+            for joint in joints {
+                guard let p = frame.imagePoint(joint) else { continue }
+                let center = CGPoint(x: CGFloat(p.x) * size.width, y: CGFloat(p.y) * size.height)
+                cg.fillEllipse(in: CGRect(x: center.x - radius, y: center.y - radius, width: radius * 2, height: radius * 2))
             }
         }
     }

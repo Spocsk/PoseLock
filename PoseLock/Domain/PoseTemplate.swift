@@ -1,4 +1,5 @@
 import Foundation
+import simd
 
 struct FeatureTarget: Sendable, Equatable {
     let feature: PoseFeature
@@ -228,6 +229,36 @@ enum TemplateLibrary {
                 t(.spineInclination, 6, 12, 0.8, "Poitrine haute.", .torso),
                 t(.headAlignment, 20, 14, 0.7, "Regard par-dessus l’épaule avant.", .head)
             ]
+        case .zyzzClassic:
+            return [
+                t(.torsoTwist, 38, 16, 1.3, "Trois-quarts. Poitrine vers la caméra.", .torso),
+                t(.leftShoulderAbduction, 88, 18, 1.3, "Bras gauche derrière la tête.", .leftArm),
+                t(.leftElbow, 48, 18, 1.2, "Coude gauche haut, main dans la nuque.", .leftArm),
+                t(.rightElbow, 100, 16, 1.1, "Main droite à la hanche.", .rightArm),
+                t(.chestOpen, 0.50, 0.12, 1.3, "Ouvre la cage.", .shoulders),
+                t(.vTaper, 1.58, 0.28, 1.2, "Épaules larges, taille rentrée.", .torso),
+                t(.spineInclination, 6, 12, 1.0, "Expire. Rentre la taille.", .torso),
+                t(.shoulderLevel, 8, 12, 0.8, "Épaule avant un peu plus haute.", .shoulders)
+            ]
+        case .zyzzVacuum:
+            return [
+                t(.torsoTwist, 0, 12, 1.1, "Face caméra. Buste carré.", .torso),
+                t(.spineInclination, 4, 10, 1.4, "Expire. Rentre la taille.", .torso),
+                t(.vTaper, 1.68, 0.28, 1.4, "Taille étroite. Vacuum.", .torso),
+                t(.chestOpen, 0.48, 0.12, 1.1, "Cage haute, lats ouverts.", .shoulders),
+                t(.leftElbow, 165, 20, 0.6, "Bras longs, hors du ventre.", .leftArm),
+                t(.rightElbow, 165, 20, 0.6, "Bras longs, hors du ventre.", .rightArm),
+                t(.shoulderLevel, 0, 10, 1.0, "Épaules égales.", .shoulders)
+            ]
+        case .zyzzTwist:
+            return [
+                t(.torsoTwist, 55, 16, 1.5, "Twist plus marqué. Poitrine vers la caméra.", .torso),
+                t(.chestOpen, 0.46, 0.12, 1.2, "Ouvre le côté visible.", .shoulders),
+                t(.shoulderLevel, 10, 12, 0.9, "Ligne d’épaule avant plus haute.", .shoulders),
+                t(.vTaper, 1.52, 0.26, 1.1, "Serre la taille.", .torso),
+                t(.spineInclination, 8, 12, 0.9, "Poitrine haute.", .torso),
+                t(.headAlignment, 24, 14, 0.8, "Regard par-dessus l’épaule avant.", .head)
+            ]
         }
     }
 
@@ -240,5 +271,291 @@ enum TemplateLibrary {
         _ region: SkeletonRegion
     ) -> FeatureTarget {
         FeatureTarget(feature: feature, target: target, tolerance: tolerance, weight: weight, cue: cue, region: region)
+    }
+}
+
+/// Silhouette 3D/2D à partir des cibles du template — illustration coach, home, paywall.
+enum PosePreviewBuilder {
+    private static let upperArm: Float = 0.33
+    private static let forearm: Float = 0.32
+    private static let thigh: Float = 0.45
+    private static let shin: Float = 0.45
+
+    static func frame(for poseID: PoseID) -> BodyFrame {
+        let features = TemplateLibrary.features(for: poseID)
+        func target(_ feature: PoseFeature, _ fallback: Float) -> Float {
+            features.first { $0.feature == feature }?.target ?? fallback
+        }
+        func optional(_ feature: PoseFeature) -> Float? {
+            features.first { $0.feature == feature }?.target
+        }
+
+        let twist: Float = target(.torsoTwist, 0)
+        let viewYaw = min(max(twist, 0), 40)
+        let hipHalf: Float = 0.12
+        let stance: Float = target(.stanceWidth, 0.26)
+        let vTaper: Float = target(.vTaper, 1.7)
+        let chest = optional(.chestOpen)
+        var shoulderHalf: Float = chest.map { $0 / 2 } ?? (vTaper * hipHalf)
+        shoulderHalf = min(max(shoulderHalf, 0.18), 0.34)
+
+        var joints: [Joint: SIMD3<Float>] = [:]
+        joints[.root] = .zero
+        joints[.leftHip] = SIMD3<Float>(-hipHalf, 0, 0)
+        joints[.rightHip] = SIMD3<Float>(hipHalf, 0, 0)
+
+        let hipLevel: Float = target(.hipLevel, 0)
+        if hipLevel > 0.4 {
+            let dy = (hipLevel / 90) * (hipHalf * 2)
+            joints[.rightHip]!.y += dy / 2
+            joints[.leftHip]!.y -= dy / 2
+        }
+
+        let inc = target(.spineInclination, 3) * Float.pi / 180
+        let spineDir = SIMD3<Float>(0, cos(inc), -sin(inc))
+        joints[.spine] = spineDir * 0.40
+        joints[.neck] = spineDir * 0.75
+        let headInc = target(.headAlignment, 0) * Float.pi / 180
+        joints[.head] = joints[.neck]! + SIMD3<Float>(sin(headInc), cos(headInc), -sin(inc) * 0.15) * 0.26
+
+        let shoulderY: Float = 0.72
+        joints[.leftShoulder] = SIMD3<Float>(-shoulderHalf, shoulderY, 0)
+        joints[.rightShoulder] = SIMD3<Float>(shoulderHalf, shoulderY, 0)
+        let shoulderLevel: Float = target(.shoulderLevel, 0)
+        if shoulderLevel > 0.4 {
+            let dy = (shoulderLevel / 90) * (shoulderHalf * 2)
+            joints[.rightShoulder]!.y += dy / 2
+            joints[.leftShoulder]!.y -= dy / 2
+        }
+
+        let leftElbowAngle = target(.leftElbow, 168)
+        let rightElbowAngle = target(.rightElbow, 168)
+        let leftAbd = inferredAbduction(elbow: leftElbowAngle, specified: optional(.leftShoulderAbduction))
+        let rightAbd = inferredAbduction(elbow: rightElbowAngle, specified: optional(.rightShoulderAbduction))
+
+        let leftArm = arm(
+            shoulder: joints[.leftShoulder]!,
+            hip: joints[.leftHip]!,
+            isLeft: true,
+            abduction: leftAbd,
+            elbowAngle: leftElbowAngle,
+            wristHeight: optional(.leftWristHeight)
+        )
+        joints[.leftElbow] = leftArm.elbow
+        joints[.leftWrist] = leftArm.wrist
+
+        let rightArm = arm(
+            shoulder: joints[.rightShoulder]!,
+            hip: joints[.rightHip]!,
+            isLeft: false,
+            abduction: rightAbd,
+            elbowAngle: rightElbowAngle,
+            wristHeight: optional(.rightWristHeight)
+        )
+        joints[.rightElbow] = rightArm.elbow
+        joints[.rightWrist] = rightArm.wrist
+
+        let leftLeg = leg(
+            hip: joints[.leftHip]!,
+            isLeft: true,
+            kneeAngle: target(.leftKnee, 172),
+            ankleX: -stance / 2
+        )
+        joints[.leftKnee] = leftLeg.knee
+        joints[.leftAnkle] = leftLeg.ankle
+
+        let rightLeg = leg(
+            hip: joints[.rightHip]!,
+            isLeft: false,
+            kneeAngle: target(.rightKnee, 172),
+            ankleX: stance / 2
+        )
+        joints[.rightKnee] = rightLeg.knee
+        joints[.rightAnkle] = rightLeg.ankle
+
+        let yawJoints: [Joint] = [
+            .spine, .neck, .head,
+            .leftShoulder, .rightShoulder,
+            .leftElbow, .rightElbow,
+            .leftWrist, .rightWrist
+        ]
+        for joint in yawJoints {
+            if let p = joints[joint] {
+                joints[joint] = rotateY(p, degrees: viewYaw)
+            }
+        }
+
+        let normalized = ScoringEngine.normalize(joints: joints)
+        return BodyFrame(
+            joints3D: normalized,
+            joints2D: projectFitted(normalized),
+            confidence: 0.95,
+            subjectHeightRatio: 0.72,
+            handsVisible: true,
+            feetVisible: true
+        )
+    }
+
+    /// 0 = bras le long du corps, 90 = horizontal, ~90+ légèrement relevé.
+    private static func inferredAbduction(elbow: Float, specified: Float?) -> Float {
+        if let specified { return specified }
+        if elbow < 75 { return 92 }
+        if elbow < 125 { return 48 }
+        return 16
+    }
+
+    private static func arm(
+        shoulder: SIMD3<Float>,
+        hip: SIMD3<Float>,
+        isLeft: Bool,
+        abduction: Float,
+        elbowAngle: Float,
+        wristHeight: Float?
+    ) -> (elbow: SIMD3<Float>, wrist: SIMD3<Float>) {
+        let side: Float = isLeft ? -1 : 1
+        let a = abduction * Float.pi / 180
+        let fistsInFront = abduction < 55 && elbowAngle < 85
+        var upperDir = SIMD3<Float>(side * sin(a), -cos(a), fistsInFront ? 0.45 * sin(max(a, 0.2)) : 0)
+        upperDir = simd_normalize(upperDir)
+        let elbow = shoulder + upperArm * upperDir
+
+        let u = simd_normalize(elbow - shoulder)
+        let bend = (180 - elbowAngle) * Float.pi / 180
+        var toward: SIMD3<Float>
+        if elbowAngle < 80 {
+            toward = SIMD3<Float>(-side * 0.15, 1, fistsInFront ? 0.4 : 0)
+        } else if elbowAngle < 125 {
+            toward = hip - elbow
+        } else {
+            toward = u
+        }
+        var plane = toward - u * simd_dot(toward, u)
+        if simd_length(plane) < 0.08 {
+            plane = SIMD3<Float>(0, 1, 0) - u * simd_dot(SIMD3<Float>(0, 1, 0), u)
+        }
+        if simd_length(plane) < 0.04 {
+            plane = SIMD3<Float>(side, 0, 0)
+        }
+        plane = simd_normalize(plane)
+        var forearmDir = simd_normalize(u * cos(bend) + plane * sin(bend))
+        var wrist = elbow + forearm * forearmDir
+
+        if let wristHeight {
+            let desiredY = shoulder.y + wristHeight
+            let dy = (desiredY - elbow.y) / forearm
+            let clamped = min(max(dy, -0.98), 0.98)
+            let rest = sqrt(max(0, 1 - clamped * clamped))
+            var hz = SIMD2<Float>(forearmDir.x, forearmDir.z)
+            let hl = simd_length(hz)
+            if hl > 0.01 {
+                hz = (hz / hl) * rest
+            } else {
+                hz = SIMD2<Float>(side * rest * 0.25, 0)
+            }
+            forearmDir = simd_normalize(SIMD3<Float>(hz.x, clamped, hz.y))
+            wrist = elbow + forearm * forearmDir
+        }
+        return (elbow, wrist)
+    }
+
+    private static func leg(
+        hip: SIMD3<Float>,
+        isLeft: Bool,
+        kneeAngle: Float,
+        ankleX: Float
+    ) -> (knee: SIMD3<Float>, ankle: SIMD3<Float>) {
+        let ankle = SIMD3<Float>(ankleX, hip.y - (thigh + shin) * 0.98, 0)
+        let hipToAnkle = ankle - hip
+        var dist = simd_length(hipToAnkle)
+        let maxReach = thigh + shin - 0.01
+        if dist > maxReach {
+            dist = maxReach
+        }
+        dist = max(dist, 0.08)
+        let dir = simd_normalize(hipToAnkle)
+        let x = (dist * dist + thigh * thigh - shin * shin) / (2 * dist)
+        let heightSq = max(0, thigh * thigh - x * x)
+        let height = sqrt(heightSq)
+        let side: Float = isLeft ? -1 : 1
+        var perp = SIMD3<Float>(-dir.y * side, dir.x * side, 0.12)
+        if simd_length(perp) < 0.01 {
+            perp = SIMD3<Float>(side, 0, 0)
+        }
+        perp = simd_normalize(perp)
+        let visibleBend = max(0, (180 - kneeAngle) / 25)
+        let knee = hip + dir * x + perp * (height * min(visibleBend, 1))
+        return (knee, ankle)
+    }
+
+    /// Aligne le bassin du skeleton capturé sur celui de la référence. Vision
+    /// place le sujet selon son orientation devant l’objectif, ce qui n’a rien
+    /// à voir avec la pose : sans ce recalage les deux silhouettes ne seraient
+    /// pas comparables. La torsion buste / bassin, elle, est préservée.
+    static func alignYawToHips(
+        _ joints: [Joint: SIMD3<Float>],
+        like reference: [Joint: SIMD3<Float>]
+    ) -> [Joint: SIMD3<Float>] {
+        guard let delta = hipYaw(reference).flatMap({ ref in hipYaw(joints).map { ref - $0 } }) else {
+            return joints
+        }
+        return joints.mapValues { rotateY($0, degrees: delta) }
+    }
+
+    private static func hipYaw(_ joints: [Joint: SIMD3<Float>]) -> Float? {
+        guard let left = joints[.leftHip], let right = joints[.rightHip] else { return nil }
+        let dx = right.x - left.x
+        let dz = right.z - left.z
+        guard dx * dx + dz * dz > 0.0001 else { return nil }
+        return atan2(dz, dx) * 180 / .pi
+    }
+
+    static func rotateY(_ p: SIMD3<Float>, degrees: Float) -> SIMD3<Float> {
+        let r = degrees * Float.pi / 180
+        let c = cos(r)
+        let s = sin(r)
+        return SIMD3<Float>(p.x * c + p.z * s, p.y, -p.x * s + p.z * c)
+    }
+
+    /// Projette en 0…1, Y vers le bas, en tenant compte de Z pour les ¾.
+    static func projectFitted(_ joints3D: [Joint: SIMD3<Float>], yaw: Float = 0) -> [Joint: SIMD2<Float>] {
+        projectFitted([joints3D], yaw: yaw).first ?? [:]
+    }
+
+    /// Même cadre pour tous les jeux de joints : indispensable pour comparer
+    /// deux skeletons, sinon chacun serait recadré sur sa propre bounding box
+    /// et l’écart disparaîtrait.
+    static func projectFitted(_ sets: [[Joint: SIMD3<Float>]], yaw: Float = 0) -> [[Joint: SIMD2<Float>]] {
+        let projected: [[Joint: SIMD2<Float>]] = sets.map { set in
+            set.mapValues { p -> SIMD2<Float> in
+                let r = yaw == 0 ? p : rotateY(p, degrees: yaw)
+                return SIMD2<Float>(r.x + r.z * 0.38, r.y)
+            }
+        }
+        let all = projected.flatMap(\.values)
+        guard let minX = all.map(\.x).min(),
+              let maxX = all.map(\.x).max(),
+              let minY = all.map(\.y).min(),
+              let maxY = all.map(\.y).max() else {
+            return sets.map { _ in [:] }
+        }
+        let width = max(maxX - minX, 0.18)
+        let height = max(maxY - minY, 0.18)
+        let cx = (minX + maxX) / 2
+        let scale = max(width / 0.76, height / 0.84)
+        return projected.map { set in
+            var out: [Joint: SIMD2<Float>] = [:]
+            for (joint, p) in set {
+                let nx = 0.5 + (p.x - cx) / scale
+                let ny = 0.10 + (maxY - p.y) / scale
+                out[joint] = SIMD2<Float>(min(max(nx, 0.04), 0.96), min(max(ny, 0.04), 0.96))
+            }
+            return out
+        }
+    }
+}
+
+extension BodyFrame {
+    static func preview(for poseID: PoseID) -> BodyFrame {
+        PosePreviewBuilder.frame(for: poseID)
     }
 }

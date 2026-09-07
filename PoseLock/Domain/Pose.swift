@@ -31,6 +31,11 @@ enum PoseID: String, Codable, CaseIterable, Identifiable, Sendable {
     case shoulderSymmetry
     case twistThreeQuarter
 
+    // Zyzz — Pro only
+    case zyzzClassic
+    case zyzzVacuum
+    case zyzzTwist
+
     var id: String { rawValue }
 
     var displayName: String {
@@ -58,6 +63,9 @@ enum PoseID: String, Codable, CaseIterable, Identifiable, Sendable {
         case .clavicleOpen: return "Ouverture cage"
         case .shoulderSymmetry: return "Symétrie épaules"
         case .twistThreeQuarter: return "Twist ¾"
+        case .zyzzClassic: return "Pose Zyzz"
+        case .zyzzVacuum: return "Vacuum face"
+        case .zyzzTwist: return "Twist esthétique"
         }
     }
 
@@ -74,6 +82,8 @@ enum PoseID: String, Codable, CaseIterable, Identifiable, Sendable {
         case .frontPosture, .profilePosture, .shoulderToWaist,
              .clavicleOpen, .shoulderSymmetry, .twistThreeQuarter:
             return .physique
+        case .zyzzClassic, .zyzzVacuum, .zyzzTwist:
+            return .zyzz
         }
     }
 
@@ -83,6 +93,7 @@ enum PoseID: String, Codable, CaseIterable, Identifiable, Sendable {
         case .scene: return "figure.stand"
         case .content: return "camera.filters"
         case .physique: return "person"
+        case .zyzz: return "sparkles"
         }
     }
 }

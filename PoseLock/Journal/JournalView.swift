@@ -2,52 +2,50 @@ import SwiftUI
 import UIKit
 import UniformTypeIdentifiers
 
-struct JournalSheet: View {
+enum JournalTab: String, CaseIterable, Identifiable {
+    case takes
+    case poses
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .takes: return "Prises"
+        case .poses: return "Poses"
+        }
+    }
+}
+
+struct JournalView: View {
     var entries: [LockEntry]
     var isPro: Bool
-    @Environment(\.dismiss) private var dismiss
     @State private var selectedID: UUID?
+    @State private var tab: JournalTab = .takes
 
     private let columns = [GridItem(.adaptive(minimum: 104), spacing: 4)]
 
     var body: some View {
         NavigationStack {
-            Group {
-                if entries.isEmpty {
-                    VStack(spacing: 8) {
-                        Text("Aucune photo.")
-                            .font(Theme.bodyFont)
-                            .foregroundStyle(Theme.ivory)
-                        Text("Un lock, et le journal commence.")
-                            .font(Theme.captionFont)
-                            .foregroundStyle(Theme.ivoryMuted)
+            VStack(spacing: 0) {
+                Picker("Vue", selection: $tab) {
+                    ForEach(JournalTab.allCases) { tab in
+                        Text(tab.displayName).tag(tab)
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
-                    ScrollView {
-                        LazyVGrid(columns: columns, spacing: 4) {
-                            ForEach(entries, id: \.id) { entry in
-                                Button {
-                                    selectedID = entry.id
-                                } label: {
-                                    JournalCell(entry: entry)
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
-                        .padding(8)
-                    }
+                }
+                .pickerStyle(.segmented)
+                .padding(.horizontal, 16)
+                .padding(.bottom, 8)
+
+                switch tab {
+                case .takes:
+                    takesGrid
+                case .poses:
+                    PoseRecapView(entries: entries)
                 }
             }
             .background(Theme.background.ignoresSafeArea())
             .navigationTitle("Journal")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Fermer") { dismiss() }
-                        .foregroundStyle(Theme.gold)
-                }
-            }
             .navigationDestination(item: $selectedID) { id in
                 if let entry = entries.first(where: { $0.id == id }) {
                     JournalDetailView(entry: entry, entries: entries, isPro: isPro)
@@ -55,6 +53,35 @@ struct JournalSheet: View {
             }
         }
         .preferredColorScheme(.dark)
+    }
+
+    @ViewBuilder
+    private var takesGrid: some View {
+        if entries.isEmpty {
+            VStack(spacing: 8) {
+                Text("Aucune photo.")
+                    .font(Theme.bodyFont)
+                    .foregroundStyle(Theme.ivory)
+                Text("Un lock, et le journal commence.")
+                    .font(Theme.captionFont)
+                    .foregroundStyle(Theme.ivoryMuted)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else {
+            ScrollView {
+                LazyVGrid(columns: columns, spacing: 4) {
+                    ForEach(entries, id: \.id) { entry in
+                        Button {
+                            selectedID = entry.id
+                        } label: {
+                            JournalCell(entry: entry)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(8)
+            }
+        }
     }
 }
 
@@ -135,7 +162,7 @@ struct JournalDetailView: View {
         .background(Theme.background.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showShare) {
-            ShareCardView(entry: entry, branded: !isPro)
+            ShareCardView(entry: entry)
         }
     }
 
@@ -145,7 +172,7 @@ struct JournalDetailView: View {
             Image(uiImage: image)
                 .resizable()
                 .scaledToFit()
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .clipShape(RoundedRectangle(cornerRadius: Theme.continuousCorner, style: .continuous))
         } else {
             Rectangle()
                 .fill(Theme.elevated)
@@ -195,14 +222,13 @@ struct JournalDetailView: View {
 
 struct ShareCardView: View {
     var entry: LockEntry
-    var branded: Bool
     @Environment(\.dismiss) private var dismiss
     @State private var rendered: UIImage?
 
     var body: some View {
         NavigationStack {
             VStack {
-                ShareCardCanvas(entry: entry, branded: branded)
+                ShareCardCanvas(entry: entry)
                     .aspectRatio(9 / 16, contentMode: .fit)
                     .padding(24)
                 Spacer()
@@ -234,7 +260,7 @@ struct ShareCardView: View {
 
     @MainActor
     private func render() {
-        let renderer = ImageRenderer(content: ShareCardCanvas(entry: entry, branded: branded).frame(width: 1080, height: 1920))
+        let renderer = ImageRenderer(content: ShareCardCanvas(entry: entry).frame(width: 1080, height: 1920))
         renderer.scale = 1
         rendered = renderer.uiImage
     }
@@ -242,7 +268,6 @@ struct ShareCardView: View {
 
 struct ShareCardCanvas: View {
     var entry: LockEntry
-    var branded: Bool
 
     var body: some View {
         GeometryReader { geo in
@@ -264,14 +289,11 @@ struct ShareCardCanvas: View {
                         .font(.system(size: max(48, geo.size.width * 0.18), weight: .light))
                         .foregroundStyle(Theme.ivory)
                         .padding(.top, 4)
-                    if branded {
-                        Text("PoseLock")
-                            .font(.system(size: max(11, geo.size.width * 0.03), weight: .regular))
-                            .foregroundStyle(Theme.gold)
-                            .padding(.top, 16)
-                    }
                     Spacer().frame(height: geo.size.height * 0.08)
                 }
+            }
+            .overlay(alignment: .bottomTrailing) {
+                ShareMarkLabel(reference: min(geo.size.width, geo.size.height))
             }
         }
         .background(Theme.background)

@@ -1,4 +1,5 @@
 import simd
+import UIKit
 import XCTest
 @testable import PoseLock
 
@@ -42,7 +43,7 @@ final class ScoringEngineTests: XCTestCase {
     }
 
     func testFrontPostureGoldScoresHigh() {
-        let frame = Self.standingFrame()
+        let frame = BodyFrame.standingPreview()
         let template = TemplateLibrary.template(for: .frontPosture)
         let evaluation = ScoringEngine.evaluate(frame: frame, template: template)
         XCTAssertEqual(evaluation.gate, .ok)
@@ -72,42 +73,95 @@ final class ScoringEngineTests: XCTestCase {
         XCTAssertEqual(PoseCatalog.poses(for: .scene).count, 11)
         XCTAssertEqual(PoseCatalog.poses(for: .content).count, 6)
         XCTAssertEqual(PoseCatalog.poses(for: .physique).count, 6)
+        XCTAssertEqual(PoseCatalog.poses(for: .zyzz).count, 3)
+        XCTAssertFalse(Pack.onboardingCases.contains(.zyzz))
+        XCTAssertEqual(Pack.onboardingCases.count, 3)
     }
 
-    static func standingFrame() -> BodyFrame {
-        let joints: [Joint: SIMD3<Float>] = [
-            .root: SIMD3(0, 0, 0),
-            .spine: SIMD3(0, 0.4, 0),
-            .neck: SIMD3(0, 0.75, 0),
-            .head: SIMD3(0, 1.0, 0),
-            .leftShoulder: SIMD3(-0.22, 0.72, 0),
-            .rightShoulder: SIMD3(0.22, 0.72, 0),
-            .leftElbow: SIMD3(-0.24, 0.4, 0),
-            .rightElbow: SIMD3(0.24, 0.4, 0),
-            .leftWrist: SIMD3(-0.25, 0.08, 0),
-            .rightWrist: SIMD3(0.25, 0.08, 0),
-            .leftHip: SIMD3(-0.12, 0, 0),
-            .rightHip: SIMD3(0.12, 0, 0),
-            .leftKnee: SIMD3(-0.12, -0.45, 0),
-            .rightKnee: SIMD3(0.12, -0.45, 0),
-            .leftAnkle: SIMD3(-0.12, -0.9, 0),
-            .rightAnkle: SIMD3(0.12, -0.9, 0)
-        ]
-        let normalized = ScoringEngine.normalize(joints: joints)
-        var joints2D: [Joint: SIMD2<Float>] = [:]
-        for (joint, p) in normalized {
-            joints2D[joint] = SIMD2(p.x * 0.25 + 0.5, 0.15 + (1 - (p.y + 1) / 2) * 0.7)
+    func testEveryPoseHasThreeCoachSteps() {
+        for pose in PoseID.allCases {
+            let steps = PoseCoachCopy.steps(for: pose)
+            XCTAssertEqual(steps.count, 3, pose.rawValue)
+            XCTAssertFalse(steps[1].detail.isEmpty, pose.rawValue)
         }
-        return BodyFrame(
-            joints3D: normalized,
-            joints2D: joints2D,
-            confidence: 0.9,
-            subjectHeightRatio: 0.7,
-            handsVisible: true,
-            feetVisible: true
-        )
+    }
+
+    /// Le lock forcé de debug injecte cette frame. Elle doit passer la porte de
+    /// cadrage, sinon le HUD réclamerait « Recule » au moment même du lock.
+    /// Son score, lui, ne suffit pas : reconstruite depuis les cibles, elle ne
+    /// repasse pas la mesure pour les poses tournées, d'où l'estampille côté debug.
+    func testPreviewFrameOfEveryPosePassesTheFrameGate() {
+        for pose in PoseID.allCases {
+            let (gate, missing) = ScoringEngine.gate(BodyFrame.preview(for: pose))
+            XCTAssertEqual(gate, .ok, pose.rawValue)
+            XCTAssertTrue(missing.isEmpty, pose.rawValue)
+        }
+    }
+
+    func testPreviewFramesHaveAllJointsAndDistinctPoses() {
+        for pose in PoseID.allCases {
+            let frame = BodyFrame.preview(for: pose)
+            for joint in Joint.allCases {
+                XCTAssertNotNil(frame.joints3D[joint], "\(pose.rawValue) missing \(joint.rawValue)")
+                XCTAssertNotNil(frame.joints2D[joint], "\(pose.rawValue) 2D missing \(joint.rawValue)")
+            }
+            XCTAssertTrue(frame.handsVisible)
+            XCTAssertTrue(frame.feetVisible)
+        }
+
+        let biceps = BodyFrame.preview(for: .frontDoubleBiceps)
+        let lat = BodyFrame.preview(for: .frontLatSpread)
+        let stand = BodyFrame.preview(for: .frontPosture)
+
+        let bicepsWrist = biceps.joints3D[.leftWrist]!
+        let bicepsShoulder = biceps.joints3D[.leftShoulder]!
+        let bicepsElbow = biceps.joints3D[.leftElbow]!
+        XCTAssertGreaterThan(bicepsWrist.y, bicepsShoulder.y - 0.05, "FDB: poignet trop bas")
+        XCTAssertGreaterThan(bicepsElbow.y, stand.joints3D[.leftElbow]!.y + 0.15, "FDB: coude trop bas")
+
+        let latWrist = lat.joints3D[.leftWrist]!
+        let latHip = lat.joints3D[.leftHip]!
+        XCTAssertLessThan(abs(latWrist.y - latHip.y), 0.45, "Lat spread: mains trop loin des hanches")
+        XCTAssertLessThan(latWrist.y, bicepsWrist.y - 0.12, "Lat spread vs biceps: poignets pas distincts")
+
+        let biceps2D = biceps.joints2D[.leftWrist]!
+        let stand2D = stand.joints2D[.leftWrist]!
+        XCTAssertLessThan(biceps2D.y, stand2D.y - 0.08, "2D: biceps doit monter les poignets")
     }
 }
+
+#if DEBUG
+/// Le lock forcé n'existe qu'en debug, mais l'owner s'en sert pour traverser le
+/// journal. Ce test tient sa promesse : sans caméra, il doit tout de même produire
+/// ce que `persistLock` exige — un score lockable, une image, un squelette.
+@MainActor
+final class DebugForceLockTests: XCTestCase {
+    func testForcedLockProducesEverythingTheJournalNeeds() async throws {
+        let model = CameraViewModel()
+        model.poseID = .backLatSpread // La pose dont la silhouette note 0 : cas le pire.
+
+        await model.debugForceLock()
+
+        XCTAssertTrue(model.didLock)
+        XCTAssertGreaterThan(model.lastScore, ScoringConstants.lockScore)
+        XCTAssertTrue(model.evaluation.isGloballyGreen)
+        // Sans flux caméra le fond de substitution prend le relais, sinon
+        // `persistLock` abandonnerait et rien n'atteindrait le journal.
+        XCTAssertNotNil(model.lastClean)
+        XCTAssertNotNil(model.lastOverlay)
+        let skeleton = try XCTUnwrap(model.lastSkeleton)
+        XCTAssertEqual(skeleton.joints.count, Joint.allCases.count)
+    }
+
+    func testForcedLockIsIgnoredOnceLocked() async {
+        let model = CameraViewModel()
+        await model.debugForceLock()
+        let first = model.lastScore
+        await model.debugForceLock()
+        XCTAssertEqual(model.lastScore, first)
+    }
+}
+#endif
 
 final class DailyPoseSelectorTests: XCTestCase {
     func testDefaultsWhenNoHistory() {
@@ -165,5 +219,241 @@ final class LockQuotaTests: XCTestCase {
             return LockEntrySnapshot(date: day, pack: .physique, poseID: .frontPosture, score: 80)
         }
         XCTAssertEqual(JournalStats.streak(entries: entries, now: today, calendar: calendar), 3)
+    }
+}
+
+final class ShareMarkTests: XCTestCase {
+    /// La signature doit atterrir dans le coin bas-droit et nulle part ailleurs :
+    /// c'est ce coin qui reste vide sur la carte et sur une photo de pose.
+    func testStampLandsInTheBottomTrailingCornerOnly() throws {
+        let size = CGSize(width: 400, height: 600)
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        let black = UIGraphicsImageRenderer(size: size, format: format).image { context in
+            UIColor.black.setFill()
+            context.fill(CGRect(origin: .zero, size: size))
+        }
+
+        let marked = ShareMark.stamped(black)
+
+        XCTAssertEqual(marked.size, black.size)
+        XCTAssertTrue(
+            try hasInk(marked, in: CGRect(x: 200, y: 300, width: 200, height: 300)),
+            "rien n'a été dessiné dans le coin bas-droit"
+        )
+        XCTAssertFalse(
+            try hasInk(marked, in: CGRect(x: 0, y: 0, width: 200, height: 300)),
+            "le coin haut-gauche devait rester intact"
+        )
+    }
+
+    func testStampLeavesADegenerateImageAlone() {
+        let empty = UIImage()
+        XCTAssertEqual(ShareMark.stamped(empty).size, .zero)
+    }
+
+    /// Vrai dès qu'un pixel de la zone n'est plus noir.
+    private func hasInk(_ image: UIImage, in rect: CGRect) throws -> Bool {
+        let cg = try XCTUnwrap(image.cgImage)
+        let width = cg.width
+        let height = cg.height
+        var pixels = [UInt8](repeating: 0, count: width * height * 4)
+        let context = CGContext(
+            data: &pixels,
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bytesPerRow: width * 4,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        )
+        try XCTUnwrap(context).draw(cg, in: CGRect(x: 0, y: 0, width: width, height: height))
+        for y in Int(rect.minY)..<min(Int(rect.maxY), height) {
+            for x in Int(rect.minX)..<min(Int(rect.maxX), width) {
+                let offset = (y * width + x) * 4
+                if pixels[offset] > 40 || pixels[offset + 1] > 40 || pixels[offset + 2] > 40 {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+}
+
+final class SkeletonSnapshotTests: XCTestCase {
+    func testEncodeDecodeRoundTrip() throws {
+        let frame = BodyFrame.preview(for: .frontDoubleBiceps)
+        let evaluation = PoseEvaluation(
+            gate: .ok,
+            rawScore: 82,
+            greenRegions: [.leftArm, .torso],
+            missingJoints: [],
+            worstCue: "",
+            features: []
+        )
+        let snapshot = SkeletonSnapshot(frame: frame, evaluation: evaluation)
+        XCTAssertFalse(snapshot.joints.isEmpty)
+
+        let data = try JSONEncoder().encode(snapshot)
+        let decoded = try JSONDecoder().decode(SkeletonSnapshot.self, from: data)
+        XCTAssertEqual(decoded, snapshot)
+        XCTAssertEqual(Set(decoded.greenRegions), [.leftArm, .torso])
+
+        let restored = decoded.joints3D
+        for (joint, position) in frame.joints3D {
+            let p = try XCTUnwrap(restored[joint])
+            XCTAssertEqual(simd_length(p - position), 0, accuracy: 0.0001)
+        }
+    }
+}
+
+final class PoseRecapTests: XCTestCase {
+    func testKeepsBestTakePerPose() throws {
+        let now = Date()
+        let best = now.addingTimeInterval(-60)
+        let entries = [
+            LockEntrySnapshot(date: now, pack: .scene, poseID: .sideChest, score: 61),
+            LockEntrySnapshot(date: best, pack: .scene, poseID: .sideChest, score: 93),
+            LockEntrySnapshot(date: now, pack: .scene, poseID: .frontDoubleBiceps, score: 70)
+        ]
+        let recaps = JournalStats.poseRecaps(entries: entries)
+        XCTAssertEqual(recaps.count, 2)
+
+        let sideChest = try XCTUnwrap(recaps.first { $0.poseID == .sideChest })
+        XCTAssertEqual(sideChest.bestScore, 93)
+        XCTAssertEqual(sideChest.bestDate, best)
+        XCTAssertEqual(sideChest.takeCount, 2)
+        XCTAssertEqual(sideChest.averageScore, 77, accuracy: 0.01)
+    }
+
+    func testSortsByBestScoreDescending() {
+        let now = Date()
+        let entries = [
+            LockEntrySnapshot(date: now, pack: .scene, poseID: .sideChest, score: 40),
+            LockEntrySnapshot(date: now, pack: .scene, poseID: .frontDoubleBiceps, score: 88)
+        ]
+        XCTAssertEqual(JournalStats.poseRecaps(entries: entries).map(\.poseID), [.frontDoubleBiceps, .sideChest])
+    }
+
+    func testIgnoresPosesWithoutTakes() {
+        XCTAssertTrue(JournalStats.poseRecaps(entries: []).isEmpty)
+    }
+
+    func testDailyBestsKeepsBestScorePerDay() {
+        let calendar = Calendar(identifier: .gregorian)
+        let today = calendar.startOfDay(for: Date())
+        let yesterday = calendar.date(byAdding: .day, value: -1, to: today)!
+        let entries = [
+            LockEntrySnapshot(date: today.addingTimeInterval(60), pack: .scene, poseID: .frontDoubleBiceps, score: 70),
+            LockEntrySnapshot(date: today.addingTimeInterval(120), pack: .scene, poseID: .frontDoubleBiceps, score: 91),
+            LockEntrySnapshot(date: yesterday, pack: .scene, poseID: .frontDoubleBiceps, score: 80),
+            LockEntrySnapshot(date: today, pack: .scene, poseID: .sideChest, score: 99)
+        ]
+        let points = JournalStats.dailyBests(
+            poseID: .frontDoubleBiceps,
+            entries: entries,
+            from: yesterday,
+            to: today,
+            calendar: calendar
+        )
+        XCTAssertEqual(points.map(\.score), [80, 91])
+        XCTAssertEqual(points.map { calendar.startOfDay(for: $0.day) }, [yesterday, today])
+    }
+
+    func testDailyBestsIgnoresOutsideWindow() {
+        let calendar = Calendar(identifier: .gregorian)
+        let today = calendar.startOfDay(for: Date())
+        let old = calendar.date(byAdding: .day, value: -20, to: today)!
+        let entries = [
+            LockEntrySnapshot(date: old, pack: .scene, poseID: .frontDoubleBiceps, score: 88),
+            LockEntrySnapshot(date: today, pack: .scene, poseID: .frontDoubleBiceps, score: 60)
+        ]
+        let points = JournalStats.dailyBests(
+            poseID: .frontDoubleBiceps,
+            entries: entries,
+            from: calendar.date(byAdding: .day, value: -13, to: today)!,
+            to: today,
+            calendar: calendar
+        )
+        XCTAssertEqual(points.map(\.score), [60])
+    }
+}
+
+final class CompetitionDeadlineTests: XCTestCase {
+    func testSkipsOffsetsAlreadyPassed() {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+        let now = calendar.date(from: DateComponents(year: 2026, month: 9, day: 10, hour: 10))!
+        let date = calendar.date(from: DateComponents(year: 2026, month: 9, day: 14))!
+        let deadline = CompetitionDeadline(date: date, place: nil)
+        XCTAssertEqual(deadline.daysRemaining(now: now, calendar: calendar), 4)
+        XCTAssertEqual(deadline.upcomingOffsets(now: now, calendar: calendar), [3, 1])
+    }
+
+    func testNotificationCopyUsesLockState() {
+        let locked = CompetitionDeadline.notificationCopy(
+            daysRemaining: 7,
+            pose: .frontDoubleBiceps,
+            place: "Lyon",
+            hasLock: true
+        )
+        XCTAssertEqual(locked.title, "Il reste 7 jours")
+        XCTAssertTrue(locked.body.contains("Front double biceps"))
+        XCTAssertTrue(locked.body.contains("Lyon"))
+        XCTAssertTrue(locked.body.contains("pas encore locké"))
+
+        let fresh = CompetitionDeadline.notificationCopy(
+            daysRemaining: 1,
+            pose: .zyzzClassic,
+            place: nil,
+            hasLock: false
+        )
+        XCTAssertEqual(fresh.title, "Il reste 1 jour")
+        XCTAssertTrue(fresh.body.contains("pas encore de lock"))
+        XCTAssertFalse(fresh.body.contains(" · "))
+    }
+}
+
+final class SharedProjectionTests: XCTestCase {
+    func testSharedFrameKeepsBothRootsClose() throws {
+        let reference = BodyFrame.preview(for: .frontDoubleBiceps).joints3D
+        // Le capturé décalé et pivoté : ce qu'on obtiendrait d'un sujet mal placé.
+        let captured = reference.mapValues { p in
+            PosePreviewBuilder.rotateY(p, degrees: 35) + SIMD3<Float>(0.4, 0, 0)
+        }
+        let normalized = ScoringEngine.normalize(joints: captured)
+        let aligned = PosePreviewBuilder.alignYawToHips(normalized, like: reference)
+
+        let sets = PosePreviewBuilder.projectFitted([reference, aligned])
+        XCTAssertEqual(sets.count, 2)
+        let a = try XCTUnwrap(sets[0][.root])
+        let b = try XCTUnwrap(sets[1][.root])
+        XCTAssertEqual(simd_length(a - b), 0, accuracy: 0.03)
+    }
+
+    func testSeparateFramesWouldNotShareScale() throws {
+        let reference = BodyFrame.preview(for: .sideChest).joints3D
+        // Deux fois plus grand : un cadre partagé doit conserver l'écart.
+        let scaled = reference.mapValues { $0 * 2 }
+        let sets = PosePreviewBuilder.projectFitted([reference, scaled])
+        let refHead = try XCTUnwrap(sets[0][.head])
+        let scaledHead = try XCTUnwrap(sets[1][.head])
+        XCTAssertGreaterThan(simd_length(refHead - scaledHead), 0.05)
+
+        let alone = PosePreviewBuilder.projectFitted(reference)
+        let scaledAlone = PosePreviewBuilder.projectFitted(scaled)
+        let aloneHead = try XCTUnwrap(alone[.head])
+        let scaledAloneHead = try XCTUnwrap(scaledAlone[.head])
+        XCTAssertEqual(simd_length(aloneHead - scaledAloneHead), 0, accuracy: 0.01)
+    }
+
+    func testYawAppliesToEverySet() throws {
+        let reference = BodyFrame.preview(for: .frontPosture).joints3D
+        let straight = PosePreviewBuilder.projectFitted([reference, reference])
+        let turned = PosePreviewBuilder.projectFitted([reference, reference], yaw: 60)
+        XCTAssertEqual(turned[0], turned[1])
+        let a = try XCTUnwrap(straight[0][.leftWrist])
+        let b = try XCTUnwrap(turned[0][.leftWrist])
+        XCTAssertGreaterThan(simd_length(a - b), 0.01)
     }
 }

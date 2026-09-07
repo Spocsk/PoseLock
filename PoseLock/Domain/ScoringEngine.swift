@@ -122,7 +122,7 @@ enum ScoringEngine {
     }
 
     static func normalize(joints: [Joint: SIMD3<Float>]) -> [Joint: SIMD3<Float>] {
-        guard var origin = joints[.root] ?? midpoint(joints[.leftHip], joints[.rightHip]) else {
+        guard let origin = joints[.root] ?? midpoint(joints[.leftHip], joints[.rightHip]) else {
             return joints
         }
         var out: [Joint: SIMD3<Float>] = [:]
@@ -183,7 +183,9 @@ enum ScoringEngine {
             return distanceXZ(j, .leftShoulder, .rightShoulder)
                 ?? distanceXZ(j, .leftElbow, .rightElbow)
         case .headAlignment:
-            return levelDelta(j, .neck, .head)
+            // 0 = tête empilée sur le cou (axe vertical), pas un pair gauche/droite.
+            return inclinationFromVertical(j, .neck, .head)
+                ?? inclinationFromVertical(j, .root, .head)
         }
     }
 
@@ -271,7 +273,7 @@ enum ScoringEngine {
     }
 }
 
-final class ScoreSmoother: Sendable {
+final class ScoreSmoother: @unchecked Sendable {
     private let lock = NSLock()
     private var current: Float?
 

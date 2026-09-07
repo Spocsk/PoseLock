@@ -18,7 +18,7 @@ struct CameraSessionView: View {
         @Bindable var session = session
         ZStack {
             Theme.background.ignoresSafeArea()
-            CameraPreviewRepresentable(session: model.capture.session)
+            CameraPreviewRepresentable(session: model.capture.session, isFront: model.isFront)
                 .ignoresSafeArea()
             SkeletonOverlay(frame: model.bodyFrame, evaluation: model.evaluation)
                 .ignoresSafeArea()
@@ -26,10 +26,13 @@ struct CameraSessionView: View {
                 pose: PoseCatalog.definition(for: session.selectedPoseID),
                 evaluation: model.evaluation,
                 score: model.smoothedScore,
+                isFront: model.isFront,
                 onClose: { session.showCamera = false },
-                onFlip: { model.flip() },
-                onBubble: { showLibrary = true }
+                onSelectFront: { model.setCamera(front: $0) },
+                onBubble: { showLibrary = true },
+                onForceLock: forceLockAction
             )
+            .padding(.top, 8)
             Color.white.opacity(model.flashOpacity)
                 .ignoresSafeArea()
                 .allowsHitTesting(false)
@@ -48,7 +51,6 @@ struct CameraSessionView: View {
             model.start(front: settings.cameraFront)
         }
         .onDisappear {
-            settings.cameraFront = model.isFront
             model.stop()
         }
         .onChange(of: session.selectedPoseID) { _, newPose in
@@ -67,6 +69,16 @@ struct CameraSessionView: View {
         .sheet(isPresented: $session.showPaywall) {
             PaywallSheet(reason: session.paywallReason)
         }
+    }
+
+    /// Le lock forcé n'existe qu'en debug : en release il n'y a pas de fermeture à
+    /// passer, donc pas de bouton à afficher.
+    private var forceLockAction: (() -> Void)? {
+        #if DEBUG
+        return { Task { await model.debugForceLock() } }
+        #else
+        return nil
+        #endif
     }
 
     private var permissionOverlay: some View {
@@ -88,6 +100,11 @@ struct CameraSessionView: View {
             .padding(.horizontal, 32)
             Button("Fermer") { session.showCamera = false }
                 .foregroundStyle(Theme.gold)
+            #if DEBUG
+            if let forceLockAction {
+                DevForceLockButton(action: forceLockAction)
+            }
+            #endif
         }
         .padding(24)
         .background(Theme.background.opacity(0.92))
@@ -100,29 +117,40 @@ struct CameraSessionView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(maxHeight: 360)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .clipShape(RoundedRectangle(cornerRadius: Theme.continuousCorner, style: .continuous))
             }
             Text("\(Int(model.lastScore.rounded()))")
                 .font(Theme.scoreFont)
                 .foregroundStyle(Theme.lockGreen)
             HStack(spacing: 12) {
-                Button("Même pose") {
+                Button("Rejouer") {
                     persisted = false
                     model.resetAfterLock()
                 }
                 .buttonStyle(PrimaryButtonStyle())
-                Button("Fermer") { session.showCamera = false }
-                    .font(.system(size: 16, weight: .regular))
-                    .foregroundStyle(Theme.ivory)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(Theme.elevated)
+                Button {
+                    session.showCamera = false
+                } label: {
+                    Text("Fermer")
+                        .font(.system(size: 16, weight: .regular))
+                        .foregroundStyle(Theme.ivory)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .contentShape(Rectangle())
+                        .background(Theme.elevated, in: RoundedRectangle(cornerRadius: Theme.continuousCorner, style: .continuous))
+                }
+                .buttonStyle(.plain)
             }
             .padding(.horizontal, 24)
         }
         .padding(.bottom, 40)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-        .background(Theme.background.opacity(0.55).ignoresSafeArea())
+        .background {
+            Rectangle()
+                .fill(.thickMaterial)
+                .overlay(Theme.background.opacity(0.35))
+                .ignoresSafeArea()
+        }
     }
 
     private func persistLock() {
@@ -146,11 +174,14 @@ struct CameraSessionView: View {
                 score: model.lastScore,
                 durationToLock: model.durationToLock,
                 cleanPath: saved.cleanPath,
-                overlayPath: saved.overlayPath
+                overlayPath: saved.overlayPath,
+                skeletonData: model.lastSkeleton.flatMap { try? JSONEncoder().encode($0) }
             )
             modelContext.insert(entry)
             if settings.saveToPhotos {
-                Task { await saveToSystemPhotos(clean) }
+                // Signée seulement pour sortir : le fichier gardé par PhotoStore, que
+                // le journal et les cartes relisent, reste sans marque.
+                Task { await saveToSystemPhotos(ShareMark.stamped(clean)) }
             }
         } catch {
             persisted = false
@@ -184,9 +215,13 @@ struct PoseLibrarySheet: View {
                                 choose(pose.poseID, pack: listed)
                             } label: {
                                 HStack {
-                                    Image(systemName: pose.symbolName)
-                                        .foregroundStyle(Theme.gold)
-                                        .frame(width: 28)
+                                    PosePreviewSkeleton(
+                                        poseID: pose.poseID,
+                                        highlight: .regions([.leftArm, .rightArm, .shoulders]),
+                                        lineWidth: 1.8,
+                                        jointSize: 3
+                                    )
+                                    .frame(width: 36, height: 48)
                                     Text(pose.displayName)
                                         .foregroundStyle(Theme.ivory)
                                     Spacer()
@@ -215,7 +250,7 @@ struct PoseLibrarySheet: View {
 
     private func choose(_ poseID: PoseID, pack listed: Pack) {
         if !isPro && listed != pack {
-            session.paywallReason = .otherPack
+            session.paywallReason = listed == .zyzz ? .zyzz : .otherPack
             session.showPaywall = true
             return
         }

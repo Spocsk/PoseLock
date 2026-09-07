@@ -11,6 +11,7 @@ final class PoseDetector: @unchecked Sendable {
 
     func detect(sampleBuffer: CMSampleBuffer, isFront: Bool) -> BodyFrame? {
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return nil }
+        // Buffers bruts (non miroir). Front = leftMirrored pour coller au preview selfie.
         let orientation: CGImagePropertyOrientation = isFront ? .leftMirrored : .right
         let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: orientation, options: [:])
         do {
@@ -35,10 +36,6 @@ final class PoseDetector: @unchecked Sendable {
                         joints3D[joint] = Self.translation(point)
                         confidences.append(1)
                     }
-                    if joints2D[joint] == nil,
-                       let image = try? observation3D.pointInImage(mapped) {
-                        joints2D[joint] = SIMD2(Float(image.x), Float(1 - image.y))
-                    }
                 }
             }
         }
@@ -47,13 +44,22 @@ final class PoseDetector: @unchecked Sendable {
             let all = (try? observation2D.recognizedPoints(.all)) ?? [:]
             for (joint, name) in Self.vision2D {
                 if let point = all[name], point.confidence > 0.08 {
-                    if joints2D[joint] == nil {
-                        joints2D[joint] = SIMD2(Float(point.location.x), Float(1 - point.location.y))
-                    }
+                    joints2D[joint] = SIMD2(Float(point.location.x), Float(1 - point.location.y))
                     if joints3D[joint] == nil {
                         joints3D[joint] = SIMD3(Float(point.location.x) - 0.5, Float(point.location.y) - 0.5, 0)
                     }
                     confidences.append(Float(point.confidence))
+                }
+            }
+        }
+
+        if joints2D.isEmpty, let observation3D {
+            for joint in Joint.allCases {
+                for mapped in Self.vision3DNames(joint) {
+                    if joints2D[joint] == nil,
+                       let image = try? observation3D.pointInImage(mapped) {
+                        joints2D[joint] = SIMD2(Float(image.x), Float(1 - image.y))
+                    }
                 }
             }
         }

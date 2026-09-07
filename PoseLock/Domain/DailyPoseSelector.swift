@@ -72,11 +72,27 @@ struct DayRecap: Sendable, Equatable {
     let streak: Int
 }
 
+struct PoseRecap: Sendable, Equatable, Identifiable {
+    let poseID: PoseID
+    let bestScore: Float
+    let bestDate: Date
+    let takeCount: Int
+    let averageScore: Float
+
+    var id: String { poseID.rawValue }
+}
+
 struct WeekStats: Sendable, Equatable {
     let weekLockCount: Int
     let bestPoseName: String?
     let bestPoseScore: Int?
     let averageScore: Int?
+}
+
+struct DailyBest: Sendable, Equatable, Identifiable {
+    let day: Date
+    let score: Int
+    var id: Date { day }
 }
 
 enum JournalStats {
@@ -138,6 +154,27 @@ enum JournalStats {
         return count
     }
 
+    /// Une ligne par pose travaillée, meilleure prise en tête de classement.
+    static func poseRecaps(entries: [LockEntrySnapshot]) -> [PoseRecap] {
+        Dictionary(grouping: entries, by: \.poseID)
+            .compactMap { poseID, takes -> PoseRecap? in
+                guard let best = takes.max(by: { $0.score < $1.score }) else { return nil }
+                let total = takes.map { Double($0.score) }.reduce(0, +)
+                return PoseRecap(
+                    poseID: poseID,
+                    bestScore: best.score,
+                    bestDate: best.date,
+                    takeCount: takes.count,
+                    averageScore: Float(total / Double(takes.count))
+                )
+            }
+            .sorted {
+                $0.bestScore == $1.bestScore
+                    ? $0.poseID.displayName < $1.poseID.displayName
+                    : $0.bestScore > $1.bestScore
+            }
+    }
+
     static func counterpart(
         of entry: LockEntrySnapshot,
         in entries: [LockEntrySnapshot],
@@ -149,5 +186,26 @@ enum JournalStats {
             $0.poseID == entry.poseID && calendar.isDate($0.date, inSameDayAs: targetDay)
         }
         return same.max(by: { $0.score < $1.score })
+    }
+
+    /// Meilleur score par jour civil, pour une pose, dans `[from, to]`.
+    static func dailyBests(
+        poseID: PoseID,
+        entries: [LockEntrySnapshot],
+        from: Date,
+        to: Date,
+        calendar: Calendar = .current
+    ) -> [DailyBest] {
+        let start = calendar.startOfDay(for: from)
+        let end = calendar.startOfDay(for: to)
+        let relevant = entries.filter {
+            $0.poseID == poseID && calendar.startOfDay(for: $0.date) >= start && calendar.startOfDay(for: $0.date) <= end
+        }
+        let grouped = Dictionary(grouping: relevant) { calendar.startOfDay(for: $0.date) }
+        return grouped.compactMap { day, takes -> DailyBest? in
+            guard let best = takes.map(\.score).max() else { return nil }
+            return DailyBest(day: day, score: Int(best.rounded()))
+        }
+        .sorted { $0.day < $1.day }
     }
 }

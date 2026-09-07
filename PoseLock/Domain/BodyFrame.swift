@@ -78,6 +78,85 @@ struct BodyFrame: Sendable, Equatable {
     func imagePoint(_ joint: Joint) -> SIMD2<Float>? {
         joints2D[joint]
     }
+
+    /// Silhouette face, bras le long du corps — preview coaching et tests.
+    static func standingPreview() -> BodyFrame {
+        let joints: [Joint: SIMD3<Float>] = [
+            .root: SIMD3(0, 0, 0),
+            .spine: SIMD3(0, 0.4, 0),
+            .neck: SIMD3(0, 0.75, 0),
+            .head: SIMD3(0, 1.0, 0),
+            .leftShoulder: SIMD3(-0.22, 0.72, 0),
+            .rightShoulder: SIMD3(0.22, 0.72, 0),
+            .leftElbow: SIMD3(-0.24, 0.4, 0),
+            .rightElbow: SIMD3(0.24, 0.4, 0),
+            .leftWrist: SIMD3(-0.25, 0.08, 0),
+            .rightWrist: SIMD3(0.25, 0.08, 0),
+            .leftHip: SIMD3(-0.12, 0, 0),
+            .rightHip: SIMD3(0.12, 0, 0),
+            .leftKnee: SIMD3(-0.12, -0.45, 0),
+            .rightKnee: SIMD3(0.12, -0.45, 0),
+            .leftAnkle: SIMD3(-0.12, -0.9, 0),
+            .rightAnkle: SIMD3(0.12, -0.9, 0)
+        ]
+        let normalized = ScoringEngine.normalize(joints: joints)
+        var joints2D: [Joint: SIMD2<Float>] = [:]
+        for (joint, p) in normalized {
+            joints2D[joint] = SIMD2(p.x * 0.25 + 0.5, 0.15 + (1 - (p.y + 1) / 2) * 0.7)
+        }
+        return BodyFrame(
+            joints3D: normalized,
+            joints2D: joints2D,
+            confidence: 0.9,
+            subjectHeightRatio: 0.7,
+            handsVisible: true,
+            feetVisible: true
+        )
+    }
+}
+
+/// Skeleton d’une prise, persisté dans le journal. Tableau explicite plutôt
+/// qu’un dictionnaire à clé enum, qui s’encoderait en liste alternée clé / valeur.
+struct SkeletonSnapshot: Codable, Sendable, Equatable {
+    struct JointPosition: Codable, Sendable, Equatable {
+        let joint: Joint
+        /// 3D normalisé, bassin à l’origine, échelle hanches–tête ≈ 1.
+        let x: Float
+        let y: Float
+        let z: Float
+        /// Projection image, 0…1.
+        let u: Float
+        let v: Float
+    }
+
+    var joints: [JointPosition]
+    var greenRegions: [SkeletonRegion]
+    var confidence: Float
+
+    init(joints: [JointPosition], greenRegions: [SkeletonRegion], confidence: Float) {
+        self.joints = joints
+        self.greenRegions = greenRegions
+        self.confidence = confidence
+    }
+
+    init(frame: BodyFrame, evaluation: PoseEvaluation) {
+        let names = Set(frame.joints3D.keys).union(frame.joints2D.keys)
+        joints = names.sorted { $0.rawValue < $1.rawValue }.map { joint in
+            let p = frame.joints3D[joint] ?? .zero
+            let image = frame.joints2D[joint] ?? SIMD2<Float>(0.5, 0.5)
+            return JointPosition(joint: joint, x: p.x, y: p.y, z: p.z, u: image.x, v: image.y)
+        }
+        greenRegions = evaluation.greenRegions.sorted { $0.rawValue < $1.rawValue }
+        confidence = frame.confidence
+    }
+
+    var joints3D: [Joint: SIMD3<Float>] {
+        Dictionary(uniqueKeysWithValues: joints.map { ($0.joint, SIMD3($0.x, $0.y, $0.z)) })
+    }
+
+    var joints2D: [Joint: SIMD2<Float>] {
+        Dictionary(uniqueKeysWithValues: joints.map { ($0.joint, SIMD2($0.u, $0.v)) })
+    }
 }
 
 enum FrameGate: Equatable, Sendable {
