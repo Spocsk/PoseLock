@@ -1,0 +1,561 @@
+import Foundation
+import simd
+
+struct FeatureTarget: Sendable, Equatable {
+    let feature: PoseFeature
+    /// Degrés (0…180) ou ratio selon la feature.
+    let target: Float
+    let tolerance: Float
+    let weight: Float
+    let cue: String
+    let region: SkeletonRegion
+}
+
+struct PoseTemplate: Sendable, Equatable {
+    let poseID: PoseID
+    let version: String
+    let features: [FeatureTarget]
+}
+
+/// Templates gold v1 — une variante par pose, tolérances larges.
+/// Les poids viennent d’un référentiel posing, pas d’un goût personnel.
+/// Variantes morpho (brachial court/long, taille haute/basse) = post-V1.
+enum TemplateLibrary {
+    static func template(for poseID: PoseID) -> PoseTemplate {
+        PoseTemplate(poseID: poseID, version: ScoringConstants.templateVersion, features: features(for: poseID))
+    }
+
+    static func features(for poseID: PoseID) -> [FeatureTarget] {
+        switch poseID {
+        case .quarterTurnFace:
+            return [
+                t(.torsoTwist, 20, 18, 1.2, "Ouvre un quart vers la caméra.", .torso),
+                t(.shoulderLevel, 0, 12, 1.0, "Niveau les épaules.", .shoulders),
+                t(.spineInclination, 4, 12, 0.8, "Grandis-toi. Poitrine haute.", .torso),
+                t(.leftElbow, 165, 20, 0.6, "Relâche le bras gauche.", .leftArm),
+                t(.rightElbow, 165, 20, 0.6, "Relâche le bras droit.", .rightArm),
+                t(.stanceWidth, 0.28, 0.12, 0.7, "Écarte un peu les pieds.", .hips)
+            ]
+        case .quarterTurnProfile:
+            return [
+                t(.torsoTwist, 80, 18, 1.3, "Profil. Poitrine vers l’avant.", .torso),
+                t(.spineInclination, 6, 12, 0.9, "Étire la ligne de dos.", .torso),
+                t(.shoulderLevel, 8, 14, 0.8, "Épaule avant un peu plus haute.", .shoulders),
+                t(.leftElbow, 160, 25, 0.5, "Bras longs, pas cassés.", .leftArm),
+                t(.rightElbow, 160, 25, 0.5, "Bras longs, pas cassés.", .rightArm)
+            ]
+        case .quarterTurnBack:
+            return [
+                t(.torsoTwist, 160, 20, 1.2, "Dos à la caméra, un quart.", .torso),
+                t(.shoulderLevel, 0, 12, 1.0, "Épaules larges, même hauteur.", .shoulders),
+                t(.spineInclination, 8, 12, 1.0, "Creuse légèrement le dos.", .torso),
+                t(.chestOpen, 0.42, 0.12, 0.9, "Ouvre le haut du dos.", .shoulders)
+            ]
+        case .frontDoubleBiceps:
+            return [
+                t(.leftElbow, 58, 16, 1.4, "Plie davantage le bras gauche.", .leftArm),
+                t(.rightElbow, 58, 16, 1.4, "Plie davantage le bras droit.", .rightArm),
+                t(.leftShoulderAbduction, 92, 16, 1.2, "Monte le bras gauche.", .leftArm),
+                t(.rightShoulderAbduction, 92, 16, 1.2, "Monte le bras droit.", .rightArm),
+                t(.leftWristHeight, 0.12, 0.18, 0.8, "Poignet gauche au-dessus de l’épaule.", .leftArm),
+                t(.rightWristHeight, 0.12, 0.18, 0.8, "Poignet droit au-dessus de l’épaule.", .rightArm),
+                t(.torsoTwist, 0, 14, 1.0, "Face caméra. Buste carré.", .torso),
+                t(.shoulderLevel, 0, 10, 1.1, "Niveau les épaules.", .shoulders),
+                t(.leftKnee, 168, 14, 0.6, "Tends la jambe gauche.", .leftLeg),
+                t(.rightKnee, 168, 14, 0.6, "Tends la jambe droite.", .rightLeg)
+            ]
+        case .frontLatSpread:
+            return [
+                t(.leftElbow, 95, 18, 1.1, "Coude gauche à la taille.", .leftArm),
+                t(.rightElbow, 95, 18, 1.1, "Coude droit à la taille.", .rightArm),
+                t(.chestOpen, 0.52, 0.10, 1.5, "Écarte les lats. Plus large.", .shoulders),
+                t(.vTaper, 1.55, 0.28, 1.2, "Ouvre le haut, serre la taille.", .torso),
+                t(.torsoTwist, 0, 12, 1.0, "Face caméra.", .torso),
+                t(.shoulderLevel, 0, 10, 1.0, "Épaules égales.", .shoulders)
+            ]
+        case .sideChest:
+            return [
+                t(.torsoTwist, 78, 16, 1.4, "Profil. Poitrine vers la caméra.", .torso),
+                t(.leftElbow, 70, 18, 1.1, "Plie le bras avant.", .leftArm),
+                t(.rightElbow, 155, 20, 0.8, "Bras arrière long.", .rightArm),
+                t(.chestOpen, 0.40, 0.12, 1.3, "Ouvre la cage. Gonfle.", .torso),
+                t(.spineInclination, 10, 12, 0.9, "Arc léger, poitrine haute.", .torso),
+                t(.leftKnee, 165, 16, 0.7, "Jambe avant tendue.", .leftLeg)
+            ]
+        case .backDoubleBiceps:
+            return [
+                t(.torsoTwist, 175, 16, 1.2, "Dos plein cadre.", .torso),
+                t(.leftElbow, 58, 16, 1.3, "Plie le bras gauche.", .leftArm),
+                t(.rightElbow, 58, 16, 1.3, "Plie le bras droit.", .rightArm),
+                t(.leftShoulderAbduction, 90, 16, 1.1, "Monte le bras gauche.", .leftArm),
+                t(.rightShoulderAbduction, 90, 16, 1.1, "Monte le bras droit.", .rightArm),
+                t(.spineInclination, 12, 12, 1.0, "Creuse le dos.", .torso),
+                t(.shoulderLevel, 0, 10, 1.0, "Épaules égales.", .shoulders)
+            ]
+        case .backLatSpread:
+            return [
+                t(.torsoTwist, 175, 16, 1.2, "Dos à la caméra.", .torso),
+                t(.leftElbow, 100, 18, 1.0, "Mains à la taille.", .leftArm),
+                t(.rightElbow, 100, 18, 1.0, "Mains à la taille.", .rightArm),
+                t(.chestOpen, 0.55, 0.10, 1.5, "Écarte les lats.", .shoulders),
+                t(.spineInclination, 10, 12, 0.9, "Légère cambrure.", .torso)
+            ]
+        case .sideTriceps:
+            return [
+                t(.torsoTwist, 82, 16, 1.3, "Profil. Épaule avant vers nous.", .torso),
+                t(.leftElbow, 172, 12, 1.4, "Tends le bras avant.", .leftArm),
+                t(.rightElbow, 70, 20, 0.7, "Bras arrière en appui.", .rightArm),
+                t(.spineInclination, 8, 12, 0.8, "Poitrine haute.", .torso),
+                t(.leftKnee, 168, 14, 0.6, "Jambe avant longue.", .leftLeg)
+            ]
+        case .absAndThigh:
+            return [
+                t(.torsoTwist, 8, 14, 1.0, "Face caméra, légèrement de trois-quarts.", .torso),
+                t(.spineInclination, 6, 10, 1.1, "Rentrez le bassin. Abs.", .torso),
+                t(.leftElbow, 88, 18, 0.8, "Main derrière la tête ou à la hanche.", .leftArm),
+                t(.rightElbow, 160, 20, 0.6, "Autre bras long.", .rightArm),
+                t(.leftKnee, 155, 16, 1.2, "Plie la jambe avant. Quad.", .leftLeg),
+                t(.rightKnee, 170, 14, 0.8, "Jambe arrière tendue.", .rightLeg)
+            ]
+        case .mostMuscular:
+            return [
+                t(.torsoTwist, 5, 14, 0.9, "Face. Caisse vers la caméra.", .torso),
+                t(.leftElbow, 72, 16, 1.2, "Rapproche les poings.", .leftArm),
+                t(.rightElbow, 72, 16, 1.2, "Rapproche les poings.", .rightArm),
+                t(.chestOpen, 0.48, 0.12, 1.3, "Ouvre la cage. Trapèzes.", .shoulders),
+                t(.spineInclination, 12, 12, 1.0, "Penche un peu. Most muscular.", .torso),
+                t(.leftShoulderAbduction, 40, 16, 0.9, "Coudes devant le torse.", .leftArm),
+                t(.rightShoulderAbduction, 40, 16, 0.9, "Coudes devant le torse.", .rightArm)
+            ]
+        case .threeQuarterLat:
+            return [
+                t(.torsoTwist, 38, 16, 1.3, "Trois-quarts. Montre le lat.", .torso),
+                t(.leftShoulderAbduction, 70, 18, 1.1, "Ouvre le bras avant.", .leftArm),
+                t(.chestOpen, 0.46, 0.12, 1.2, "Lat étalé, taille étroite.", .shoulders),
+                t(.vTaper, 1.48, 0.28, 1.1, "V-taper. Écarte le haut.", .torso),
+                t(.spineInclination, 8, 12, 0.8, "Poitrine haute.", .torso)
+            ]
+        case .sideChestMirror:
+            return [
+                t(.torsoTwist, 85, 16, 1.3, "Profil miroir. Poitrine.", .torso),
+                t(.leftElbow, 68, 18, 1.1, "Bras avant plié.", .leftArm),
+                t(.chestOpen, 0.40, 0.12, 1.2, "Gonfle la cage.", .torso),
+                t(.spineInclination, 10, 12, 0.9, "Arc léger.", .torso)
+            ]
+        case .mostMuscularCrop:
+            return [
+                t(.torsoTwist, 8, 14, 0.9, "Face. Haut du corps.", .torso),
+                t(.leftElbow, 70, 16, 1.2, "Poings rapprochés.", .leftArm),
+                t(.rightElbow, 70, 16, 1.2, "Poings rapprochés.", .rightArm),
+                t(.chestOpen, 0.50, 0.12, 1.3, "Ouvre trapèzes et pecs.", .shoulders),
+                t(.spineInclination, 14, 12, 1.0, "Penche vers l’objectif.", .torso)
+            ]
+        case .vacuum:
+            return [
+                t(.torsoTwist, 70, 18, 1.0, "Profil ou trois-quarts.", .torso),
+                t(.spineInclination, 4, 10, 1.4, "Expire. Rentre la taille.", .torso),
+                t(.vTaper, 1.65, 0.30, 1.3, "Taille étroite. Vacuum.", .torso),
+                t(.leftElbow, 155, 22, 0.5, "Bras longs, hors du ventre.", .leftArm),
+                t(.rightElbow, 155, 22, 0.5, "Bras longs, hors du ventre.", .rightArm)
+            ]
+        case .backDoubleThreeQuarter:
+            return [
+                t(.torsoTwist, 140, 18, 1.3, "Dos trois-quarts.", .torso),
+                t(.leftElbow, 60, 16, 1.2, "Plie le bras visible.", .leftArm),
+                t(.rightElbow, 60, 16, 1.2, "Plie l’autre bras.", .rightArm),
+                t(.spineInclination, 12, 12, 1.0, "Creuse le dos.", .torso),
+                t(.chestOpen, 0.48, 0.12, 1.0, "Lats ouverts.", .shoulders)
+            ]
+        case .handsOnHips:
+            return [
+                t(.torsoTwist, 12, 14, 1.0, "Face, légère rotation.", .torso),
+                t(.leftElbow, 100, 16, 1.1, "Main gauche à la hanche.", .leftArm),
+                t(.rightElbow, 100, 16, 1.1, "Main droite à la hanche.", .rightArm),
+                t(.vTaper, 1.50, 0.26, 1.2, "Ouvre les épaules.", .shoulders),
+                t(.shoulderLevel, 0, 10, 1.0, "Épaules égales.", .shoulders),
+                t(.stanceWidth, 0.30, 0.12, 0.7, "Pieds écartés.", .hips)
+            ]
+        case .frontPosture:
+            return [
+                t(.torsoTwist, 0, 12, 1.2, "Face. Buste carré.", .torso),
+                t(.shoulderLevel, 0, 8, 1.4, "Niveau les épaules.", .shoulders),
+                t(.hipLevel, 0, 8, 1.2, "Bassin droit.", .hips),
+                t(.spineInclination, 2, 8, 1.3, "Grandis-toi. Oreilles au-dessus des épaules.", .torso),
+                t(.headAlignment, 0, 8, 1.0, "Tête dans l’axe.", .head),
+                t(.leftElbow, 168, 14, 0.6, "Bras le long du corps.", .leftArm),
+                t(.rightElbow, 168, 14, 0.6, "Bras le long du corps.", .rightArm),
+                t(.stanceWidth, 0.22, 0.10, 0.7, "Pieds sous les hanches.", .hips)
+            ]
+        case .profilePosture:
+            return [
+                t(.torsoTwist, 88, 14, 1.3, "Profil franc.", .torso),
+                t(.spineInclination, 4, 10, 1.3, "Oreille au-dessus de l’épaule.", .torso),
+                t(.headAlignment, 4, 10, 1.0, "Regarde loin. Nuque longue.", .head),
+                t(.shoulderLevel, 6, 12, 0.8, "Épaules empilées.", .shoulders),
+                t(.leftElbow, 168, 14, 0.5, "Bras longs.", .leftArm)
+            ]
+        case .shoulderToWaist:
+            return [
+                t(.torsoTwist, 0, 12, 1.0, "Corps entier, face.", .torso),
+                t(.vTaper, 1.52, 0.24, 1.6, "Ouvre les épaules, serre la taille.", .shoulders),
+                t(.chestOpen, 0.48, 0.12, 1.2, "Écarte un peu les bras.", .shoulders),
+                t(.shoulderLevel, 0, 10, 1.1, "Symétrie gauche / droite.", .shoulders),
+                t(.hipLevel, 0, 10, 0.9, "Bassin droit.", .hips),
+                t(.spineInclination, 3, 10, 0.8, "Grandis-toi.", .torso)
+            ]
+        case .clavicleOpen:
+            return [
+                t(.torsoTwist, 8, 12, 0.8, "Face, légère ouverture.", .torso),
+                t(.chestOpen, 0.50, 0.10, 1.5, "Ouvre les clavicules. Cage large.", .shoulders),
+                t(.leftShoulderAbduction, 28, 14, 1.0, "Écarte un peu le bras gauche.", .leftArm),
+                t(.rightShoulderAbduction, 28, 14, 1.0, "Écarte un peu le bras droit.", .rightArm),
+                t(.spineInclination, 4, 10, 1.0, "Sternum haut.", .torso),
+                t(.shoulderLevel, 0, 10, 1.0, "Épaules égales.", .shoulders)
+            ]
+        case .shoulderSymmetry:
+            return [
+                t(.shoulderLevel, 0, 6, 1.6, "Mets les épaules à la même hauteur.", .shoulders),
+                t(.hipLevel, 0, 8, 1.2, "Bassin droit.", .hips),
+                t(.torsoTwist, 0, 10, 1.1, "Face. Pas de torsion.", .torso),
+                t(.leftShoulderAbduction, 18, 12, 0.9, "Même écart à gauche.", .leftArm),
+                t(.rightShoulderAbduction, 18, 12, 0.9, "Même écart à droite.", .rightArm),
+                t(.headAlignment, 0, 8, 0.8, "Tête au centre.", .head)
+            ]
+        case .twistThreeQuarter:
+            return [
+                t(.torsoTwist, 42, 14, 1.4, "Tourne le buste, hanches plus face.", .torso),
+                t(.shoulderLevel, 6, 12, 0.9, "Épaule avant un peu plus proche.", .shoulders),
+                t(.chestOpen, 0.44, 0.12, 1.1, "Ouvre le côté visible.", .shoulders),
+                t(.spineInclination, 6, 12, 0.8, "Poitrine haute.", .torso),
+                t(.headAlignment, 20, 14, 0.7, "Regard par-dessus l’épaule avant.", .head)
+            ]
+        case .zyzzClassic:
+            return [
+                t(.torsoTwist, 38, 16, 1.3, "Trois-quarts. Poitrine vers la caméra.", .torso),
+                t(.leftShoulderAbduction, 88, 18, 1.3, "Bras gauche derrière la tête.", .leftArm),
+                t(.leftElbow, 48, 18, 1.2, "Coude gauche haut, main dans la nuque.", .leftArm),
+                t(.rightElbow, 100, 16, 1.1, "Main droite à la hanche.", .rightArm),
+                t(.chestOpen, 0.50, 0.12, 1.3, "Ouvre la cage.", .shoulders),
+                t(.vTaper, 1.58, 0.28, 1.2, "Épaules larges, taille rentrée.", .torso),
+                t(.spineInclination, 6, 12, 1.0, "Expire. Rentre la taille.", .torso),
+                t(.shoulderLevel, 8, 12, 0.8, "Épaule avant un peu plus haute.", .shoulders)
+            ]
+        case .zyzzVacuum:
+            return [
+                t(.torsoTwist, 0, 12, 1.1, "Face caméra. Buste carré.", .torso),
+                t(.spineInclination, 4, 10, 1.4, "Expire. Rentre la taille.", .torso),
+                t(.vTaper, 1.68, 0.28, 1.4, "Taille étroite. Vacuum.", .torso),
+                t(.chestOpen, 0.48, 0.12, 1.1, "Cage haute, lats ouverts.", .shoulders),
+                t(.leftElbow, 165, 20, 0.6, "Bras longs, hors du ventre.", .leftArm),
+                t(.rightElbow, 165, 20, 0.6, "Bras longs, hors du ventre.", .rightArm),
+                t(.shoulderLevel, 0, 10, 1.0, "Épaules égales.", .shoulders)
+            ]
+        case .zyzzTwist:
+            return [
+                t(.torsoTwist, 55, 16, 1.5, "Twist plus marqué. Poitrine vers la caméra.", .torso),
+                t(.chestOpen, 0.46, 0.12, 1.2, "Ouvre le côté visible.", .shoulders),
+                t(.shoulderLevel, 10, 12, 0.9, "Ligne d’épaule avant plus haute.", .shoulders),
+                t(.vTaper, 1.52, 0.26, 1.1, "Serre la taille.", .torso),
+                t(.spineInclination, 8, 12, 0.9, "Poitrine haute.", .torso),
+                t(.headAlignment, 24, 14, 0.8, "Regard par-dessus l’épaule avant.", .head)
+            ]
+        }
+    }
+
+    private static func t(
+        _ feature: PoseFeature,
+        _ target: Float,
+        _ tolerance: Float,
+        _ weight: Float,
+        _ cue: String,
+        _ region: SkeletonRegion
+    ) -> FeatureTarget {
+        FeatureTarget(feature: feature, target: target, tolerance: tolerance, weight: weight, cue: cue, region: region)
+    }
+}
+
+/// Silhouette 3D/2D à partir des cibles du template — illustration coach, home, paywall.
+enum PosePreviewBuilder {
+    private static let upperArm: Float = 0.33
+    private static let forearm: Float = 0.32
+    private static let thigh: Float = 0.45
+    private static let shin: Float = 0.45
+
+    static func frame(for poseID: PoseID) -> BodyFrame {
+        let features = TemplateLibrary.features(for: poseID)
+        func target(_ feature: PoseFeature, _ fallback: Float) -> Float {
+            features.first { $0.feature == feature }?.target ?? fallback
+        }
+        func optional(_ feature: PoseFeature) -> Float? {
+            features.first { $0.feature == feature }?.target
+        }
+
+        let twist: Float = target(.torsoTwist, 0)
+        let viewYaw = min(max(twist, 0), 40)
+        let hipHalf: Float = 0.12
+        let stance: Float = target(.stanceWidth, 0.26)
+        let vTaper: Float = target(.vTaper, 1.7)
+        let chest = optional(.chestOpen)
+        var shoulderHalf: Float = chest.map { $0 / 2 } ?? (vTaper * hipHalf)
+        shoulderHalf = min(max(shoulderHalf, 0.18), 0.34)
+
+        var joints: [Joint: SIMD3<Float>] = [:]
+        joints[.root] = .zero
+        joints[.leftHip] = SIMD3<Float>(-hipHalf, 0, 0)
+        joints[.rightHip] = SIMD3<Float>(hipHalf, 0, 0)
+
+        let hipLevel: Float = target(.hipLevel, 0)
+        if hipLevel > 0.4 {
+            let dy = (hipLevel / 90) * (hipHalf * 2)
+            joints[.rightHip]!.y += dy / 2
+            joints[.leftHip]!.y -= dy / 2
+        }
+
+        let inc = target(.spineInclination, 3) * Float.pi / 180
+        let spineDir = SIMD3<Float>(0, cos(inc), -sin(inc))
+        joints[.spine] = spineDir * 0.40
+        joints[.neck] = spineDir * 0.75
+        let headInc = target(.headAlignment, 0) * Float.pi / 180
+        joints[.head] = joints[.neck]! + SIMD3<Float>(sin(headInc), cos(headInc), -sin(inc) * 0.15) * 0.26
+
+        let shoulderY: Float = 0.72
+        joints[.leftShoulder] = SIMD3<Float>(-shoulderHalf, shoulderY, 0)
+        joints[.rightShoulder] = SIMD3<Float>(shoulderHalf, shoulderY, 0)
+        let shoulderLevel: Float = target(.shoulderLevel, 0)
+        if shoulderLevel > 0.4 {
+            let dy = (shoulderLevel / 90) * (shoulderHalf * 2)
+            joints[.rightShoulder]!.y += dy / 2
+            joints[.leftShoulder]!.y -= dy / 2
+        }
+
+        let leftElbowAngle = target(.leftElbow, 168)
+        let rightElbowAngle = target(.rightElbow, 168)
+        let leftAbd = inferredAbduction(elbow: leftElbowAngle, specified: optional(.leftShoulderAbduction))
+        let rightAbd = inferredAbduction(elbow: rightElbowAngle, specified: optional(.rightShoulderAbduction))
+
+        let leftArm = arm(
+            shoulder: joints[.leftShoulder]!,
+            hip: joints[.leftHip]!,
+            isLeft: true,
+            abduction: leftAbd,
+            elbowAngle: leftElbowAngle,
+            wristHeight: optional(.leftWristHeight)
+        )
+        joints[.leftElbow] = leftArm.elbow
+        joints[.leftWrist] = leftArm.wrist
+
+        let rightArm = arm(
+            shoulder: joints[.rightShoulder]!,
+            hip: joints[.rightHip]!,
+            isLeft: false,
+            abduction: rightAbd,
+            elbowAngle: rightElbowAngle,
+            wristHeight: optional(.rightWristHeight)
+        )
+        joints[.rightElbow] = rightArm.elbow
+        joints[.rightWrist] = rightArm.wrist
+
+        let leftLeg = leg(
+            hip: joints[.leftHip]!,
+            isLeft: true,
+            kneeAngle: target(.leftKnee, 172),
+            ankleX: -stance / 2
+        )
+        joints[.leftKnee] = leftLeg.knee
+        joints[.leftAnkle] = leftLeg.ankle
+
+        let rightLeg = leg(
+            hip: joints[.rightHip]!,
+            isLeft: false,
+            kneeAngle: target(.rightKnee, 172),
+            ankleX: stance / 2
+        )
+        joints[.rightKnee] = rightLeg.knee
+        joints[.rightAnkle] = rightLeg.ankle
+
+        let yawJoints: [Joint] = [
+            .spine, .neck, .head,
+            .leftShoulder, .rightShoulder,
+            .leftElbow, .rightElbow,
+            .leftWrist, .rightWrist
+        ]
+        for joint in yawJoints {
+            if let p = joints[joint] {
+                joints[joint] = rotateY(p, degrees: viewYaw)
+            }
+        }
+
+        let normalized = ScoringEngine.normalize(joints: joints)
+        return BodyFrame(
+            joints3D: normalized,
+            joints2D: projectFitted(normalized),
+            confidence: 0.95,
+            subjectHeightRatio: 0.72,
+            handsVisible: true,
+            feetVisible: true
+        )
+    }
+
+    /// 0 = bras le long du corps, 90 = horizontal, ~90+ légèrement relevé.
+    private static func inferredAbduction(elbow: Float, specified: Float?) -> Float {
+        if let specified { return specified }
+        if elbow < 75 { return 92 }
+        if elbow < 125 { return 48 }
+        return 16
+    }
+
+    private static func arm(
+        shoulder: SIMD3<Float>,
+        hip: SIMD3<Float>,
+        isLeft: Bool,
+        abduction: Float,
+        elbowAngle: Float,
+        wristHeight: Float?
+    ) -> (elbow: SIMD3<Float>, wrist: SIMD3<Float>) {
+        let side: Float = isLeft ? -1 : 1
+        let a = abduction * Float.pi / 180
+        let fistsInFront = abduction < 55 && elbowAngle < 85
+        var upperDir = SIMD3<Float>(side * sin(a), -cos(a), fistsInFront ? 0.45 * sin(max(a, 0.2)) : 0)
+        upperDir = simd_normalize(upperDir)
+        let elbow = shoulder + upperArm * upperDir
+
+        let u = simd_normalize(elbow - shoulder)
+        let bend = (180 - elbowAngle) * Float.pi / 180
+        var toward: SIMD3<Float>
+        if elbowAngle < 80 {
+            toward = SIMD3<Float>(-side * 0.15, 1, fistsInFront ? 0.4 : 0)
+        } else if elbowAngle < 125 {
+            toward = hip - elbow
+        } else {
+            toward = u
+        }
+        var plane = toward - u * simd_dot(toward, u)
+        if simd_length(plane) < 0.08 {
+            plane = SIMD3<Float>(0, 1, 0) - u * simd_dot(SIMD3<Float>(0, 1, 0), u)
+        }
+        if simd_length(plane) < 0.04 {
+            plane = SIMD3<Float>(side, 0, 0)
+        }
+        plane = simd_normalize(plane)
+        var forearmDir = simd_normalize(u * cos(bend) + plane * sin(bend))
+        var wrist = elbow + forearm * forearmDir
+
+        if let wristHeight {
+            let desiredY = shoulder.y + wristHeight
+            let dy = (desiredY - elbow.y) / forearm
+            let clamped = min(max(dy, -0.98), 0.98)
+            let rest = sqrt(max(0, 1 - clamped * clamped))
+            var hz = SIMD2<Float>(forearmDir.x, forearmDir.z)
+            let hl = simd_length(hz)
+            if hl > 0.01 {
+                hz = (hz / hl) * rest
+            } else {
+                hz = SIMD2<Float>(side * rest * 0.25, 0)
+            }
+            forearmDir = simd_normalize(SIMD3<Float>(hz.x, clamped, hz.y))
+            wrist = elbow + forearm * forearmDir
+        }
+        return (elbow, wrist)
+    }
+
+    private static func leg(
+        hip: SIMD3<Float>,
+        isLeft: Bool,
+        kneeAngle: Float,
+        ankleX: Float
+    ) -> (knee: SIMD3<Float>, ankle: SIMD3<Float>) {
+        let ankle = SIMD3<Float>(ankleX, hip.y - (thigh + shin) * 0.98, 0)
+        let hipToAnkle = ankle - hip
+        var dist = simd_length(hipToAnkle)
+        let maxReach = thigh + shin - 0.01
+        if dist > maxReach {
+            dist = maxReach
+        }
+        dist = max(dist, 0.08)
+        let dir = simd_normalize(hipToAnkle)
+        let x = (dist * dist + thigh * thigh - shin * shin) / (2 * dist)
+        let heightSq = max(0, thigh * thigh - x * x)
+        let height = sqrt(heightSq)
+        let side: Float = isLeft ? -1 : 1
+        var perp = SIMD3<Float>(-dir.y * side, dir.x * side, 0.12)
+        if simd_length(perp) < 0.01 {
+            perp = SIMD3<Float>(side, 0, 0)
+        }
+        perp = simd_normalize(perp)
+        let visibleBend = max(0, (180 - kneeAngle) / 25)
+        let knee = hip + dir * x + perp * (height * min(visibleBend, 1))
+        return (knee, ankle)
+    }
+
+    /// Aligne le bassin du skeleton capturé sur celui de la référence. Vision
+    /// place le sujet selon son orientation devant l’objectif, ce qui n’a rien
+    /// à voir avec la pose : sans ce recalage les deux silhouettes ne seraient
+    /// pas comparables. La torsion buste / bassin, elle, est préservée.
+    static func alignYawToHips(
+        _ joints: [Joint: SIMD3<Float>],
+        like reference: [Joint: SIMD3<Float>]
+    ) -> [Joint: SIMD3<Float>] {
+        guard let delta = hipYaw(reference).flatMap({ ref in hipYaw(joints).map { ref - $0 } }) else {
+            return joints
+        }
+        return joints.mapValues { rotateY($0, degrees: delta) }
+    }
+
+    private static func hipYaw(_ joints: [Joint: SIMD3<Float>]) -> Float? {
+        guard let left = joints[.leftHip], let right = joints[.rightHip] else { return nil }
+        let dx = right.x - left.x
+        let dz = right.z - left.z
+        guard dx * dx + dz * dz > 0.0001 else { return nil }
+        return atan2(dz, dx) * 180 / .pi
+    }
+
+    static func rotateY(_ p: SIMD3<Float>, degrees: Float) -> SIMD3<Float> {
+        let r = degrees * Float.pi / 180
+        let c = cos(r)
+        let s = sin(r)
+        return SIMD3<Float>(p.x * c + p.z * s, p.y, -p.x * s + p.z * c)
+    }
+
+    /// Projette en 0…1, Y vers le bas, en tenant compte de Z pour les ¾.
+    static func projectFitted(_ joints3D: [Joint: SIMD3<Float>], yaw: Float = 0) -> [Joint: SIMD2<Float>] {
+        projectFitted([joints3D], yaw: yaw).first ?? [:]
+    }
+
+    /// Même cadre pour tous les jeux de joints : indispensable pour comparer
+    /// deux skeletons, sinon chacun serait recadré sur sa propre bounding box
+    /// et l’écart disparaîtrait.
+    static func projectFitted(_ sets: [[Joint: SIMD3<Float>]], yaw: Float = 0) -> [[Joint: SIMD2<Float>]] {
+        let projected: [[Joint: SIMD2<Float>]] = sets.map { set in
+            set.mapValues { p -> SIMD2<Float> in
+                let r = yaw == 0 ? p : rotateY(p, degrees: yaw)
+                return SIMD2<Float>(r.x + r.z * 0.38, r.y)
+            }
+        }
+        let all = projected.flatMap(\.values)
+        guard let minX = all.map(\.x).min(),
+              let maxX = all.map(\.x).max(),
+              let minY = all.map(\.y).min(),
+              let maxY = all.map(\.y).max() else {
+            return sets.map { _ in [:] }
+        }
+        let width = max(maxX - minX, 0.18)
+        let height = max(maxY - minY, 0.18)
+        let cx = (minX + maxX) / 2
+        let scale = max(width / 0.76, height / 0.84)
+        return projected.map { set in
+            var out: [Joint: SIMD2<Float>] = [:]
+            for (joint, p) in set {
+                let nx = 0.5 + (p.x - cx) / scale
+                let ny = 0.10 + (maxY - p.y) / scale
+                out[joint] = SIMD2<Float>(min(max(nx, 0.04), 0.96), min(max(ny, 0.04), 0.96))
+            }
+            return out
+        }
+    }
+}
+
+extension BodyFrame {
+    static func preview(for poseID: PoseID) -> BodyFrame {
+        PosePreviewBuilder.frame(for: poseID)
+    }
+}
