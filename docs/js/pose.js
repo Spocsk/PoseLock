@@ -126,58 +126,82 @@
     });
   }
 
-  function stadium(ctx, a, b, r) {
-    const dx = b[0] - a[0];
-    const dy = b[1] - a[1];
-    const len = Math.hypot(dx, dy) || 1;
-    const nx = -dy / len;
-    const ny = dx / len;
-    ctx.beginPath();
-    ctx.moveTo(a[0] + nx * r, a[1] + ny * r);
-    ctx.arcTo(a[0] + nx * r + dx, a[1] + ny * r + dy, b[0] - nx * r, b[1] - ny * r, r);
-    ctx.arc(b[0], b[1], r, Math.atan2(ny, nx), Math.atan2(-ny, -nx));
-    ctx.arcTo(a[0] - nx * r + dx, a[1] - ny * r + dy, a[0] - nx * r, a[1] - ny * r, r);
-    ctx.arc(a[0], a[1], r, Math.atan2(-ny, -nx), Math.atan2(ny, nx));
-    ctx.closePath();
+  function insetToward(pt, mid, pinch) {
+    const dx = pt[0] - mid[0];
+    const dy = pt[1] - mid[1];
+    const len = Math.hypot(dx, dy);
+    if (len < 0.5) return pt;
+    const t = pinch / len;
+    return [pt[0] - dx * t, pt[1] - dy * t];
   }
 
   function drawFigure(ctx, joints, color) {
     const w = ctx.canvas.width;
     const h = ctx.canvas.height;
-    const pad = w * 0.1;
+    const pad = Math.min(w, h) * 0.12;
     ctx.clearRect(0, 0, w, h);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
     const p = {};
     Object.keys(joints).forEach(function (k) { p[k] = map(joints[k], w, h, pad); });
     const hipW = Math.hypot(p.head[0] - p.root[0], p.head[1] - p.root[1]) * 0.24;
-    ctx.fillStyle = color || "#c4b08b";
-    ctx.strokeStyle = "rgba(10,10,10,0.5)";
-    ctx.lineWidth = Math.max(1, w * 0.004);
+    const fill = color || "#c4b08b";
 
-    const torso = new Path2D();
-    const hw = hipW * 0.95;
-    torso.moveTo(p.lShoulder[0], p.lShoulder[1]);
-    torso.lineTo(p.rShoulder[0], p.rShoulder[1]);
-    torso.lineTo(p.rHip[0] + hw * 0.15, p.rHip[1]);
-    torso.lineTo(p.lHip[0] - hw * 0.15, p.lHip[1]);
-    torso.closePath();
-    ctx.fill(torso);
-    ctx.stroke(torso);
+    const waistLeft = [
+      p.lShoulder[0] * 0.45 + p.lHip[0] * 0.55,
+      p.lShoulder[1] * 0.45 + p.lHip[1] * 0.55
+    ];
+    const waistRight = [
+      p.rShoulder[0] * 0.45 + p.rHip[0] * 0.55,
+      p.rShoulder[1] * 0.45 + p.rHip[1] * 0.55
+    ];
+    const mid = [(waistLeft[0] + waistRight[0]) / 2, (waistLeft[1] + waistRight[1]) / 2];
+    const pinch = hipW * 0.22;
+    const wL = insetToward(waistLeft, mid, pinch);
+    const wR = insetToward(waistRight, mid, pinch);
 
-    function limb(a, b, r) {
-      stadium(ctx, a, b, r);
-      ctx.fill();
-    }
-    limb(p.lShoulder, p.lElbow, hipW * 0.28);
-    limb(p.lElbow, p.lWrist, hipW * 0.22);
-    limb(p.rShoulder, p.rElbow, hipW * 0.28);
-    limb(p.rElbow, p.rWrist, hipW * 0.22);
-    limb(p.lHip, p.lKnee, hipW * 0.34);
-    limb(p.lKnee, p.lAnkle, hipW * 0.26);
-    limb(p.rHip, p.rKnee, hipW * 0.34);
-    limb(p.rKnee, p.rAnkle, hipW * 0.26);
-
+    ctx.fillStyle = fill;
     ctx.beginPath();
-    ctx.arc(p.head[0], p.head[1], Math.max(hipW * 0.43, 6), 0, Math.PI * 2);
+    ctx.moveTo(p.lShoulder[0], p.lShoulder[1]);
+    ctx.lineTo(p.rShoulder[0], p.rShoulder[1]);
+    ctx.lineTo(wR[0], wR[1]);
+    ctx.lineTo(p.rHip[0], p.rHip[1]);
+    ctx.lineTo(p.lHip[0], p.lHip[1]);
+    ctx.lineTo(wL[0], wL[1]);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.strokeStyle = fill;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    function limb(a, b, width) {
+      ctx.lineWidth = width;
+      ctx.beginPath();
+      ctx.moveTo(a[0], a[1]);
+      ctx.lineTo(b[0], b[1]);
+      ctx.stroke();
+    }
+    limb(p.lShoulder, p.lElbow, hipW * 0.48);
+    limb(p.lElbow, p.lWrist, hipW * 0.36);
+    limb(p.rShoulder, p.rElbow, hipW * 0.48);
+    limb(p.rElbow, p.rWrist, hipW * 0.36);
+    limb(p.lHip, p.lKnee, hipW * 0.67);
+    limb(p.lKnee, p.lAnkle, hipW * 0.46);
+    limb(p.rHip, p.rKnee, hipW * 0.67);
+    limb(p.rKnee, p.rAnkle, hipW * 0.46);
+
+    const radius = Math.max(hipW * 0.43, 4);
+    const head = [
+      p.neck[0] + (p.head[0] - p.neck[0]) * 0.65,
+      p.neck[1] + (p.head[1] - p.neck[1]) * 0.65
+    ];
+    ctx.lineWidth = radius * 0.7;
+    ctx.beginPath();
+    ctx.moveTo(p.neck[0], p.neck[1]);
+    ctx.lineTo(head[0], head[1]);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(head[0], head[1], radius, 0, Math.PI * 2);
     ctx.fill();
   }
 

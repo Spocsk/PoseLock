@@ -94,6 +94,53 @@ a {
   color: var(--bg);
   cursor: default;
 }
+.cta--store {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  height: 44px;
+  min-height: 44px;
+  padding: 0 0.85rem 0 0.7rem;
+  border-radius: 8px;
+  background: #000;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1;
+}
+.cta--store:disabled,
+.cta--store[aria-disabled="true"] {
+  background: #000;
+  color: #fff;
+  opacity: 1;
+}
+.cta-apple {
+  width: 16px;
+  height: 20px;
+  flex-shrink: 0;
+  display: block;
+}
+.cta-store-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+}
+.cta-store-kicker {
+  font-family: var(--text);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+}
+.cta-store-name {
+  font-family: var(--text);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
 .cta--ghost {
   background: transparent;
   color: var(--ivory-muted);
@@ -117,17 +164,23 @@ a {
   z-index: 0;
 }
 .hero-visual img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 62% 28%;
+  position: absolute;
+  top: 50%;
+  right: 0;
+  height: min(100%, 1024px);
+  width: auto;
+  max-width: min(48vw, 576px);
+  transform: translateY(-50%);
+  filter: blur(10px);
+  opacity: 0.78;
+  object-fit: contain;
 }
 .hero-vignette {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse at 58% 32%, transparent 28%, rgba(10, 10, 10, 0.45) 70%, var(--bg) 100%),
-    linear-gradient(to top, var(--bg) 0%, rgba(10, 10, 10, 0.55) 28%, transparent 58%);
+    linear-gradient(90deg, var(--bg) 0%, var(--bg) 32%, rgba(10, 10, 10, 0.88) 48%, rgba(10, 10, 10, 0.35) 70%, transparent 92%),
+    linear-gradient(to top, var(--bg) 0%, rgba(10, 10, 10, 0.72) 22%, transparent 52%);
   pointer-events: none;
 }
 .hero-grain {
@@ -283,13 +336,14 @@ a {
 }
 .beats {
   display: flex;
-  gap: 1.25rem;
+  gap: 1.75rem;
   margin-top: 2rem;
   padding: 0;
   list-style: none;
   font-family: var(--display);
-  font-size: 0.8rem;
-  letter-spacing: 0.16em;
+  font-size: clamp(1.2rem, 2.4vw, 1.7rem);
+  font-weight: 700;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ivory-faint);
 }
@@ -511,9 +565,15 @@ a {
   gap: 1.5rem;
   align-items: end;
   max-width: 52rem;
+  margin-inline: auto;
+  width: 100%;
 }
 .shot {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 .shot .caption {
   margin: 0 0 0.4rem;
@@ -538,7 +598,7 @@ a {
   width: 100%;
   max-width: 200px;
   aspect-ratio: 3 / 4;
-  margin-top: 0.75rem;
+  margin: 0.75rem auto 0;
 }
 .journal-rule {
   width: 1px;
