@@ -9,6 +9,7 @@ struct OnboardingPaywallView: View {
     var onUnavailable: () -> Void
     var onPurchased: () -> Void
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(StoreManager.self) private var store
     @State private var selectedID: String?
     @State private var loadAttempts = 0
@@ -16,6 +17,12 @@ struct OnboardingPaywallView: View {
 
     /// À défaut de choix explicite, l'offre la plus longue : c'est celle qui porte
     /// la remise.
+    private var offerLayout: AnyLayout {
+        dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12))
+            : AnyLayout(HStackLayout(alignment: .top, spacing: 12))
+    }
+
     private var selected: PlanOffer? {
         store.offers.first { $0.id == selectedID } ?? store.offers.last
     }
@@ -24,7 +31,17 @@ struct OnboardingPaywallView: View {
         VStack(spacing: 0) {
             header
 
-            if store.offers.isEmpty {
+            if store.isPro {
+                VStack(spacing: 20) {
+                    Text("PoseLock Pro est actif").font(Theme.titleFont)
+                    Text("Ton abonnement est déjà reconnu sur cet appareil.")
+                        .font(Theme.supportFont).foregroundStyle(Theme.ivoryMuted)
+                    Button("Continuer", action: onPurchased)
+                        .buttonStyle(PrimaryButtonStyle())
+                }
+                .padding(24)
+                .frame(maxHeight: .infinity)
+            } else if store.offers.isEmpty {
                 if isLoadingOffers {
                     ProgressView()
                         .tint(Theme.gold)
@@ -37,13 +54,13 @@ struct OnboardingPaywallView: View {
                     content
                         .padding(.horizontal, 24)
                         .padding(.bottom, 24)
+                    if dynamicTypeSize.isAccessibilitySize { footer }
                 }
-                footer
+                if !dynamicTypeSize.isAccessibilitySize { footer }
             }
         }
-        .task { await reload() }
-        .onChange(of: store.isPro) { _, isPro in
-            if isPro { onPurchased() }
+        .task {
+            await reload()
         }
     }
 
@@ -51,9 +68,9 @@ struct OnboardingPaywallView: View {
         HStack {
             Button(action: onBack) {
                 Image(systemName: "chevron.left")
-                    .font(.system(size: 14, weight: .medium))
+                    .font(Theme.supportFont)
                     .foregroundStyle(Theme.ivoryMuted)
-                    .frame(width: 32, height: 32)
+                    .frame(width: Theme.minimumTarget, height: Theme.minimumTarget)
                     .background(Theme.elevated, in: Circle())
                     .overlay(Circle().stroke(Theme.hairline, lineWidth: 1))
             }
@@ -63,7 +80,7 @@ struct OnboardingPaywallView: View {
             Spacer()
 
             Button("Restaurer") {
-                Task { await store.restore() }
+                Task { await buy { await store.restore() } }
             }
             .font(Theme.supportFont)
             .foregroundStyle(Theme.ivoryMuted)
@@ -78,7 +95,7 @@ struct OnboardingPaywallView: View {
         VStack(alignment: .leading, spacing: 24) {
             VStack(alignment: .leading, spacing: 10) {
                 Text(PaywallCopy.title(for: selected))
-                    .font(.system(size: 26, weight: .regular))
+                    .font(Theme.titleFont)
                     .foregroundStyle(Theme.ivory)
                     .fixedSize(horizontal: false, vertical: true)
 
@@ -93,17 +110,19 @@ struct OnboardingPaywallView: View {
                 TrialTimeline(trialLabel: trial, priceLabel: selected.priceLabel)
             }
 
-            VStack(alignment: .leading, spacing: 14) {
-                ForEach(ProBenefit.allCases) { benefit in
-                    PaywallBenefitRow(benefit: benefit)
-                }
-            }
 
-            HStack(alignment: .top, spacing: 10) {
+
+            offerLayout {
                 ForEach(store.offers) { offer in
                     PlanCard(offer: offer, isSelected: offer.id == selected?.id) {
                         selectedID = offer.id
                     }
+                }
+            }
+
+            VStack(alignment: .leading, spacing: 14) {
+                ForEach(ProBenefit.allCases) { benefit in
+                    PaywallBenefitRow(benefit: benefit)
                 }
             }
         }
@@ -118,7 +137,7 @@ struct OnboardingPaywallView: View {
 
             Button(PaywallCopy.callToAction(for: selected)) {
                 guard let selected else { return }
-                Task { await store.purchase(selected) }
+                Task { await buy { await store.purchase(selected) } }
             }
             .buttonStyle(PrimaryButtonStyle())
             .disabled(store.isLoading || selected == nil)
@@ -170,5 +189,12 @@ struct OnboardingPaywallView: View {
         await store.refreshOffers()
         loadAttempts += 1
         isLoadingOffers = false
+    }
+
+    /// L'achat met `isPro` à jour, mais `@Observable` + `onChange` ne le voit
+    /// pas toujours. On avance dès que l'entitlement est active, ici.
+    private func buy(_ work: () async -> Void) async {
+        await work()
+        if store.isPro { onPurchased() }
     }
 }

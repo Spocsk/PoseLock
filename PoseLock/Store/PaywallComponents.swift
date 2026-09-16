@@ -62,7 +62,7 @@ struct TrialTimeline: View {
                 HStack(alignment: .top, spacing: 12) {
                     VStack(spacing: 0) {
                         Image(systemName: step.symbol)
-                            .font(.system(size: 11, weight: .regular))
+                            .font(Theme.captionFont)
                             .foregroundStyle(Theme.background)
                             .frame(width: 26, height: 26)
                             .background(Theme.gold, in: Circle())
@@ -77,7 +77,7 @@ struct TrialTimeline: View {
 
                     VStack(alignment: .leading, spacing: 4) {
                         Text(step.title)
-                            .font(.system(size: 16, weight: .regular))
+                            .font(Theme.bodyFont)
                             .foregroundStyle(Theme.ivory)
                         Text(step.detail)
                             .font(Theme.supportFont)
@@ -110,7 +110,7 @@ struct PaywallBenefitRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: "checkmark")
-                .font(.system(size: 11, weight: .regular))
+                .font(Theme.captionFont)
                 .foregroundStyle(Theme.gold)
                 .frame(width: 18, height: 18)
                 .background(Theme.gold.opacity(0.12), in: Circle())
@@ -138,15 +138,17 @@ struct PlanCard: View {
     var body: some View {
         Button(action: onSelect) {
             VStack(alignment: .leading, spacing: 6) {
-                // Toujours présente, masquée sans remise : sinon la période et le
-                // prix ne tombent pas à la même hauteur d'une carte à l'autre.
-                badge(offer.discountPercent ?? 0)
-                    .hidden()
-                    .overlay(alignment: .leading) {
-                        if let discount = offer.discountPercent {
-                            badge(discount)
-                        }
+                HStack {
+                    if let discount = offer.discountPercent {
+                        badge(discount)
+                    } else {
+                        badge(0).hidden().accessibilityHidden(true)
                     }
+                    Spacer()
+                    Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                        .foregroundStyle(isSelected ? Theme.gold : Theme.ivoryMuted)
+                        .accessibilityHidden(true)
+                }
 
                 Text(offer.periodLabel)
                     .font(Theme.supportFont)
@@ -155,19 +157,18 @@ struct PlanCard: View {
                     .tracking(0.8)
 
                 Text(offer.priceLabel)
-                    .font(.system(size: 20, weight: .regular))
+                    .font(Theme.titleFont)
                     .foregroundStyle(Theme.ivory)
 
-                if let monthly = offer.monthlyEquivalentLabel {
-                    Text("\(monthly) / mois")
-                        .font(Theme.supportFont)
-                        .foregroundStyle(Theme.ivoryFaint)
-                }
+                Text(offer.monthlyEquivalentLabel.map { "\($0) / mois" } ?? " ")
+                    .font(Theme.supportFont)
+                    .foregroundStyle(Theme.ivoryMuted)
+                    .accessibilityHidden(offer.monthlyEquivalentLabel == nil)
             }
             .padding(14)
             // Les deux cartes prennent la hauteur du rang : sans ça, celle qui
             // n'a ni remise ni équivalent mensuel est plus courte que l'autre.
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .frame(maxWidth: .infinity, alignment: .topLeading)
             .background(isSelected ? Theme.gold.opacity(0.10) : Theme.elevated)
             .clipShape(RoundedRectangle(cornerRadius: Theme.continuousCorner, style: .continuous))
             .overlay(
@@ -197,17 +198,17 @@ struct PlanCard: View {
 struct PaywallHero: View {
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
+            RoundedRectangle(cornerRadius: Theme.continuousCorner, style: .continuous)
                 .fill(Theme.elevated)
 
             VStack(spacing: 12) {
                 PosePreviewSkeleton(poseID: .frontDoubleBiceps, highlight: .allGreen)
-                    .frame(height: 150)
+                    .frame(height: 100)
                     .padding(.top, 20)
 
                 HStack(spacing: 8) {
                     Text("\(Int(ScoringConstants.lockScore))")
-                        .font(.system(size: 22, weight: .light))
+                        .font(Theme.titleFont)
                         .foregroundStyle(Theme.lockGreen)
                     Text("lockable")
                         .font(Theme.captionFont)
@@ -219,7 +220,7 @@ struct PaywallHero: View {
             }
         }
         .overlay(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
+            RoundedRectangle(cornerRadius: Theme.continuousCorner, style: .continuous)
                 .stroke(Theme.lockGreen.opacity(0.28), lineWidth: 1)
         )
         .accessibilityHidden(true)

@@ -57,14 +57,6 @@ struct HomeView: View {
                         lastLockDuration: lastLockDuration
                     )
                     StatsRowView(week: week)
-                    ZyzzCatalogCard(isPro: store.isPro) {
-                        session.requestPackChange(
-                            .zyzz,
-                            settings: settings,
-                            isPro: store.isPro,
-                            entries: entries
-                        )
-                    }
                     DeadlineCard(
                         isPro: store.isPro,
                         date: settings.competitionDate,
@@ -84,12 +76,13 @@ struct HomeView: View {
                         }
                     )
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, Theme.pageInset)
                 .padding(.top, 12)
                 .padding(.bottom, 32)
             }
             .background(Theme.background.ignoresSafeArea())
-            .toolbar(.hidden, for: .navigationBar)
+            .navigationTitle("PoseLock")
+            .navigationBarTitleDisplayMode(.large)
             .sheet(isPresented: $session.showPoseLibrary) {
                 PoseLibrarySheet(pack: settings.pack, isPro: store.isPro, selected: $session.selectedPoseID)
             }
@@ -114,7 +107,7 @@ struct DailyRecapView: View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(alignment: .firstTextBaseline, spacing: 10) {
                 Text(dateText.capitalized)
-                    .font(.system(size: 13, weight: .regular))
+                    .font(Theme.supportFont)
                     .foregroundStyle(Theme.ivoryMuted)
                 if recap.streak > 0 {
                     Text("\(recap.streak) j")
@@ -122,16 +115,21 @@ struct DailyRecapView: View {
                         .foregroundStyle(Theme.goldMuted)
                 }
             }
-            let best = recap.bestScore.map(String.init) ?? "—"
-            Text("Aujourd’hui · \(recap.lockCount) lock\(recap.lockCount == 1 ? "" : "s") · meilleur \(best)")
-                .font(.system(size: 20, weight: .regular))
+            Text(recap.lockCount == 0 ? "Ta prochaine pose commence ici." : "\(recap.lockCount) lock\(recap.lockCount == 1 ? "" : "s") aujourd’hui")
+                .font(Theme.titleFont)
                 .foregroundStyle(Theme.ivory)
+            if let best = recap.bestScore {
+                Text("Meilleur score · \(best) / 100")
+                    .font(Theme.supportFont)
+                    .foregroundStyle(Theme.ivoryMuted)
+            }
         }
         .padding(.top, 8)
     }
 }
 
 struct PoseCardView: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     var pose: PoseDefinition
     var lastScore: Int?
     var onWork: () -> Void
@@ -141,30 +139,37 @@ struct PoseCardView: View {
         VStack(alignment: .leading, spacing: 16) {
             Button(action: onBrowse) {
                 HStack(spacing: 16) {
+                    if !dynamicTypeSize.isAccessibilitySize {
                     PosePreviewSkeleton(
                         poseID: pose.poseID,
                         highlight: .regions([.leftArm, .rightArm, .shoulders, .torso]),
                         lineWidth: 2.6,
                         jointSize: 4
                     )
-                    .frame(width: 64, height: 80)
+                    .frame(width: 100, height: 140)
                     .background(Theme.background.opacity(0.35))
                     .clipShape(RoundedRectangle(cornerRadius: Theme.continuousCorner, style: .continuous))
+                    }
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Pose à travailler")
                             .font(Theme.captionFont)
                             .foregroundStyle(Theme.ivoryMuted)
                         Text(pose.displayName)
-                            .font(.system(size: 18, weight: .regular))
+                            .font(Theme.bodyFont)
                             .foregroundStyle(Theme.ivory)
-                        Text(lastScore.map { "Dernier \($0)" } ?? "—")
+                        Text(lastScore.map { "Dernier score · \($0) / 100" } ?? "Première séance")
                             .font(Theme.bodyFont)
                             .foregroundStyle(Theme.goldMuted)
                     }
-                    Spacer()
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.right")
+                        .font(Theme.supportFont)
+                        .foregroundStyle(Theme.ivoryMuted)
                 }
+                .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .accessibilityHint("Choisir une autre pose")
 
             Button("Travailler", action: onWork)
                 .buttonStyle(PrimaryButtonStyle())
@@ -177,21 +182,17 @@ struct PoseCardView: View {
 }
 
 struct StatsRowView: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     var week: WeekStats
 
     var body: some View {
-        HStack(spacing: 0) {
+        let layout = dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 20)) : AnyLayout(HStackLayout(spacing: 16))
+        layout {
             stat("Cette semaine", "\(week.weekLockCount) lock\(week.weekLockCount == 1 ? "" : "s")")
-            Divider().overlay(Theme.hairline).frame(height: 36)
             stat("Meilleure pose", week.bestPoseName.map { "\($0) \(week.bestPoseScore ?? 0)" } ?? "—")
-            Divider().overlay(Theme.hairline).frame(height: 36)
             stat("Moyenne", week.averageScore.map(String.init) ?? "—")
         }
-        .padding(.vertical, 16)
-        .padding(.horizontal, 8)
-        .background(Theme.elevated)
-        .clipShape(RoundedRectangle(cornerRadius: Theme.continuousCorner, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: Theme.continuousCorner, style: .continuous).stroke(Theme.hairline, lineWidth: 1))
+        .padding(.vertical, 8)
     }
 
     private func stat(_ title: String, _ value: String) -> some View {
@@ -200,55 +201,12 @@ struct StatsRowView: View {
                 .font(Theme.captionFont)
                 .foregroundStyle(Theme.ivoryMuted)
             Text(value)
-                .font(.system(size: 13, weight: .regular))
+                .font(Theme.supportFont)
                 .foregroundStyle(Theme.ivory)
-                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
                 .multilineTextAlignment(.center)
-                .minimumScaleFactor(0.8)
         }
         .frame(maxWidth: .infinity)
-    }
-}
-
-struct ZyzzCatalogCard: View {
-    var isPro: Bool
-    var onTap: () -> Void
-
-    var body: some View {
-        Button(action: onTap) {
-            HStack(spacing: 14) {
-                PosePreviewSkeleton(
-                    poseID: .zyzzClassic,
-                    highlight: .regions([.leftArm, .rightArm, .shoulders, .torso]),
-                    lineWidth: 2.2,
-                    jointSize: 3.5
-                )
-                .frame(width: 48, height: 64)
-                .background(Theme.background.opacity(0.35))
-                .clipShape(RoundedRectangle(cornerRadius: Theme.continuousCorner, style: .continuous))
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Catégorie Zyzz")
-                        .font(.system(size: 18, weight: .regular))
-                        .foregroundStyle(Theme.ivory)
-                    Text("Vacuum, twist, V-taper. La ligne esthétique.")
-                        .font(Theme.supportFont)
-                        .foregroundStyle(Theme.ivoryMuted)
-                }
-                Spacer()
-                if !isPro {
-                    Image(systemName: "lock.fill")
-                        .font(Theme.captionFont)
-                        .foregroundStyle(Theme.goldMuted)
-                }
-            }
-            .padding(18)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Theme.elevated)
-            .overlay(RoundedRectangle(cornerRadius: Theme.continuousCorner, style: .continuous).stroke(Theme.hairline, lineWidth: 1))
-            .clipShape(RoundedRectangle(cornerRadius: Theme.continuousCorner, style: .continuous))
-            .opacity(isPro ? 1 : 0.72)
-        }
-        .buttonStyle(.plain)
     }
 }
 
@@ -295,7 +253,7 @@ struct DeadlineCard: View {
             }
             if let date {
                 Text(headline(for: date))
-                    .font(.system(size: 18, weight: .regular))
+                    .font(Theme.bodyFont)
                     .foregroundStyle(Theme.ivory)
                 if let recommendedPose {
                     Text(recommendedPose.displayName)
@@ -306,7 +264,7 @@ struct DeadlineCard: View {
                 }
             } else {
                 Text(emptyTitle)
-                    .font(.system(size: 18, weight: .regular))
+                    .font(Theme.bodyFont)
                     .foregroundStyle(Theme.ivory)
                 Text(emptyDetail)
                     .font(Theme.supportFont)
@@ -318,7 +276,7 @@ struct DeadlineCard: View {
         .background(Theme.elevated)
         .overlay(RoundedRectangle(cornerRadius: Theme.continuousCorner, style: .continuous).stroke(Theme.hairline, lineWidth: 1))
         .clipShape(RoundedRectangle(cornerRadius: Theme.continuousCorner, style: .continuous))
-        .opacity(locked ? 0.72 : 1)
+
     }
 
     private var emptyTitle: String {

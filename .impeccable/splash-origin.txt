@@ -1,0 +1,1 @@
+Sourced raster from PoseLock/Assets.xcassets/SplashPose.imageset/splash-pose.jpg. Stage lighting décor used by the iOS splash. Not a named user. Do not treat as a testimonial.

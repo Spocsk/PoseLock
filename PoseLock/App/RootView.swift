@@ -3,6 +3,7 @@ import SwiftUI
 import UIKit
 
 struct RootView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.modelContext) private var modelContext
     @Environment(StoreManager.self) private var store
     @Environment(AppSession.self) private var session
@@ -81,6 +82,9 @@ struct RootView: View {
             await store.load()
         }
         .onAppear { styleTabBar() }
+        .transaction { transaction in
+            if reduceMotion { transaction.disablesAnimations = true }
+        }
     }
 
     private var settings: AppSettings? { settingsRows.first }

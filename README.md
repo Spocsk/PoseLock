@@ -30,3 +30,19 @@ Simulateur : onboarding → accueil → réglages → caméra (preview). Vision 
 Quatre surfaces : onboarding, accueil, caméra (full screen, hors tab bar), réglages. Journal et bibliothèque de poses = feuilles.
 
 Le score juge la ligne, jamais la personne. Templates gold `v1`, une variante par pose, division Scène = Classic Physique.
+
+## Landing
+
+Site statique dans `docs/`, prévu pour GitHub Pages (`main` / dossier `/docs`).
+
+URL projet : [https://spocsk.github.io/PoseLock/](https://spocsk.github.io/PoseLock/)
+
+En local :
+
+```bash
+python3 -m http.server 8080 --directory docs
+```
+
+Puis ouvrir `http://127.0.0.1:8080`. Le bouton App Store est volontairement inactif (pas de fiche pour l’instant).
+
+GitHub Pages est branché sur `main` / `/docs`. L’URL se met à jour au prochain push de `docs/` sur `main`.

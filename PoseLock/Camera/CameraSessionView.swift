@@ -132,7 +132,7 @@ struct CameraSessionView: View {
                     session.showCamera = false
                 } label: {
                     Text("Fermer")
-                        .font(.system(size: 16, weight: .regular))
+                        .font(Theme.bodyFont)
                         .foregroundStyle(Theme.ivory)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)

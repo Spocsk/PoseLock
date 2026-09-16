@@ -7,6 +7,7 @@ import UIKit
 struct OnboardingSplashView: View {
     var onContinue: () -> Void
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var breathing = false
     @State private var revealed = false
 
@@ -38,6 +39,7 @@ struct OnboardingSplashView: View {
         .allowsHitTesting(false)
         .opacity(revealed ? 1 : 0)
         .onAppear {
+            if reduceMotion { revealed = true; return }
             withAnimation(.easeOut(duration: 0.9)) {
                 revealed = true
             }

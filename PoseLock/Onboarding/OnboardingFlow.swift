@@ -53,8 +53,18 @@ struct OnboardingFlow: View {
                 if step.showsChrome {
                     OnboardingChrome(step: step, onBack: goBack)
                 }
-                content
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                if step == .splash || step == .paywall {
+                    content.frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    GeometryReader { proxy in
+                        ScrollView {
+                            content
+                                .frame(maxWidth: .infinity)
+                                .frame(minHeight: proxy.size.height)
+                        }
+                        .scrollIndicators(.hidden)
+                    }
+                }
             }
         }
     }
@@ -134,6 +144,7 @@ struct OnboardingFlow: View {
     }
 
     private func advance(to next: OnboardingStep) {
+        guard next != step else { return }
         goingBack = next < step
         PoseLockHaptics.selection(enabled: settings.hapticsEnabled)
         withAnimation(.spring(response: 0.48, dampingFraction: 0.84)) { step = next }
@@ -156,6 +167,7 @@ struct OnboardingFlow: View {
 
 /// Fait entrer chaque bloc d'une slide l'un après l'autre plutôt que d'un seul tenant.
 struct StaggeredAppear: ViewModifier {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     var index: Int
 
     @State private var appeared = false
@@ -165,6 +177,7 @@ struct StaggeredAppear: ViewModifier {
             .opacity(appeared ? 1 : 0)
             .offset(y: appeared ? 0 : 14)
             .onAppear {
+                if reduceMotion { appeared = true; return }
                 withAnimation(
                     .spring(response: 0.55, dampingFraction: 0.86)
                         .delay(0.06 + Double(index) * 0.09)
@@ -189,9 +202,9 @@ struct OnboardingChrome: View {
         HStack(spacing: 14) {
             Button(action: onBack) {
                 Image(systemName: "chevron.left")
-                    .font(.system(size: 14, weight: .medium))
+                    .font(Theme.supportFont)
                     .foregroundStyle(Theme.ivoryMuted)
-                    .frame(width: 32, height: 32)
+                    .frame(width: Theme.minimumTarget, height: Theme.minimumTarget)
                     .background(Theme.elevated, in: Circle())
                     .overlay(Circle().stroke(Theme.hairline, lineWidth: 1))
             }
@@ -279,7 +292,7 @@ struct OnboardingAcknowledgement: View {
     var body: some View {
         HStack(spacing: 8) {
             Image(systemName: "checkmark")
-                .font(.system(size: 10, weight: .semibold))
+                .font(Theme.captionFont)
                 .foregroundStyle(Theme.gold)
                 .frame(width: 18, height: 18)
                 .background(Theme.gold.opacity(0.14), in: Circle())
@@ -535,7 +548,7 @@ struct OnboardingProofView: View {
                 .frame(height: 130)
 
             Text("\(score)")
-                .font(.system(size: 26, weight: .light))
+                .font(Theme.titleFont)
                 .foregroundStyle(color)
                 .monospacedDigit()
         }
@@ -606,7 +619,7 @@ struct OnboardingCameraView: View {
                     .padding(.top, 20)
                 HStack(spacing: 8) {
                     Text("\(Int(ScoringConstants.lockScore))")
-                        .font(.system(size: 22, weight: .light))
+                        .font(Theme.titleFont)
                         .foregroundStyle(Theme.lockGreen)
                     Text("lockable")
                         .font(Theme.captionFont)
@@ -627,7 +640,7 @@ struct OnboardingCameraView: View {
     private func privacyRow(_ symbolName: String, _ text: String) -> some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: symbolName)
-                .font(.system(size: 13, weight: .light))
+                .font(Theme.supportFont)
                 .foregroundStyle(Theme.gold)
                 .frame(width: 20)
             Text(text)
@@ -768,6 +781,7 @@ struct OnboardingHeader: View {
 }
 
 struct OnboardingOptionRow: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     var title: String
     var subtitle: String
     var symbolName: String?
@@ -776,16 +790,16 @@ struct OnboardingOptionRow: View {
 
     var body: some View {
         HStack(spacing: 14) {
-            if let symbolName {
+            if let symbolName, !dynamicTypeSize.isAccessibilitySize {
                 Image(systemName: symbolName)
-                    .font(.system(size: 17, weight: .light))
+                    .font(Theme.bodyFont)
                     .foregroundStyle(isSelected ? Theme.gold : Theme.ivoryMuted)
                     .frame(width: 24)
             }
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 8) {
                     Text(title)
-                        .font(.system(size: 17, weight: .regular))
+                        .font(Theme.bodyFont)
                         .foregroundStyle(Theme.ivory)
                     if let badge {
                         Text(badge)
@@ -823,13 +837,22 @@ struct OnboardingOptionRow: View {
 }
 
 struct PrimaryButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(size: 16, weight: .regular))
-            .foregroundStyle(Theme.background)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
-            .background(Theme.gold, in: RoundedRectangle(cornerRadius: Theme.continuousCorner, style: .continuous))
-            .opacity(configuration.isPressed ? 0.7 : 1)
+            .font(Theme.buttonFont)
+            .multilineTextAlignment(.center)
+            .foregroundStyle(isEnabled ? Theme.background : Theme.ivoryMuted)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+            .frame(maxWidth: .infinity, minHeight: 52)
+            .background(isEnabled ? Theme.gold : Theme.elevated,
+                        in: RoundedRectangle(cornerRadius: Theme.continuousCorner, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: Theme.continuousCorner))
+            .opacity(configuration.isPressed ? 0.85 : 1)
+            .scaleEffect(configuration.isPressed && !reduceMotion ? 0.985 : 1)
+            .animation(reduceMotion ? nil : .easeOut(duration: 0.16), value: configuration.isPressed)
     }
 }

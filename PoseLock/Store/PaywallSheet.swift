@@ -6,6 +6,7 @@ import SwiftUI
 /// qui vient d'être refusé.
 struct PaywallSheet: View {
     var reason: PaywallReason
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(StoreManager.self) private var store
     @Environment(AppSession.self) private var session
     @Environment(\.dismiss) private var dismiss
@@ -13,6 +14,12 @@ struct PaywallSheet: View {
     @Query private var settingsRows: [AppSettings]
 
     @State private var selectedID: String?
+
+    private var offerLayout: AnyLayout {
+        dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12))
+            : AnyLayout(HStackLayout(alignment: .top, spacing: 12))
+    }
 
     private var selected: PlanOffer? {
         store.offers.first { $0.id == selectedID } ?? store.offers.last
@@ -23,34 +30,38 @@ struct PaywallSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
                     PaywallHero()
-                        .frame(height: 220)
+                        .frame(height: 170)
 
                     VStack(alignment: .leading, spacing: 10) {
-                        Text(reason.title)
-                            .font(.system(size: 26, weight: .regular))
+                        Text(store.isPro ? "PoseLock Pro" : reason.title)
+                            .font(Theme.titleFont)
                             .foregroundStyle(Theme.ivory)
                             .fixedSize(horizontal: false, vertical: true)
 
-                        Text(reason.message)
+                        Text(store.isPro ? "Tous tes avantages sont débloqués." : reason.message)
                             .font(Theme.bodyFont)
                             .foregroundStyle(Theme.ivoryMuted)
                             .fixedSize(horizontal: false, vertical: true)
                     }
 
-                    if let selected, let trial = selected.trialLabel {
+                    if !store.isPro, let selected, let trial = selected.trialLabel {
                         TrialTimeline(trialLabel: trial, priceLabel: selected.priceLabel)
                     }
 
-                    VStack(alignment: .leading, spacing: 14) {
-                        ForEach(ProBenefit.allCases) { benefit in
-                            PaywallBenefitRow(benefit: benefit)
-                        }
-                    }
 
-                    if store.offers.isEmpty {
+
+                    if store.isPro {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("Ton abonnement Pro est actif.").font(Theme.bodyFont)
+                            if let date = store.renewalDate {
+                                Text("Fin de la période en cours : \(date.formatted(.dateTime.day().month().year().locale(Locale(identifier: "fr_FR"))))")
+                                    .font(Theme.supportFont).foregroundStyle(Theme.ivoryMuted)
+                            }
+                        }
+                    } else if store.offers.isEmpty {
                         unavailable
                     } else {
-                        HStack(alignment: .top, spacing: 10) {
+                        offerLayout {
                             ForEach(store.offers) { offer in
                                 PlanCard(offer: offer, isSelected: offer.id == selected?.id) {
                                     selectedID = offer.id
@@ -58,12 +69,19 @@ struct PaywallSheet: View {
                             }
                         }
                     }
+
+                    VStack(alignment: .leading, spacing: 14) {
+                        ForEach(ProBenefit.allCases) { benefit in
+                            PaywallBenefitRow(benefit: benefit)
+                        }
+                    }
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 24)
+                if dynamicTypeSize.isAccessibilitySize && !store.isPro && !store.offers.isEmpty { footer }
             }
             .safeAreaInset(edge: .bottom) {
-                if !store.offers.isEmpty { footer }
+                if !dynamicTypeSize.isAccessibilitySize && !store.isPro && !store.offers.isEmpty { footer }
             }
             .background(Theme.background.ignoresSafeArea())
             .navigationBarTitleDisplayMode(.inline)
@@ -72,21 +90,19 @@ struct PaywallSheet: View {
                     Button("Fermer") { dismiss() }.foregroundStyle(Theme.gold)
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Restaurer") { Task { await store.restore() } }
-                        .font(Theme.supportFont)
-                        .foregroundStyle(Theme.ivoryMuted)
-                        .disabled(store.isLoading)
+                    Button("Restaurer") {
+                        Task {
+                            await store.restore()
+                            if store.isPro { dismissAfterPurchase() }
+                        }
+                    }
+                    .font(Theme.supportFont)
+                    .foregroundStyle(Theme.ivoryMuted)
+                    .disabled(store.isLoading)
                 }
             }
-            .task { await store.refreshOffers() }
-            .onChange(of: store.isPro) { _, isPro in
-                guard isPro else { return }
-                // Le pack demandé au moment du blocage s'applique enfin.
-                if let pending = session.pendingPack {
-                    settingsRows.first?.pack = pending
-                    session.pendingPack = nil
-                }
-                dismiss()
+            .task {
+                await store.refreshOffers()
             }
         }
         .preferredColorScheme(.dark)
@@ -101,7 +117,10 @@ struct PaywallSheet: View {
 
             Button(PaywallCopy.callToAction(for: selected)) {
                 guard let selected else { return }
-                Task { await store.purchase(selected) }
+                Task {
+                    await store.purchase(selected)
+                    if store.isPro { dismissAfterPurchase() }
+                }
             }
             .buttonStyle(PrimaryButtonStyle())
             .disabled(store.isLoading || selected == nil)
@@ -137,5 +156,14 @@ struct PaywallSheet: View {
             }
             .buttonStyle(PrimaryButtonStyle())
         }
+    }
+
+    /// Le pack demandé au moment du blocage s'applique enfin.
+    private func dismissAfterPurchase() {
+        if let pending = session.pendingPack {
+            settingsRows.first?.pack = pending
+            session.pendingPack = nil
+        }
+        dismiss()
     }
 }

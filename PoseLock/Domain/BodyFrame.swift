@@ -173,7 +173,7 @@ enum ScoringConstants {
     static let minSubjectHeight: Float = 0.33
     static let minConfidence: Float = 0.35
     static let freeLocksPerDay = 3
-    static let templateVersion = "v1"
+    static let templateVersion = "v2"
     /// `score = 100 * exp(-k * weightedMSE)`
     static let scoreDecay: Float = 0.65
 }
@@ -185,6 +185,9 @@ enum PoseFeature: String, CaseIterable, Codable, Sendable {
     case rightKnee
     case leftShoulderAbduction
     case rightShoulderAbduction
+    /// Orientation globale face / profil / dos par rapport à la caméra.
+    case bodyYaw
+    /// Rotation des épaules par rapport au bassin.
     case torsoTwist
     case shoulderLevel
     case hipLevel

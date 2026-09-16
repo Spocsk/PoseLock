@@ -76,7 +76,7 @@ struct PoseRecapCard: View {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(recap.poseID.displayName)
-                        .font(.system(size: 18, weight: .regular))
+                        .font(Theme.bodyFont)
                         .foregroundStyle(Theme.ivory)
                     Text(recap.poseID.pack.displayName)
                         .font(Theme.captionFont)
@@ -84,7 +84,7 @@ struct PoseRecapCard: View {
                 }
                 Spacer()
                 Text("\(Int(recap.bestScore.rounded()))")
-                    .font(.system(size: 30, weight: .light))
+                    .font(Theme.metricFont)
                     .foregroundStyle(Theme.gold)
             }
 
@@ -116,7 +116,7 @@ struct PoseRecapCard: View {
                 onShare(yaw)
             } label: {
                 Label("Partager", systemImage: "square.and.arrow.up")
-                    .font(.system(size: 15, weight: .regular))
+                    .font(Theme.bodyFont)
                     .foregroundStyle(Theme.gold)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 10)
@@ -166,7 +166,7 @@ struct PoseRecapCard: View {
                 .font(Theme.captionFont)
                 .foregroundStyle(Theme.ivoryMuted)
             Text(value)
-                .font(.system(size: 13, weight: .regular))
+                .font(Theme.supportFont)
                 .foregroundStyle(Theme.ivory)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)

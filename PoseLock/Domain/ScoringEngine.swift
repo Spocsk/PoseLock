@@ -163,6 +163,9 @@ enum ScoringEngine {
         case .rightShoulderAbduction:
             return triple(j, .rightHip, .rightShoulder, .rightElbow)
                 ?? triple(j, .root, .rightShoulder, .rightElbow)
+        case .bodyYaw:
+            return lineYaw(j, a: .leftHip, b: .rightHip)
+                ?? lineYaw(j, a: .leftShoulder, b: .rightShoulder)
         case .torsoTwist:
             return lineYawDelta(j, hipA: .leftHip, hipB: .rightHip, shA: .leftShoulder, shB: .rightShoulder)
         case .shoulderLevel:
@@ -251,6 +254,14 @@ enum ScoringEngine {
         let cross = hip.x * sh.z - hip.z * sh.x
         let dot = simd_clamp(simd_dot(hip, sh), -1, 1)
         return abs(atan2(cross, dot)) * 180 / .pi
+    }
+
+    private static func lineYaw(_ j: [Joint: SIMD3<Float>], a: Joint, b: Joint) -> Float? {
+        guard let pa = j[a], let pb = j[b] else { return nil }
+        let dx = pb.x - pa.x
+        let dz = pb.z - pa.z
+        guard dx * dx + dz * dz > 0.0001 else { return nil }
+        return abs(atan2(dz, dx) * 180 / .pi)
     }
 
     private static func vTaper(_ j: [Joint: SIMD3<Float>]) -> Float? {

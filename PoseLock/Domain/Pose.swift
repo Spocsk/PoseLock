@@ -87,7 +87,7 @@ enum PoseID: String, Codable, CaseIterable, Identifiable, Sendable {
         }
     }
 
-    /// SF Symbol placeholder — silhouettes dédiées plus tard.
+    /// Icône de pack. La pose elle-même est dessinée par `PoseFigure`, pas un asset.
     var symbolName: String {
         switch pack {
         case .scene: return "figure.stand"
@@ -107,7 +107,7 @@ struct PoseDefinition: Identifiable, Sendable, Equatable {
 }
 
 enum PoseCatalog {
-    static let templateVersion = "v1"
+    static let templateVersion = "v2"
 
     static let all: [PoseDefinition] = PoseID.allCases.map {
         PoseDefinition(poseID: $0, pack: $0.pack, displayName: $0.displayName, symbolName: $0.symbolName)

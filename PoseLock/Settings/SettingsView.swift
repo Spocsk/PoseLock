@@ -33,7 +33,7 @@ struct SettingsView: View {
                     }
                     Toggle("Qualité photo haute", isOn: $settings.photoQualityHigh)
                     Toggle("Sauvegarder aussi dans Photos", isOn: $settings.saveToPhotos)
-                    Toggle("Haptics", isOn: $settings.hapticsEnabled)
+                    Toggle("Retours haptiques", isOn: $settings.hapticsEnabled)
                     Picker("Caméra par défaut", selection: $settings.cameraFront) {
                         Text("Arrière").tag(false)
                         Text("Avant").tag(true)
@@ -66,10 +66,23 @@ struct SettingsView: View {
                     Text("Échéance")
                 } footer: {
                     if store.isPro, settings.competitionDate != nil {
-                        Text("J-7, J-3, J-1. La permission se demande ici, pas au lancement.")
+                        Text("Un rappel à 9 h, à J-7, J-3 et J-1 de ton échéance.")
                     }
                 }
 
+
+                Section("Abonnement") {
+                    LabeledContent("État") {
+                        Text(store.isPro ? "PoseLock Pro" : "Gratuit · \(ScoringConstants.freeLocksPerDay) locks/jour")
+                            .foregroundStyle(Theme.ivoryMuted)
+                    }
+                    Button("PoseLock Pro") { showPaywall = true }
+                    Button("Restaurer les achats") {
+                        Task { await store.restore() }
+                    }
+                    Link("Confidentialité", destination: privacyURL)
+                    Link("Conditions d’utilisation", destination: eulaURL)
+                }
                 #if DEBUG
                 Section {
                     Button("Effacer toutes les données locales", role: .destructive) {
@@ -82,23 +95,13 @@ struct SettingsView: View {
                 }
                 #endif
 
-                Section("Abonnement") {
-                    LabeledContent("État") {
-                        Text(store.isPro ? "PoseLock Pro" : "Free · 3 locks/jour")
-                            .foregroundStyle(Theme.ivoryMuted)
-                    }
-                    Button("PoseLock Pro") { showPaywall = true }
-                    Button("Restaurer les achats") {
-                        Task { await store.restore() }
-                    }
-                    Link("Privacy Policy", destination: privacyURL)
-                    Link("EULA (Apple)", destination: eulaURL)
-                }
             }
+            .listStyle(.insetGrouped)
+            .environment(\.defaultMinListRowHeight, 52)
             .scrollContentBackground(.hidden)
             .background(Theme.background.ignoresSafeArea())
             .navigationTitle("Réglages")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitleDisplayMode(.large)
             .tint(Theme.gold)
             .confirmationDialog("Effacer toutes les photos lockées ?", isPresented: $confirmErase, titleVisibility: .visible) {
                 Button("Effacer le journal", role: .destructive) { eraseJournal() }

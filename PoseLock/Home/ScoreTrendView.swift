@@ -10,8 +10,8 @@ struct ScoreTrendView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Évolution · \(poseName)")
-                .font(Theme.captionFont)
-                .foregroundStyle(Theme.ivoryMuted)
+                .font(Theme.bodyFont)
+                .foregroundStyle(Theme.ivory)
 
             if points.isEmpty {
                 Text("Pas encore de courbe. Un lock et ça démarre.")
@@ -26,7 +26,7 @@ struct ScoreTrendView: View {
                         y: .value("Score", point.score)
                     )
                     .foregroundStyle(Theme.gold)
-                    .interpolationMethod(.catmullRom)
+                    .interpolationMethod(.monotone)
                     PointMark(
                         x: .value("Jour", point.day),
                         y: .value("Score", point.score)
@@ -59,11 +59,8 @@ struct ScoreTrendView: View {
                     .foregroundStyle(Theme.ivoryMuted)
             }
         }
-        .padding(18)
+        .padding(.vertical, 8)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.elevated)
-        .overlay(RoundedRectangle(cornerRadius: Theme.continuousCorner, style: .continuous).stroke(Theme.hairline, lineWidth: 1))
-        .clipShape(RoundedRectangle(cornerRadius: Theme.continuousCorner, style: .continuous))
     }
 
     private var caption: String? {

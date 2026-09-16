@@ -57,6 +57,7 @@ struct CameraHUD: View {
         VStack {
             HStack(alignment: .top) {
                 hudCircleButton("xmark", action: onClose)
+                    .accessibilityLabel("Fermer la caméra")
                 Spacer()
                 Button(action: onBubble) {
                     VStack(spacing: 6) {
@@ -113,6 +114,9 @@ struct CameraHUD: View {
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 24)
                 }
+                .padding(16)
+                .background(Theme.background.opacity(0.85), in: RoundedRectangle(cornerRadius: Theme.continuousCorner))
+                .padding(.horizontal, Theme.pageInset)
             }
 
             #if DEBUG
@@ -141,7 +145,7 @@ struct CameraHUD: View {
     private func hudCircleButton(_ systemName: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: systemName)
-                .font(.system(size: 16, weight: .regular))
+                .font(Theme.bodyFont)
                 .foregroundStyle(Theme.ivory)
                 .frame(width: 44, height: 44)
                 .background(.ultraThinMaterial)

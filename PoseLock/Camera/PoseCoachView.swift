@@ -11,14 +11,12 @@ struct PoseCoachStep: Equatable {
     var detail: String
     var symbolName: String
     var highlight: Highlight
+    var cues: [String] = []
 }
 
 enum PoseCoachCopy {
     static func steps(for poseID: PoseID) -> [PoseCoachStep] {
-        let features = TemplateLibrary.features(for: poseID)
-        let focus = Array(features.prefix(2))
-        let cueText = focus.map(\.cue).joined(separator: " ")
-        let regions = Set(focus.map(\.region))
+        let setup = setupCues(for: poseID)
         let hold = ScoringConstants.lockHoldSeconds
         let holdText = hold.truncatingRemainder(dividingBy: 1) == 0
             ? "\(Int(hold))"
@@ -32,9 +30,10 @@ enum PoseCoachCopy {
             ),
             PoseCoachStep(
                 title: poseID.displayName,
-                detail: cueText,
+                detail: setup.cues.joined(separator: " "),
                 symbolName: poseID.symbolName,
-                highlight: .regions(regions)
+                highlight: .regions(setup.regions),
+                cues: setup.cues
             ),
             PoseCoachStep(
                 title: "Tiens la ligne",
@@ -44,6 +43,37 @@ enum PoseCoachCopy {
             )
         ]
     }
+
+    /// Un cue par groupe de mise en place (buste, bras, tête), pas les deux premières features collées.
+    static func setupCues(for poseID: PoseID) -> (cues: [String], regions: Set<SkeletonRegion>) {
+        let features = TemplateLibrary.features(for: poseID)
+        let groups: [[SkeletonRegion]] = [
+            [.torso, .hips],
+            [.leftArm],
+            [.rightArm],
+            [.shoulders],
+            [.head],
+            [.leftLeg, .rightLeg]
+        ]
+        var cues: [String] = []
+        var regions: Set<SkeletonRegion> = []
+        for group in groups {
+            guard cues.count < 4 else { break }
+            guard let feature = features.first(where: { group.contains($0.region) }) else { continue }
+            guard !cues.contains(feature.cue) else { continue }
+            cues.append(feature.cue)
+            regions.insert(feature.region)
+        }
+        if cues.count < 3 {
+            for feature in features {
+                guard cues.count < 4 else { break }
+                guard !cues.contains(feature.cue) else { continue }
+                cues.append(feature.cue)
+                regions.insert(feature.region)
+            }
+        }
+        return (cues, regions)
+    }
 }
 
 struct PoseCoachView: View {
@@ -51,6 +81,9 @@ struct PoseCoachView: View {
     var onStart: () -> Void
 
     @State private var page = 0
+    @State private var assemble: CGFloat = 0
+    @State private var yaw: Float = 0
+    @State private var yawAtDragStart: Float?
 
     private var steps: [PoseCoachStep] { PoseCoachCopy.steps(for: poseID) }
 
@@ -59,8 +92,10 @@ struct PoseCoachView: View {
             VStack(spacing: 0) {
                 TabView(selection: $page) {
                     ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
-                        coachPage(step)
-                            .tag(index)
+                        ScrollView {
+                            coachPage(step, index: index).padding(.bottom, 36)
+                        }
+                        .tag(index)
                     }
                 }
                 .tabViewStyle(.page(indexDisplayMode: .always))
@@ -73,7 +108,7 @@ struct PoseCoachView: View {
                         onStart()
                     }
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(PrimaryButtonStyle())
                 .tint(Theme.gold)
                 .controlSize(.large)
                 .padding(.horizontal, 24)
@@ -88,87 +123,109 @@ struct PoseCoachView: View {
                 }
             }
             .toolbarBackground(Theme.background, for: .navigationBar)
+            .onChange(of: page) { _, new in
+                syncAssemble(for: new)
+            }
         }
         .preferredColorScheme(.dark)
         .tint(Theme.gold)
     }
 
-    private func coachPage(_ step: PoseCoachStep) -> some View {
+    private func coachPage(_ step: PoseCoachStep, index: Int) -> some View {
         VStack(spacing: 20) {
             Spacer(minLength: 12)
             Image(systemName: step.symbolName)
-                .font(.system(size: 36, weight: .light))
+                .font(Theme.emblemFont)
                 .foregroundStyle(Theme.gold)
                 .symbolEffect(.pulse, options: .nonRepeating, value: page)
-            PosePreviewSkeleton(poseID: poseID, highlight: step.highlight)
-                .frame(height: 280)
-                .padding(.horizontal, 32)
-                .id(page)
-                .transition(.opacity)
+            PosePreviewSkeleton(
+                poseID: poseID,
+                highlight: step.highlight,
+                assemble: index == 0 ? 0 : assemble,
+                yaw: index == 0 ? 0 : yaw
+            )
+            .frame(height: 280)
+            .padding(.horizontal, 32)
+            .contentShape(Rectangle())
+            .modifier(CoachYawModifier(enabled: index > 0, gesture: rotateGesture))
+            if index > 0 {
+                Text("Glisse pour tourner.")
+                    .font(Theme.captionFont)
+                    .foregroundStyle(Theme.ivoryFaint)
+            }
             Text(step.title)
                 .font(Theme.titleFont)
                 .foregroundStyle(Theme.ivory)
                 .multilineTextAlignment(.center)
+            cueBlock(step)
+            Spacer()
+        }
+    }
+
+    @ViewBuilder
+    private func cueBlock(_ step: PoseCoachStep) -> some View {
+        if step.cues.count > 1 {
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(Array(step.cues.enumerated()), id: \.offset) { index, cue in
+                    HStack(alignment: .top, spacing: 8) {
+                        Text("\(index + 1)")
+                            .font(Theme.captionFont)
+                            .foregroundStyle(Theme.gold)
+                            .frame(width: 14, alignment: .trailing)
+                        Text(cue)
+                            .font(Theme.supportFont)
+                            .foregroundStyle(Theme.ivoryMuted)
+                    }
+                }
+            }
+            .padding(.horizontal, 28)
+        } else {
             Text(step.detail)
                 .font(Theme.bodyFont)
                 .foregroundStyle(Theme.ivoryMuted)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 28)
-            Spacer()
         }
+    }
+
+    private var rotateGesture: some Gesture {
+        DragGesture()
+            .onChanged { value in
+                let start = yawAtDragStart ?? yaw
+                yawAtDragStart = start
+                yaw = start + Float(value.translation.width) * 0.6
+            }
+            .onEnded { _ in
+                yawAtDragStart = nil
+            }
+    }
+
+    private func syncAssemble(for page: Int) {
+        if page == 0 {
+            assemble = 0
+            yaw = 0
+            return
+        }
+        if page == 1 {
+            assemble = 0
+            withAnimation(.easeInOut(duration: 1.2)) {
+                assemble = 1
+            }
+            return
+        }
+        assemble = 1
     }
 }
 
-struct PosePreviewSkeleton: View {
-    var poseID: PoseID
-    var highlight: PoseCoachStep.Highlight = .none
-    var lineWidth: CGFloat = Theme.skeletonLine
-    var jointSize: CGFloat = Theme.skeletonJoint
+private struct CoachYawModifier<G: Gesture>: ViewModifier {
+    var enabled: Bool
+    var gesture: G
 
-    private var frame: BodyFrame { BodyFrame.preview(for: poseID) }
-
-    var body: some View {
-        Canvas { context, size in
-            var joints: Set<Joint> = []
-            for bone in Bone.all {
-                guard let a = frame.imagePoint(bone.from), let b = frame.imagePoint(bone.to) else { continue }
-                let color = strokeColor(for: bone)
-                var path = Path()
-                path.move(to: CGPoint(x: CGFloat(a.x) * size.width, y: CGFloat(a.y) * size.height))
-                path.addLine(to: CGPoint(x: CGFloat(b.x) * size.width, y: CGFloat(b.y) * size.height))
-                context.stroke(
-                    path,
-                    with: .color(color),
-                    style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round)
-                )
-                joints.insert(bone.from)
-                joints.insert(bone.to)
-            }
-            for joint in joints {
-                guard let p = frame.imagePoint(joint) else { continue }
-                let center = CGPoint(x: CGFloat(p.x) * size.width, y: CGFloat(p.y) * size.height)
-                let radius = jointSize / 2
-                let dot = Path(ellipseIn: CGRect(
-                    x: center.x - radius,
-                    y: center.y - radius,
-                    width: radius * 2,
-                    height: radius * 2
-                ))
-                context.fill(dot, with: .color(Theme.ivory.opacity(0.9)))
-            }
-        }
-        .accessibilityHidden(true)
-    }
-
-    private func strokeColor(for bone: Bone) -> Color {
-        switch highlight {
-        case .none:
-            return Theme.ivory.opacity(0.55)
-        case .regions(let regions):
-            let lit = regions.contains { $0.bones.contains(bone) }
-            return lit ? Theme.gold : Theme.ivory.opacity(0.28)
-        case .allGreen:
-            return Theme.lockGreen
+    func body(content: Content) -> some View {
+        if enabled {
+            content.highPriorityGesture(gesture)
+        } else {
+            content
         }
     }
 }

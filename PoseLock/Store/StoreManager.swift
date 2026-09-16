@@ -62,6 +62,9 @@ final class StoreManager {
             // Une annulation n'est pas une erreur : rien à dire à l'écran.
             guard !result.userCancelled else { return }
             apply(result.customerInfo)
+            // Le Test Store peut renvoyer un customerInfo sans entitlement
+            // encore actif : un second fetch débloque le paywall.
+            await refreshEntitlements()
         } catch {
             purchaseError = "L’achat n’a pas abouti."
         }

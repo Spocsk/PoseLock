@@ -1,0 +1,110 @@
+:root {
+  --bg: #0a0a0a;
+  --elevated: #171717;
+  --hairline: rgba(232, 227, 219, 0.12);
+  --gold: #c4b08b;
+  --gold-muted: rgba(196, 176, 139, 0.76);
+  --ivory: #e8e3db;
+  --ivory-muted: rgba(232, 227, 219, 0.76);
+  --ivory-faint: rgba(232, 227, 219, 0.6);
+  --lock: #8cc794;
+  --frame-red: #c74747;
+  --display: "Big Shoulders Display", "Arial Narrow", sans-serif;
+  --text: "Source Sans 3", "Segoe UI", sans-serif;
+  --ease-apple: cubic-bezier(0.23, 1, 0.32, 1);
+  --radius: 16px;
+  --page: clamp(20px, 4vw, 40px);
+  --nav-h: 64px;
+  --measure: 68ch;
+
+  --duration-stagger: 40ms;
+  --duration-micro: 80ms;
+  --duration-quick: 150ms;
+  --duration-fast: 250ms;
+  --duration-medium: 350ms;
+  --duration-slow: 400ms;
+  --duration-very-slow: 500ms;
+  --ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: ease-in-out;
+  --ease-out: ease-out;
+  --ease-linear: linear;
+  --ease-bounce: cubic-bezier(0.23, 1, 0.32, 1);
+  --distance-micro: 4px;
+  --distance-small: 6px;
+  --distance-base: 8px;
+  --distance-medium: 12px;
+  --distance-large: 30px;
+  --blur-small: 2px;
+  --blur-medium: 3px;
+  --blur-large: 8px;
+
+  --digit-dur: 500ms;
+  --digit-distance: 8px;
+  --digit-stagger: 70ms;
+  --digit-blur: 2px;
+  --digit-ease: cubic-bezier(0.23, 1, 0.32, 1);
+  --digit-dir-x: 0;
+  --digit-dir-y: 1;
+
+  --check-opacity-dur: 500ms;
+  --check-rotate-dur: 500ms;
+  --check-rotate-from: 80deg;
+  --check-bob-dur: 500ms;
+  --check-y-amount: 8px;
+  --check-blur-dur: 500ms;
+  --check-blur-from: 10px;
+  --check-path-dur: 500ms;
+  --check-path-delay: 80ms;
+  --check-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --check-ease-opacity: cubic-bezier(0.22, 1, 0.36, 1);
+  --check-ease-rotate: cubic-bezier(0.22, 1, 0.36, 1);
+  --check-ease-bob: cubic-bezier(0.23, 1, 0.32, 1);
+  --check-ease-path: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --shimmer-dur: 2000ms;
+  --shimmer-base: var(--gold-muted);
+  --shimmer-highlight: var(--ivory);
+  --shimmer-band: 400%;
+  --shimmer-ease: linear;
+
+  --tabs-dur: 250ms;
+  --tabs-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --tabs-text-muted: var(--ivory-faint);
+  --tabs-text-active: var(--bg);
+  --tabs-bar-bg: var(--elevated);
+  --tabs-pill-bg: var(--gold);
+
+  --stagger-dur: 500ms;
+  --stagger-distance: 12px;
+  --stagger-stagger: 40ms;
+  --stagger-blur: 3px;
+  --stagger-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --reel-dur: 1400ms;
+  --reel-cell: 6rem;
+  --reel-spin-blur: 3px;
+  --reel-stagger: 90ms;
+  --reel-ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --toast-open: 350ms;
+  --toast-close: 250ms;
+  --toast-distance: 16px;
+  --toast-blur: 2px;
+  --toast-scale: 0.97;
+  --toast-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --text-swap-dur: 150ms;
+  --text-swap-translate-y: 4px;
+  --text-swap-blur: 2px;
+  --text-swap-ease: ease-in-out;
+}
+
+::selection {
+  background: var(--gold);
+  color: var(--bg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}

@@ -4,6 +4,85 @@ import XCTest
 @testable import PoseLock
 
 final class ScoringEngineTests: XCTestCase {
+    func testBackPreviewTurnsTheWholeBodyAwayFromCamera() {
+        for pose in [PoseID.quarterTurnBack, .backDoubleBiceps, .backLatSpread] {
+            let joints = BodyFrame.preview(for: pose).joints3D
+            XCTAssertLessThan(joints[.rightShoulder]!.x, joints[.leftShoulder]!.x)
+            XCTAssertLessThan(joints[.rightHip]!.x, joints[.leftHip]!.x)
+        }
+    }
+
+    func testProfilePreviewHasSidewaysPelvis() {
+        let joints = BodyFrame.preview(for: .profilePosture).joints3D
+        let hips = joints[.rightHip]! - joints[.leftHip]!
+        XCTAssertGreaterThan(abs(hips.z), abs(hips.x) * 4)
+    }
+
+    func testBodyYawMeasuresCameraOrientationWithoutInventingATorsoTwist() {
+        let cases: [(PoseID, Float)] = [
+            (.quarterTurnFace, 0),
+            (.profilePosture, 88),
+            (.quarterTurnBack, 178)
+        ]
+        for (pose, expectedYaw) in cases {
+            let frame = BodyFrame.preview(for: pose)
+            XCTAssertEqual(ScoringEngine.extract(.bodyYaw, from: frame)!, expectedYaw, accuracy: 1, pose.rawValue)
+            XCTAssertEqual(ScoringEngine.extract(.torsoTwist, from: frame)!, 0, accuracy: 1, pose.rawValue)
+        }
+    }
+
+    func testTwistPoseSeparatesHipOrientationFromShoulderRotation() {
+        let frame = BodyFrame.preview(for: .twistThreeQuarter)
+        XCTAssertEqual(ScoringEngine.extract(.bodyYaw, from: frame)!, 12, accuracy: 1)
+        XCTAssertEqual(ScoringEngine.extract(.torsoTwist, from: frame)!, 42, accuracy: 1)
+    }
+
+    func testEveryPreviewMatchesItsOrientationTargets() {
+        for pose in PoseID.allCases {
+            let frame = BodyFrame.preview(for: pose)
+            let targets = TemplateLibrary.features(for: pose)
+            for feature in [PoseFeature.bodyYaw, .torsoTwist] {
+                guard let target = targets.first(where: { $0.feature == feature }) else { continue }
+                XCTAssertEqual(
+                    ScoringEngine.extract(feature, from: frame)!,
+                    target.target,
+                    accuracy: 1,
+                    "\(pose.rawValue) / \(feature.rawValue)"
+                )
+            }
+        }
+    }
+
+    func testContactPosesKeepHandsTogether() {
+        for pose in [PoseID.sideChest, .sideChestMirror, .sideTriceps, .mostMuscular, .mostMuscularCrop] {
+            let joints = BodyFrame.preview(for: pose).joints3D
+            let hands = simd_distance(joints[.leftWrist]!, joints[.rightWrist]!)
+            let shoulders = simd_distance(joints[.leftShoulder]!, joints[.rightShoulder]!)
+            XCTAssertLessThan(hands, shoulders * 0.3, pose.rawValue)
+        }
+    }
+
+    func testAbsAndThighKeepsBothHandsBehindTheHead() {
+        let joints = BodyFrame.preview(for: .absAndThigh).joints3D
+        for wrist in [Joint.leftWrist, .rightWrist] {
+            XCTAssertGreaterThan(joints[wrist]!.y, joints[.neck]!.y)
+            XCTAssertLessThan(joints[wrist]!.y, joints[.head]!.y)
+            XCTAssertLessThan(abs(joints[wrist]!.x - joints[.neck]!.x), 0.10)
+        }
+        XCTAssertGreaterThan(abs(joints[.leftElbow]!.x - joints[.rightElbow]!.x), 0.50)
+    }
+
+    func testMandatoryPosePreviewsShowTheStaggeredLeg() {
+        for pose in [PoseID.frontDoubleBiceps, .sideChest, .backDoubleBiceps, .backLatSpread, .sideTriceps, .absAndThigh] {
+            let joints = BodyFrame.preview(for: pose).joints3D
+            XCTAssertGreaterThan(
+                simd_distance(joints[.leftAnkle]!, joints[.rightAnkle]!),
+                0.16,
+                pose.rawValue
+            )
+        }
+    }
+
     func testNormalizationPutsRootAtOriginAndUnitScale() {
         var joints: [Joint: SIMD3<Float>] = [
             .root: SIMD3(10, 20, 30),
@@ -83,7 +162,33 @@ final class ScoringEngineTests: XCTestCase {
             let steps = PoseCoachCopy.steps(for: pose)
             XCTAssertEqual(steps.count, 3, pose.rawValue)
             XCTAssertFalse(steps[1].detail.isEmpty, pose.rawValue)
+            let setup = PoseCoachCopy.setupCues(for: pose)
+            XCTAssertFalse(setup.cues.isEmpty, pose.rawValue)
         }
+        let zyzz = PoseCoachCopy.setupCues(for: .zyzzClassic)
+        XCTAssertGreaterThanOrEqual(zyzz.cues.count, 3)
+        XCTAssertEqual(Set(zyzz.cues).count, zyzz.cues.count, "cues Zyzz dupliqués")
+    }
+
+    func testZyzzClassicRaisesBothHandsAboveTheHead() {
+        let frame = BodyFrame.preview(for: .zyzzClassic)
+        let joints = frame.joints3D
+        for wrist in [Joint.leftWrist, .rightWrist] {
+            XCTAssertGreaterThan(joints[wrist]!.y, joints[.head]!.y)
+            XCTAssertLessThan(frame.joints2D[wrist]!.y, frame.joints2D[.head]!.y)
+        }
+        XCTAssertGreaterThan(joints[.leftWrist]!.y, joints[.rightWrist]!.y)
+    }
+
+    func testZyzzClassicHasOneExtendedArmAndOneFlexedArm() {
+        let joints = BodyFrame.preview(for: .zyzzClassic).joints3D
+        func elbowAngle(_ shoulder: Joint, _ elbow: Joint, _ wrist: Joint) -> Float {
+            let upper = simd_normalize(joints[shoulder]! - joints[elbow]!)
+            let lower = simd_normalize(joints[wrist]! - joints[elbow]!)
+            return acos(min(1, max(-1, simd_dot(upper, lower)))) * 180 / .pi
+        }
+        XCTAssertEqual(elbowAngle(.leftShoulder, .leftElbow, .leftWrist), 165, accuracy: 1)
+        XCTAssertEqual(elbowAngle(.rightShoulder, .rightElbow, .rightWrist), 75, accuracy: 1)
     }
 
     /// Le lock forcé de debug injecte cette frame. Elle doit passer la porte de

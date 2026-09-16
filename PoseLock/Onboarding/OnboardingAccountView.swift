@@ -68,7 +68,8 @@ struct OnboardingAccountView: View {
             Button("Plus tard") { onFinish(nil) }
                 .font(Theme.bodyFont)
                 .foregroundStyle(Theme.ivoryMuted)
-                .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity, minHeight: Theme.minimumTarget)
+                .contentShape(Rectangle())
                 .padding(.top, 14)
                 .staggeredAppear(5)
         }
@@ -89,7 +90,7 @@ struct OnboardingAccountView: View {
                 )
                 .frame(width: 160, height: 160)
             Image(systemName: "person.crop.circle")
-                .font(.system(size: 44, weight: .light))
+                .font(Theme.emblemFont)
                 .foregroundStyle(Theme.gold)
         }
         .frame(maxWidth: .infinity, alignment: .center)

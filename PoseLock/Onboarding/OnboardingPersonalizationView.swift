@@ -122,7 +122,7 @@ struct OnboardingPersonalizationView: View {
     private func trustRow(_ symbolName: String, _ text: String) -> some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: symbolName)
-                .font(.system(size: 13, weight: .light))
+                .font(Theme.supportFont)
                 .foregroundStyle(Theme.gold)
                 .frame(width: 20)
             Text(text)
@@ -145,7 +145,7 @@ struct OnboardingPersonalizationView: View {
                         .fill(Theme.gold.opacity(0.14))
                         .frame(width: 20, height: 20)
                     Image(systemName: "checkmark")
-                        .font(.system(size: 10, weight: .semibold))
+                        .font(Theme.captionFont)
                         .foregroundStyle(Theme.gold)
                 }
             }

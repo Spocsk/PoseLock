@@ -5,34 +5,38 @@ enum Theme {
     /// Fond quasi noir — référence appareil photo iOS / Fitness+ au repos.
     static let background = Color(red: 0.039, green: 0.039, blue: 0.039)
     static let elevated = Color(red: 0.09, green: 0.09, blue: 0.09)
-    static let hairline = Color.white.opacity(0.08)
+    static let hairline = Color.white.opacity(0.12)
 
     /// Or froid — seul accent.
     static let gold = Color(red: 0.769, green: 0.690, blue: 0.545)
-    static let goldMuted = Color(red: 0.769, green: 0.690, blue: 0.545).opacity(0.55)
+    static let goldMuted = Color(red: 0.769, green: 0.690, blue: 0.545).opacity(0.76)
 
     /// Blanc cassé pour le texte et le skeleton hors tolérance.
     static let ivory = Color(red: 0.91, green: 0.89, blue: 0.86)
-    static let ivoryMuted = Color(red: 0.91, green: 0.89, blue: 0.86).opacity(0.55)
-    static let ivoryFaint = Color(red: 0.91, green: 0.89, blue: 0.86).opacity(0.28)
+    static let ivoryMuted = Color(red: 0.91, green: 0.89, blue: 0.86).opacity(0.76)
+    static let ivoryFaint = Color(red: 0.91, green: 0.89, blue: 0.86).opacity(0.60)
 
     /// Vert lockable — pas de néon salle.
     static let lockGreen = Color(red: 0.55, green: 0.78, blue: 0.58)
     static let frameRed = Color(red: 0.78, green: 0.28, blue: 0.28)
 
-    /// Réservé au splash : le seul gras de l'app.
-    static let wordmarkFont: Font = .system(size: 42, weight: .bold).width(.condensed)
-    static let scoreFont: Font = .system(size: 64, weight: .light, design: .default)
-    static let titleFont: Font = .system(size: 22, weight: .regular, design: .default)
-    static let bodyFont: Font = .system(size: 15, weight: .regular, design: .default)
-    /// Texte d'appui : sous-titres d'options, arguments, lignes de réassurance.
-    /// Le saut direct du corps à la légende était trop brutal pour de la prose.
-    static let supportFont: Font = .system(size: 13, weight: .regular, design: .default)
-    /// Réservée aux micro-libellés : badges, unités, mentions légales.
-    static let captionFont: Font = .system(size: 11, weight: .regular, design: .default)
-    static let bubbleNameFont: Font = .system(size: 11, weight: .regular, design: .default)
+    // Styles système : San Francisco et Dynamic Type, sans nom de police privé.
+    // 22 / 15 / 13 / 11 points à la taille standard.
+    static let wordmarkFont: Font = .system(.largeTitle, design: .default, weight: .bold)
+    static let scoreFont: Font = .system(size: 64, weight: .light)
+    static let metricFont: Font = .system(.title, design: .default, weight: .light)
+    static let titleFont: Font = .system(.title2)
+    static let bodyFont: Font = .system(.subheadline)
+    static let supportFont: Font = .system(.footnote)
+    static let captionFont: Font = .system(.caption2)
+    static let bubbleNameFont = supportFont
+    static let iconFont: Font = .system(.subheadline, design: .default, weight: .medium)
+    static let emblemFont: Font = .system(.largeTitle, design: .default, weight: .light)
+    static let buttonFont: Font = .system(.subheadline, design: .default, weight: .medium)
 
-    static let continuousCorner: CGFloat = 12
+    static let pageInset: CGFloat = 24
+    static let minimumTarget: CGFloat = 44
+    static let continuousCorner: CGFloat = 16
     static let skeletonLine: CGFloat = 5
     static let skeletonLineLocked: CGFloat = 8
     static let skeletonJoint: CGFloat = 8

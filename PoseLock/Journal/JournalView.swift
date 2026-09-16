@@ -17,12 +17,13 @@ enum JournalTab: String, CaseIterable, Identifiable {
 }
 
 struct JournalView: View {
+    @Environment(AppSession.self) private var session
     var entries: [LockEntry]
     var isPro: Bool
     @State private var selectedID: UUID?
     @State private var tab: JournalTab = .takes
 
-    private let columns = [GridItem(.adaptive(minimum: 104), spacing: 4)]
+    private let columns = [GridItem(.adaptive(minimum: 150), spacing: 12)]
 
     var body: some View {
         NavigationStack {
@@ -45,7 +46,7 @@ struct JournalView: View {
             }
             .background(Theme.background.ignoresSafeArea())
             .navigationTitle("Journal")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitleDisplayMode(.large)
             .navigationDestination(item: $selectedID) { id in
                 if let entry = entries.first(where: { $0.id == id }) {
                     JournalDetailView(entry: entry, entries: entries, isPro: isPro)
@@ -58,18 +59,19 @@ struct JournalView: View {
     @ViewBuilder
     private var takesGrid: some View {
         if entries.isEmpty {
-            VStack(spacing: 8) {
-                Text("Aucune photo.")
-                    .font(Theme.bodyFont)
-                    .foregroundStyle(Theme.ivory)
-                Text("Un lock, et le journal commence.")
-                    .font(Theme.captionFont)
-                    .foregroundStyle(Theme.ivoryMuted)
+            ContentUnavailableView {
+                Label("Ton journal commence ici", systemImage: "photo.on.rectangle.angled")
+            } description: {
+                Text("Travaille une pose et réalise ton premier lock pour retrouver ta photo et ton score.")
+            } actions: {
+                Button("Choisir une pose") { session.selectedTab = .home }
+                    .buttonStyle(PrimaryButtonStyle())
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .foregroundStyle(Theme.ivory)
+
         } else {
             ScrollView {
-                LazyVGrid(columns: columns, spacing: 4) {
+                LazyVGrid(columns: columns, spacing: 20) {
                     ForEach(entries, id: \.id) { entry in
                         Button {
                             selectedID = entry.id
@@ -79,7 +81,7 @@ struct JournalView: View {
                         .buttonStyle(.plain)
                     }
                 }
-                .padding(8)
+                .padding(Theme.pageInset)
             }
         }
     }
@@ -90,24 +92,29 @@ struct JournalCell: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            ZStack {
-                Rectangle().fill(Theme.elevated)
-                if let image = PhotoStore.image(at: entry.cleanPath) {
-                    Image(uiImage: image)
-                        .resizable()
-                        .scaledToFill()
+            Rectangle()
+                .fill(Theme.elevated)
+                .aspectRatio(3 / 4, contentMode: .fit)
+                .overlay {
+                    if let image = PhotoStore.image(at: entry.cleanPath) {
+                        GeometryReader { proxy in
+                            Image(uiImage: image)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: proxy.size.width, height: proxy.size.height)
+                                .clipped()
+                        }
+                    }
                 }
-            }
-            .frame(minHeight: 140)
-            .clipped()
+                .clipShape(RoundedRectangle(cornerRadius: Theme.continuousCorner, style: .continuous))
 
             Text("\(Int(entry.score.rounded()))")
-                .font(.system(size: 13, weight: .regular))
+                .font(Theme.supportFont)
                 .foregroundStyle(Theme.ivory)
             Text(entry.poseID.displayName)
                 .font(Theme.captionFont)
                 .foregroundStyle(Theme.ivoryMuted)
-                .lineLimit(1)
+                .lineLimit(2)
             Text(entry.date.formatted(.dateTime.day().month(.abbreviated).locale(Locale(identifier: "fr_FR"))))
                 .font(Theme.captionFont)
                 .foregroundStyle(Theme.ivoryFaint)
@@ -137,9 +144,9 @@ struct JournalDetailView: View {
                     Text("\(Int(entry.score.rounded()))")
                         .foregroundStyle(Theme.gold)
                 }
-                .font(.system(size: 18, weight: .regular))
+                .font(Theme.bodyFont)
 
-                Toggle("Overlay", isOn: $showOverlay)
+                Toggle("Afficher la silhouette", isOn: $showOverlay)
                     .tint(Theme.gold)
                     .foregroundStyle(Theme.ivoryMuted)
                     .font(Theme.captionFont)
@@ -202,7 +209,7 @@ struct JournalDetailView: View {
                         .frame(height: 160)
                         .clipped()
                 }
-                Text("\(Int(entry.score.rounded()))  →  \(Int(match.score.rounded()))")
+                Text("\(Int(match.score.rounded()))  →  \(Int(entry.score.rounded()))")
                     .font(Theme.bodyFont)
                     .foregroundStyle(Theme.ivory)
             } else {
