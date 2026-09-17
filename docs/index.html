@@ -6,40 +6,47 @@
   <title>PoseLock — Pose. Score. Lock.</title>
   <meta name="description" content="Ta pose notée en direct, sur l’iPhone. La vidéo n’en sort jamais.">
   <meta name="theme-color" content="#0A0A0A">
+  <link rel="canonical" href="https://spocsk.github.io/PoseLock/">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
   <meta property="og:title" content="PoseLock">
   <meta property="og:description" content="Pose. Score. Lock. La pose notée en direct, sur l’iPhone.">
-  <meta property="og:image" content="assets/splash-pose.jpg">
+  <meta property="og:image" content="https://spocsk.github.io/PoseLock/assets/og-poselock.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:url" content="https://spocsk.github.io/PoseLock/">
   <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="PoseLock — Pose. Score. Lock.">
+  <meta name="twitter:description" content="Ta pose notée en direct, sur l’iPhone. La vidéo n’en sort jamais.">
+  <meta name="twitter:image" content="https://spocsk.github.io/PoseLock/assets/og-poselock.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@300;700;900&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&display=swap">
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/transitions.css">
   <link rel="stylesheet" href="css/site.css">
+  <script>document.documentElement.classList.add("has-js");</script>
 </head>
 <body>
   <a class="skip" href="#contenu">Aller au contenu</a>
 
   <header class="nav">
     <a class="nav-mark" href="#top">POSELOCK</a>
-    <button class="cta cta--store" type="button" disabled aria-disabled="true" aria-label="Bientôt sur l’App Store">
-      <svg class="cta-apple" viewBox="0 0 14 18" aria-hidden="true">
-        <path fill="currentColor" d="M11.4 9.5c0-2.05 1.67-3.04 1.75-3.08-1-1.42-2.48-1.62-3-1.64-1.26-.13-2.48.76-3.12.76-.66 0-1.64-.74-2.7-.72-1.39.02-2.68.83-3.39 2.1-1.46 2.54-.37 6.28 1.03 8.34.7 1 1.52 2.12 2.6 2.08 1.05-.04 1.44-.67 2.7-.67 1.26 0 1.61.67 2.72.65 1.13-.02 1.84-1.01 2.52-2.02.8-1.15 1.12-2.27 1.14-2.33-.03-.01-2.16-.83-2.25-4.47zM9.95 3.4c.57-.7.96-1.67.85-2.64-.82.03-1.82.56-2.4 1.25-.53.62-.98 1.62-.86 2.57.91.07 1.85-.47 2.41-1.18z"/>
-      </svg>
-      <span class="cta-store-copy">
-        <span class="cta-store-kicker">Bientôt sur</span>
-        <span class="cta-store-name">l’App Store</span>
-      </span>
-    </button>
+    <a class="nav-action" href="#mecanisme">Voir le produit</a>
   </header>
 
   <main id="contenu">
     <section class="hero" id="top">
-      <div class="hero-visual">
-        <img src="assets/splash-pose.jpg" alt="Posing sous projecteur, le décor de l’application." width="576" height="1024">
+      <div class="hero-visual" aria-hidden="true">
+        <div class="hero-spotlight"></div>
+        <div class="hero-figure-plane">
+          <canvas class="hero-figure" data-pose="frontDoubleBiceps" data-mode="figure" data-color="#c4b08b"></canvas>
+          <canvas class="hero-joints hero-joints--idle" data-pose="frontDoubleBiceps" data-mode="stick"></canvas>
+          <canvas class="hero-joints hero-joints--locked" data-pose="frontDoubleBiceps" data-mode="stick" data-green></canvas>
+        </div>
+        <p class="hero-vision-label">17 points · Vision · sur l’iPhone</p>
       </div>
       <div class="hero-inner">
         <div class="t-stagger">
@@ -60,7 +67,7 @@
         </div>
         <div class="hero-score">
           <p class="caption">Exemple</p>
-          <div class="t-reel" id="hero-reel" aria-label="Score 87 sur 100"></div>
+          <div class="t-reel" id="hero-reel" role="img" aria-label="Score 87 sur 100"></div>
           <div class="lock-row">
             <span class="t-success-check" data-state="out" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -74,7 +81,7 @@
       </div>
     </section>
 
-    <aside class="t-toast t-toast-lock" data-state="out" role="status">Lock.</aside>
+    <aside class="t-toast t-toast-lock" data-state="out" aria-hidden="true">Lock.</aside>
 
     <section class="mechanism" id="mecanisme">
       <div class="mechanism-sticky">
@@ -87,7 +94,7 @@
             <li>Lock</li>
           </ol>
         </div>
-        <div class="phone" aria-label="Démonstration du mode caméra">
+        <div class="phone" role="img" aria-label="Démonstration du mode caméra : la silhouette passe de 41 à 87 puis se verrouille.">
           <canvas id="live-pose" data-pose="frontDoubleBiceps" data-mode="stick"></canvas>
           <div class="phone-pose" aria-hidden="true">
             <canvas data-pose="frontDoubleBiceps" data-mode="figure" data-color="#e8e3db"></canvas>
@@ -98,26 +105,6 @@
             <p class="hud-cue">Ouvre les coudes.</p>
           </div>
           <div class="phone-frame" aria-hidden="true"></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="camera" id="camera">
-      <div class="camera-copy">
-        <h2>La caméra juge la ligne.</h2>
-        <p>Stickman live, consignes du coach, rien d’autre. Le cadre passe au vert. Tu tiens. La photo se pose dans le journal.</p>
-        <ul class="camera-facts">
-          <li><span>Score ≥ 85</span> pour ouvrir le lock.</li>
-          <li><span>1,5 s</span> de tenue au vert.</li>
-        </ul>
-      </div>
-      <div class="judge" aria-hidden="true">
-        <div class="judge-frame">
-          <canvas data-pose="frontDoubleBiceps" data-mode="stick" data-green></canvas>
-        </div>
-        <div class="judge-hud">
-          <p class="judge-score">87</p>
-          <p class="judge-cue">Tiens 1,5 s.</p>
         </div>
       </div>
     </section>
@@ -144,15 +131,17 @@
     <section class="catalog" id="catalogues">
       <div class="catalog-head">
         <h2>Quatre catalogues. Un juge.</h2>
-        <div class="t-tabs" role="tablist" aria-label="Catalogues">
-          <span class="t-tabs-pill" aria-hidden="true"></span>
-          <button class="t-tab" type="button" role="tab" aria-selected="true" data-pack="scene">Scène</button>
-          <button class="t-tab" type="button" role="tab" aria-selected="false" data-pack="content">Contenu</button>
-          <button class="t-tab" type="button" role="tab" aria-selected="false" data-pack="physique">Physique</button>
-          <button class="t-tab" type="button" role="tab" aria-selected="false" data-pack="zyzz">Zyzz <span class="pro">Pro</span></button>
+        <div class="catalog-tabs-scroll">
+          <div class="t-tabs" role="tablist" aria-label="Catalogues">
+            <span class="t-tabs-pill" aria-hidden="true"></span>
+            <button class="t-tab" id="tab-scene" type="button" role="tab" aria-selected="true" aria-controls="catalog-panel" tabindex="0" data-pack="scene">Scène</button>
+            <button class="t-tab" id="tab-content" type="button" role="tab" aria-selected="false" aria-controls="catalog-panel" tabindex="-1" data-pack="content">Contenu</button>
+            <button class="t-tab" id="tab-physique" type="button" role="tab" aria-selected="false" aria-controls="catalog-panel" tabindex="-1" data-pack="physique">Physique</button>
+            <button class="t-tab" id="tab-zyzz" type="button" role="tab" aria-selected="false" aria-controls="catalog-panel" tabindex="-1" data-pack="zyzz">Zyzz <span class="pro">Pro</span></button>
+          </div>
         </div>
       </div>
-      <div class="catalog-stage">
+      <div class="catalog-stage" id="catalog-panel" role="tabpanel" aria-labelledby="tab-scene" tabindex="0">
         <div class="catalog-figure">
           <canvas id="pack-figure" data-pose="frontDoubleBiceps" data-mode="figure" width="400" height="560"></canvas>
         </div>
@@ -184,28 +173,19 @@
 
     <section class="close" id="bientot">
       <h2>Pose. Score. Lock.</h2>
-      <p>Gratuit : 3 locks par jour, le pack choisi à l’onboarding. Pro ouvre le plafond, les trois catalogues, le comparatif J-30, les rappels d’échéance et Zyzz.</p>
-      <button class="cta cta--store" type="button" disabled aria-disabled="true" aria-label="Bientôt sur l’App Store">
-        <svg class="cta-apple" viewBox="0 0 14 18" aria-hidden="true">
-          <path fill="currentColor" d="M11.4 9.5c0-2.05 1.67-3.04 1.75-3.08-1-1.42-2.48-1.62-3-1.64-1.26-.13-2.48.76-3.12.76-.66 0-1.64-.74-2.7-.72-1.39.02-2.68.83-3.39 2.1-1.46 2.54-.37 6.28 1.03 8.34.7 1 1.52 2.12 2.6 2.08 1.05-.04 1.44-.67 2.7-.67 1.26 0 1.61.67 2.72.65 1.13-.02 1.84-1.01 2.52-2.02.8-1.15 1.12-2.27 1.14-2.33-.03-.01-2.16-.83-2.25-4.47zM9.95 3.4c.57-.7.96-1.67.85-2.64-.82.03-1.82.56-2.4 1.25-.53.62-.98 1.62-.86 2.57.91.07 1.85-.47 2.41-1.18z"/>
-        </svg>
-        <span class="cta-store-copy">
-          <span class="cta-store-kicker">Bientôt sur</span>
-          <span class="cta-store-name">l’App Store</span>
-        </span>
-      </button>
-      <p class="close-links"><a class="cta cta--ghost" href="https://github.com/Spocsk/PoseLock">Code sur GitHub</a></p>
+      <p>Trois locks par jour pour commencer. Pro ouvre tous les catalogues, le comparatif J-30 et les rappels d’échéance.</p>
+      <p class="close-kicker">Bientôt sur l’App Store.</p>
+      <p class="close-links"><a class="cta" href="https://github.com/Spocsk/PoseLock">Voir le code sur GitHub</a></p>
     </section>
   </main>
 
   <footer class="site-foot">
     <p>PoseLock. On-device. Pas de réseau social, pas de suivi pub. Zyzz désigne une pose, pas un partenariat.</p>
+    <p class="site-foot-links"><a href="#on-device">Confidentialité</a><a href="https://github.com/Spocsk/PoseLock/issues">Support</a></p>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/Flip.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js" defer></script>
   <script src="js/pose.js" defer></script>
   <script src="js/score.js" defer></script>
   <script src="js/scroll.js" defer></script>

@@ -1,9 +1,5 @@
 (function (global) {
-  function initScroll(state) {
-    if (typeof gsap === "undefined" || typeof ScrollTrigger === "undefined") return;
-    gsap.registerPlugin(ScrollTrigger, Flip);
-
-    var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function initScroll() {
     var phone = document.querySelector(".phone");
     var hud = document.querySelector(".hud-score");
     var cue = document.querySelector(".hud-cue");
@@ -15,15 +11,9 @@
 
     var poseA = PoseDraw.poseOf("frontPosture");
     var poseB = PoseDraw.poseOf("frontDoubleBiceps");
-    var mix = { t: 0, score: 41, green: 0 };
-
-    function paint() {
-      var ctx = PoseDraw.fitCanvas(canvas);
-      var joints = PoseDraw.lerpPose(poseA, poseB, mix.t);
-      PoseDraw.drawStick(ctx, joints, { green: mix.green > 0.5 });
-    }
-    paint();
-    window.addEventListener("resize", paint);
+    var mix = { t: 0 };
+    var activeChapter = -1;
+    var swapTimer = 0;
 
     var chapters = [
       { title: "Pose", detail: "Le stickman suit tes angles. Vert : l’articulation est dans la tolérance.", cue: "Ouvre les coudes." },
@@ -31,57 +21,102 @@
       { title: "Lock", detail: "1,5 s au vert. La photo reste dans l’app. La vidéo n’en sort jamais.", cue: "Tiens 1,5 s." }
     ];
 
-    function applyChapter(i, score) {
-      var ch = chapters[i];
-      if (title.textContent !== ch.title) {
-        title.classList.add("is-leaving");
-        detail.classList.add("is-leaving");
-        window.setTimeout(function () {
-          title.textContent = ch.title;
-          detail.textContent = ch.detail;
-          title.classList.remove("is-leaving");
-          detail.classList.remove("is-leaving");
-        }, 140);
-      }
-      cue.textContent = ch.cue;
-      beats.forEach(function (el, idx) {
-        el.setAttribute("aria-current", idx === i ? "true" : "false");
+    function applyChapter(index, immediate) {
+      if (index === activeChapter) return;
+      activeChapter = index;
+      var chapter = chapters[index];
+      window.clearTimeout(swapTimer);
+      cue.textContent = chapter.cue;
+      beats.forEach(function (el, beatIndex) {
+        el.setAttribute("aria-current", beatIndex === index ? "step" : "false");
       });
-      hud.textContent = String(Math.round(score));
-      phone.classList.toggle("is-green", i === 2);
+      if (immediate || PoseScore.prefersReduce()) {
+        title.textContent = chapter.title;
+        detail.textContent = chapter.detail;
+        title.classList.remove("is-leaving");
+        detail.classList.remove("is-leaving");
+        return;
+      }
+      title.classList.add("is-leaving");
+      detail.classList.add("is-leaving");
+      swapTimer = window.setTimeout(function () {
+        title.textContent = chapter.title;
+        detail.textContent = chapter.detail;
+        title.classList.remove("is-leaving");
+        detail.classList.remove("is-leaving");
+      }, 140);
     }
 
-    if (reduce) {
+    function paint() {
+      var ctx = PoseDraw.fitCanvas(canvas);
+      var joints = PoseDraw.lerpPose(poseA, poseB, mix.t);
+      var chapter = mix.t < 0.33 ? 0 : mix.t < 0.66 ? 1 : 2;
+      PoseDraw.drawStick(ctx, joints, { green: chapter === 2 });
+      hud.textContent = String(Math.round(41 + mix.t * 46));
+      phone.classList.toggle("is-green", chapter === 2);
+      applyChapter(chapter, false);
+    }
+
+    function setFinal() {
       mix.t = 1;
-      mix.green = 1;
+      activeChapter = -1;
+      applyChapter(2, true);
       paint();
-      applyChapter(2, 87);
+    }
+
+    if (PoseScore.prefersReduce() || typeof gsap === "undefined" || typeof ScrollTrigger === "undefined") {
+      setFinal();
       return;
     }
 
-    ScrollTrigger.create({
-      trigger: ".mechanism",
-      start: "top top",
-      end: "bottom bottom",
-      scrub: 0.65,
-      onUpdate: function (self) {
-        var p = self.progress;
-        mix.t = gsap.utils.clamp(0, 1, p * 1.15);
-        var chapter = p < 0.33 ? 0 : p < 0.66 ? 1 : 2;
-        var score = 41 + mix.t * 46;
-        mix.green = chapter === 2 ? 1 : 0;
-        paint();
-        applyChapter(chapter, score);
-      }
+    gsap.registerPlugin(ScrollTrigger);
+    var media = gsap.matchMedia();
+
+    media.add("(min-width: 861px)", function () {
+      mix.t = 0;
+      activeChapter = -1;
+      applyChapter(0, true);
+      paint();
+      var tween = gsap.to(mix, {
+        t: 1,
+        ease: "none",
+        onUpdate: paint,
+        scrollTrigger: {
+          trigger: ".mechanism",
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 0.65
+        }
+      });
+      return function () { tween.kill(); };
     });
 
-    global.PoseScroll.flipPack = function (canvasEl) {
-      if (typeof Flip === "undefined") return;
-      var wrap = canvasEl.parentElement;
-      var snap = Flip.getState(wrap);
-      Flip.from(snap, { duration: 0.45, ease: "power3.out", absolute: false });
-    };
+    media.add("(max-width: 860px)", function () {
+      mix.t = 0;
+      activeChapter = -1;
+      applyChapter(0, true);
+      paint();
+      var tween = gsap.to(mix, {
+        t: 1,
+        duration: 1.35,
+        ease: "power2.inOut",
+        paused: true,
+        onUpdate: paint
+      });
+      var trigger = ScrollTrigger.create({
+        trigger: ".mechanism",
+        start: "top 72%",
+        once: true,
+        onEnter: function () { tween.play(); }
+      });
+      return function () {
+        trigger.kill();
+        tween.kill();
+      };
+    });
+
+    window.addEventListener("resize", paint);
   }
 
-  global.PoseScroll = { init: initScroll, flipPack: function () {} };
+  global.PoseScroll = { init: initScroll };
 })(window);

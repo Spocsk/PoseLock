@@ -17,10 +17,13 @@
     var pill = bar.querySelector(".t-tabs-pill");
     var tabs = [].slice.call(bar.querySelectorAll(".t-tab"));
     var figure = document.getElementById("pack-figure");
+    var panel = document.getElementById("catalog-panel");
     var name = document.querySelector("[data-pack-title]");
     var detail = document.querySelector("[data-pack-detail]");
     var pro = document.querySelector("[data-pack-pro]");
-    var currentPose = figure.getAttribute("data-pose") || "frontDoubleBiceps";
+    var renderedPose = PoseDraw.poseOf(figure.getAttribute("data-pose") || "frontDoubleBiceps");
+    var activeTween = null;
+    var textTimer = 0;
 
     function moveTo(tab, animate) {
       var x = tab.getBoundingClientRect().left - bar.getBoundingClientRect().left;
@@ -38,44 +41,70 @@
       }
     }
 
-    function apply(id) {
+    function apply(id, tab) {
       var pack = PoseDraw.PACKS[id];
-      name.textContent = pack.title;
-      detail.textContent = pack.detail;
-      pro.textContent = pack.pro ? "Catalogue Pro" : "";
-      name.classList.remove("is-leaving");
-      detail.classList.remove("is-leaving");
+      window.clearTimeout(textTimer);
+      name.classList.add("is-leaving");
+      detail.classList.add("is-leaving");
+      textTimer = window.setTimeout(function () {
+        name.textContent = pack.title;
+        detail.textContent = pack.detail;
+        pro.textContent = pack.pro ? "Catalogue Pro" : "";
+        name.classList.remove("is-leaving");
+        detail.classList.remove("is-leaving");
+      }, reduce ? 0 : 140);
       figure.setAttribute("data-pose", pack.pose);
       var ctx = PoseDraw.fitCanvas(figure);
-      var from = PoseDraw.poseOf(currentPose);
+      var from = renderedPose;
       var to = PoseDraw.poseOf(pack.pose);
-      currentPose = pack.pose;
-      if (typeof anime === "function" && !reduce) {
+      if (activeTween) activeTween.kill();
+      if (typeof gsap !== "undefined" && !reduce) {
         var mix = { t: 0 };
-        anime({
-          targets: mix,
+        activeTween = gsap.to(mix, {
           t: 1,
-          easing: "easeOutExpo",
-          duration: 620,
-          update: function () {
-            PoseDraw.drawFigure(ctx, PoseDraw.lerpPose(from, to, mix.t), "#c4b08b");
+          ease: "expo.out",
+          duration: 0.62,
+          onUpdate: function () {
+            renderedPose = PoseDraw.lerpPose(from, to, mix.t);
+            PoseDraw.drawFigure(ctx, renderedPose, "#c4b08b");
+          },
+          onComplete: function () {
+            renderedPose = to;
+            activeTween = null;
           }
         });
       } else {
+        renderedPose = to;
         PoseDraw.drawFigure(ctx, to, "#c4b08b");
       }
-      if (window.PoseScroll && typeof PoseScroll.flipPack === "function") {
-        PoseScroll.flipPack(figure, pack.pose);
+      if (panel && tab) {
+        panel.setAttribute("aria-labelledby", tab.id);
       }
     }
 
-    tabs.forEach(function (tab) {
-      tab.addEventListener("click", function () {
-        tabs.forEach(function (t) {
-          t.setAttribute("aria-selected", t === tab ? "true" : "false");
-        });
-        moveTo(tab, true);
-        apply(tab.getAttribute("data-pack"));
+    function activate(tab, focus) {
+      tabs.forEach(function (item) {
+        var selected = item === tab;
+        item.setAttribute("aria-selected", selected ? "true" : "false");
+        item.setAttribute("tabindex", selected ? "0" : "-1");
+      });
+      moveTo(tab, true);
+      apply(tab.getAttribute("data-pack"), tab);
+      tab.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "nearest", inline: "center" });
+      if (focus) tab.focus();
+    }
+
+    tabs.forEach(function (tab, index) {
+      tab.addEventListener("click", function () { activate(tab, false); });
+      tab.addEventListener("keydown", function (event) {
+        var next = index;
+        if (event.key === "ArrowRight") next = (index + 1) % tabs.length;
+        else if (event.key === "ArrowLeft") next = (index - 1 + tabs.length) % tabs.length;
+        else if (event.key === "Home") next = 0;
+        else if (event.key === "End") next = tabs.length - 1;
+        else return;
+        event.preventDefault();
+        activate(tabs[next], true);
       });
     });
     requestAnimationFrame(function () {
@@ -98,6 +127,7 @@
     function lock() {
       PoseScore.freezeReel(reel, 87);
       score.classList.add("is-locked");
+      document.querySelector(".hero").classList.add("is-locked");
       if (check) PoseScore.showCheck(check);
       if (toast) {
         toast.setAttribute("data-state", "in");
@@ -105,14 +135,6 @@
           toast.classList.add("is-leaving");
           toast.setAttribute("data-state", "out");
         }, 2400);
-      }
-      if (typeof anime === "function" && !reduce) {
-        anime({
-          targets: ".hero-score .t-reel",
-          color: "#8cc794",
-          duration: 500,
-          easing: "easeOutQuad"
-        });
       }
     }
 
@@ -136,14 +158,10 @@
     });
   }
 
-  document.querySelectorAll(".t-stagger").forEach(function (block) {
-    block.classList.add("is-shown");
-  });
-
   sizeCanvases();
   initTabs();
   heroLock();
   journalDigits();
-  PoseScroll.init({});
+  PoseScroll.init();
   window.addEventListener("resize", sizeCanvases);
 })();

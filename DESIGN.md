@@ -107,7 +107,7 @@ components:
 
 **Creative North Star: "Salle éteinte, tableau de juge"**
 
-PoseLock se lit comme une scène de gym au repos : quasi-noir, un projecteur, un chiffre. Le marketing web n’est pas une grille de features fitness. C’est un poster scrollé — photo de splash bord à bord, wordmark en Big Shoulders, score qui monte jusqu’au vert. L’app iOS reprend la même salle : fond appareil-photo, ivoire, un or froid, puis le vert seulement quand la pose tient.
+PoseLock se lit comme une scène de gym au repos : quasi-noir, un projecteur, un chiffre. Le marketing web n’est pas une grille de features fitness. C’est un poster scrollé — silhouette capsule 2D bord à bord, joints Vision, wordmark en Big Shoulders, score qui monte jusqu’au vert. L’app iOS reprend la même salle : fond appareil-photo, ivoire, un or froid, puis le vert seulement quand la pose tient.
 
 La densité est sèche. Peu de chrome, beaucoup d’air vertical (8–18 vh entre les affiches). La lecture est Source Sans 3 ; le tableau de juge (wordmark, titres d’affiche, scores, LOCK) est Big Shoulders Display. Sur iOS, San Francisco et Dynamic Type tiennent ce rôle : l’app ne bundle pas les faces web. Ce n’est pas une seconde identité — c’est la même salle, en police système.
 
@@ -175,15 +175,15 @@ Palette courte, saturée à l’os : noir de salle, ivoire de papier, or de mét
 
 Nav fixe 64px, dégradé noir 72 % → transparent, `pointer-events` seulement sur marque et CTA. Gouttière `clamp(20px, 4vw, 40px)`. Sur iOS, inset de page 24px, cible minimale 44px.
 
-Héro : une grille 1.1fr / 0.7fr, copy en bas à gauche, reel à droite. Sous 860px, une colonne, reel à gauche, CTA nav masqué. Mécanisme : 280vh, objet pinté (téléphone 320px, 9/19.4) ; sous 860px le pin tombe, téléphone 280px. Catalogues : figure 3/4 (max 280px) + copy. Journal : deux prises séparées d’un filet 1×8rem (horizontal sous 860px).
+Héro : une grille 1.1fr / 0.7fr, copy en bas à gauche, silhouette procédurale plein canvas et reel à droite. Sous 860px, une colonne, reel à gauche, navigation réduite. Mécanisme : 240svh, objet pinté (téléphone 320px, 9/19.4) ; sous 860px le pin tombe et la séquence se joue une fois à l’entrée, téléphone 280px. Catalogues : figure 3/4 (max 280px) + copy, rail d’onglets horizontal sur petit écran. Journal : deux prises séparées d’un filet 1×8rem (horizontal sous 860px).
 
-Rythme : affiches, pas modules. Padding de section en vh (8–18). Listes caméra / confiance = filets hairline, pas de cartes. `prefers-reduced-motion` : pas de pin spatial, crossfade / opacités.
+Rythme : affiches, pas modules. Padding de section en vh (8–18). La démonstration caméra vit dans le mécanisme ; la confiance utilise des filets hairline, pas des cartes. `prefers-reduced-motion` : pas de pin spatial, état final immédiat.
 
 **The Poster Rule.** Une section = une affiche. Pas de grille de cards, pas d’icônes-feature.
 
 ## Elevation & Depth
 
-Sol plat. La profondeur vient de la photo (object-position 62% 28%), d’une vignette radiale + bas, d’un grain overlay à 14 %, et d’une ombre unique sous le chassis.
+Sol plat. La profondeur vient du projecteur conique, de la superposition capsule / joints et d’une ombre unique sous le chassis.
 
 ### Shadow Vocabulary
 
@@ -228,7 +228,7 @@ Aucun champ texte sur la landing. Sur iOS, les choix (packs, plans) sont des sur
 
 ### Navigation
 
-Marque POSELOCK en Display 700, ivoire, tracking 0.14em. CTA Store à droite, masqué sous 860px. Pas de menu.
+Marque POSELOCK en Display 700, ivoire, tracking 0.14em. Lien « Voir le produit » à droite, masqué sous 860px. Pas de menu.
 
 ### Signature components
 
@@ -240,7 +240,7 @@ Marque POSELOCK en Display 700, ivoire, tracking 0.14em. CTA Store à droite, ma
 
 ### Do:
 
-- **Do** traiter la page comme un poster de salle : une photo, un score, une phrase.
+- **Do** traiter la page comme un poster de salle : une silhouette 2D, un score, une phrase.
 - **Do** étiqueter « Exemple » tout score qui n’est pas celui du visiteur (62, 87, 91 compris).
 - **Do** réserver le vert au lock et le rouge au hors-cadre.
 - **Do** garder le CTA Store disabled tant qu’il n’y a pas de fiche.

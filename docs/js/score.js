@@ -73,26 +73,6 @@
     });
   }
 
-  function countHud(el, from, to, duration, onUpdate) {
-    if (prefersReduce() || typeof anime !== "function") {
-      el.textContent = String(to);
-      if (onUpdate) onUpdate(to);
-      return;
-    }
-    var obj = { n: from };
-    anime({
-      targets: obj,
-      n: to,
-      round: 1,
-      easing: "easeOutExpo",
-      duration: duration,
-      update: function () {
-        el.textContent = String(obj.n);
-        if (onUpdate) onUpdate(obj.n);
-      }
-    });
-  }
-
   function showCheck(el) {
     el.setAttribute("data-state", "out");
     void el.offsetWidth;
@@ -109,7 +89,6 @@
     setDigits: setDigits,
     buildReel: buildReel,
     freezeReel: freezeReel,
-    countHud: countHud,
     showCheck: showCheck,
     prefersReduce: prefersReduce
   };

@@ -61,12 +61,6 @@
   --check-ease-bob: cubic-bezier(0.23, 1, 0.32, 1);
   --check-ease-path: cubic-bezier(0.22, 1, 0.36, 1);
 
-  --shimmer-dur: 2000ms;
-  --shimmer-base: var(--gold-muted);
-  --shimmer-highlight: var(--ivory);
-  --shimmer-band: 400%;
-  --shimmer-ease: linear;
-
   --tabs-dur: 250ms;
   --tabs-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --tabs-text-muted: var(--ivory-faint);
