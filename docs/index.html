@@ -25,13 +25,13 @@
 
   <header class="nav">
     <a class="nav-mark" href="#top">POSELOCK</a>
-    <button class="cta cta--store" type="button" disabled aria-disabled="true">
+    <button class="cta cta--store" type="button" disabled aria-disabled="true" aria-label="Bientôt sur l’App Store">
       <svg class="cta-apple" viewBox="0 0 14 18" aria-hidden="true">
         <path fill="currentColor" d="M11.4 9.5c0-2.05 1.67-3.04 1.75-3.08-1-1.42-2.48-1.62-3-1.64-1.26-.13-2.48.76-3.12.76-.66 0-1.64-.74-2.7-.72-1.39.02-2.68.83-3.39 2.1-1.46 2.54-.37 6.28 1.03 8.34.7 1 1.52 2.12 2.6 2.08 1.05-.04 1.44-.67 2.7-.67 1.26 0 1.61.67 2.72.65 1.13-.02 1.84-1.01 2.52-2.02.8-1.15 1.12-2.27 1.14-2.33-.03-.01-2.16-.83-2.25-4.47zM9.95 3.4c.57-.7.96-1.67.85-2.64-.82.03-1.82.56-2.4 1.25-.53.62-.98 1.62-.86 2.57.91.07 1.85-.47 2.41-1.18z"/>
       </svg>
       <span class="cta-store-copy">
         <span class="cta-store-kicker">Bientôt sur</span>
-        <span class="cta-store-name">App Store</span>
+        <span class="cta-store-name">l’App Store</span>
       </span>
     </button>
   </header>
@@ -40,8 +40,6 @@
     <section class="hero" id="top">
       <div class="hero-visual">
         <img src="assets/splash-pose.jpg" alt="Posing sous projecteur, le décor de l’application." width="576" height="1024">
-        <div class="hero-vignette" aria-hidden="true"></div>
-        <div class="hero-grain" aria-hidden="true"></div>
       </div>
       <div class="hero-inner">
         <div class="t-stagger">
@@ -49,7 +47,15 @@
           <p class="line t-stagger-line t-stagger-line--2">Pose. Score. Lock.</p>
           <p class="lede t-stagger-line t-stagger-line--3">Ta pose notée en direct, sur l’iPhone. La vidéo n’en sort jamais.</p>
           <span class="t-stagger-line t-stagger-line--4">
-            <button class="cta" type="button" disabled aria-disabled="true">Bientôt sur l’App Store</button>
+            <button class="cta cta--store" type="button" disabled aria-disabled="true" aria-label="Bientôt sur l’App Store">
+              <svg class="cta-apple" viewBox="0 0 14 18" aria-hidden="true">
+                <path fill="currentColor" d="M11.4 9.5c0-2.05 1.67-3.04 1.75-3.08-1-1.42-2.48-1.62-3-1.64-1.26-.13-2.48.76-3.12.76-.66 0-1.64-.74-2.7-.72-1.39.02-2.68.83-3.39 2.1-1.46 2.54-.37 6.28 1.03 8.34.7 1 1.52 2.12 2.6 2.08 1.05-.04 1.44-.67 2.7-.67 1.26 0 1.61.67 2.72.65 1.13-.02 1.84-1.01 2.52-2.02.8-1.15 1.12-2.27 1.14-2.33-.03-.01-2.16-.83-2.25-4.47zM9.95 3.4c.57-.7.96-1.67.85-2.64-.82.03-1.82.56-2.4 1.25-.53.62-.98 1.62-.86 2.57.91.07 1.85-.47 2.41-1.18z"/>
+              </svg>
+              <span class="cta-store-copy">
+                <span class="cta-store-kicker">Bientôt sur</span>
+                <span class="cta-store-name">l’App Store</span>
+              </span>
+            </button>
           </span>
         </div>
         <div class="hero-score">
@@ -97,21 +103,42 @@
     </section>
 
     <section class="camera" id="camera">
-      <h2>La caméra juge la ligne.</h2>
-      <p>Stickman live, consignes du coach, rien d’autre. Le cadre passe au vert. Tu tiens. La photo se pose dans le journal.</p>
-      <ul class="camera-facts">
-        <li><span>Score ≥ 85</span> pour ouvrir le lock.</li>
-        <li><span>1,5 s</span> de tenue au vert.</li>
-      </ul>
+      <div class="camera-copy">
+        <h2>La caméra juge la ligne.</h2>
+        <p>Stickman live, consignes du coach, rien d’autre. Le cadre passe au vert. Tu tiens. La photo se pose dans le journal.</p>
+        <ul class="camera-facts">
+          <li><span>Score ≥ 85</span> pour ouvrir le lock.</li>
+          <li><span>1,5 s</span> de tenue au vert.</li>
+        </ul>
+      </div>
+      <div class="judge" aria-hidden="true">
+        <div class="judge-frame">
+          <canvas data-pose="frontDoubleBiceps" data-mode="stick" data-green></canvas>
+        </div>
+        <div class="judge-hud">
+          <p class="judge-score">87</p>
+          <p class="judge-cue">Tiens 1,5 s.</p>
+        </div>
+      </div>
     </section>
 
     <section class="trust" id="on-device">
-      <h2>Rien ne quitte l’iPhone.</h2>
-      <ul class="trust-list">
-        <li>L’analyse tourne sur l’iPhone, avec Vision.</li>
-        <li>La vidéo de séance n’en sort jamais.</li>
-        <li>Aucun compte pour commencer.</li>
-      </ul>
+      <div class="trust-copy">
+        <h2>Rien ne quitte l’iPhone.</h2>
+        <ul class="trust-list">
+          <li>L’analyse tourne sur l’iPhone, avec Vision.</li>
+          <li>La vidéo de séance n’en sort jamais.</li>
+          <li>Aucun compte pour commencer.</li>
+        </ul>
+      </div>
+      <div class="vault" aria-hidden="true">
+        <div class="vault-device">
+          <span class="vault-island"></span>
+          <canvas data-pose="frontPosture" data-mode="figure" data-color="#e8e3db"></canvas>
+          <p class="vault-mark">Vision · ici</p>
+        </div>
+        <p class="vault-caption">La séance ne sort pas de ce cadre.</p>
+      </div>
     </section>
 
     <section class="catalog" id="catalogues">
@@ -158,7 +185,15 @@
     <section class="close" id="bientot">
       <h2>Pose. Score. Lock.</h2>
       <p>Gratuit : 3 locks par jour, le pack choisi à l’onboarding. Pro ouvre le plafond, les trois catalogues, le comparatif J-30, les rappels d’échéance et Zyzz.</p>
-      <button class="cta" type="button" disabled aria-disabled="true">Bientôt sur l’App Store</button>
+      <button class="cta cta--store" type="button" disabled aria-disabled="true" aria-label="Bientôt sur l’App Store">
+        <svg class="cta-apple" viewBox="0 0 14 18" aria-hidden="true">
+          <path fill="currentColor" d="M11.4 9.5c0-2.05 1.67-3.04 1.75-3.08-1-1.42-2.48-1.62-3-1.64-1.26-.13-2.48.76-3.12.76-.66 0-1.64-.74-2.7-.72-1.39.02-2.68.83-3.39 2.1-1.46 2.54-.37 6.28 1.03 8.34.7 1 1.52 2.12 2.6 2.08 1.05-.04 1.44-.67 2.7-.67 1.26 0 1.61.67 2.72.65 1.13-.02 1.84-1.01 2.52-2.02.8-1.15 1.12-2.27 1.14-2.33-.03-.01-2.16-.83-2.25-4.47zM9.95 3.4c.57-.7.96-1.67.85-2.64-.82.03-1.82.56-2.4 1.25-.53.62-.98 1.62-.86 2.57.91.07 1.85-.47 2.41-1.18z"/>
+        </svg>
+        <span class="cta-store-copy">
+          <span class="cta-store-kicker">Bientôt sur</span>
+          <span class="cta-store-name">l’App Store</span>
+        </span>
+      </button>
       <p class="close-links"><a class="cta cta--ghost" href="https://github.com/Spocsk/PoseLock">Code sur GitHub</a></p>
     </section>
   </main>
