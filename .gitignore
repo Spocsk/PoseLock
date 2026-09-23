@@ -43,6 +43,8 @@ fastlane/test_output
 *~.nib
 
 # Secrets
+.vercel/
+.playwright-cli/
 .env
 .env.*
 *.p12

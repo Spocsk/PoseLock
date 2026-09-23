@@ -1,0 +1,28 @@
+@import url("styles.css");
+
+.article-header { padding: 24px var(--page); border-bottom: 1px solid var(--line); }
+.article-header nav { display: flex; flex-wrap: wrap; align-items: center; gap: 22px; max-width: 980px; margin: auto; }
+.article-header a { color: var(--ink-muted); text-decoration: none; }
+.article-header a:first-child { color: var(--ink); font-weight: 800; font-size: 1.15rem; }
+.article-header a:hover { color: var(--orange-light); }
+.article-main { width: min(100% - 40px, 820px); margin: auto; padding: 84px 0 110px; }
+.article-main .eyebrow { color: var(--orange-light); font-size: .76rem; font-weight: 800; letter-spacing: .12em; }
+.article-main h1 { max-width: 780px; margin: 14px 0 24px; font-size: clamp(2.7rem, 6vw, 5.2rem); letter-spacing: -.055em; line-height: .99; }
+.article-main h2 { margin: 64px 0 18px; font-size: clamp(1.7rem, 3vw, 2.6rem); line-height: 1.1; }
+.article-main h3 { margin: 28px 0 12px; font-size: 1.2rem; }
+.article-main p, .article-main li { color: var(--ink-muted); font-size: 1.08rem; line-height: 1.7; }
+.article-main .lede { color: var(--ink); font-size: clamp(1.2rem, 2vw, 1.45rem); }
+.article-main a { color: var(--orange-light); }
+.article-main ol, .article-main ul { padding-left: 1.4em; }
+.article-main li + li { margin-top: 12px; }
+.article-main figure { margin: 42px 0; padding: 24px; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); }
+.article-main figure img { max-height: 550px; margin: auto; border-radius: 12px; }
+.article-main figcaption { margin-top: 15px; color: var(--ink-muted); font-size: .9rem; line-height: 1.5; }
+.article-main details { padding: 17px 0; border-bottom: 1px solid var(--line); }
+.article-main summary { cursor: pointer; font-weight: 700; }
+.article-main details p { margin-bottom: 0; }
+.article-cta { margin-top: 70px; padding: 30px; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); }
+.article-cta h2 { margin-top: 0; }
+.article-footer { display: flex; flex-wrap: wrap; gap: 20px; padding: 30px var(--page); border-top: 1px solid var(--line); color: var(--ink-muted); }
+.article-footer a { color: inherit; }
+.article-footer button { padding: 0; border: 0; color: var(--ink-muted); background: none; cursor: pointer; }

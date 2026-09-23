@@ -210,7 +210,7 @@ Caractère : contrôles d’or en pilule, HUD de juge 16px, stickman live.
 
 - **Shape:** pilule (`999px`), hauteur 44px, padding horizontal 1.15rem, Source Sans 600, tracking 0.01em.
 - **Primary:** or, texte quasi-noir. Cursor default tant que le CTA Store est un état, pas un lien.
-- **Disabled:** or 38 %, même texte. C’est l’état shipping (« Bientôt sur l’App Store »), pas un ghost.
+- **Disabled:** or 38 %, même texte. C’est l’état shipping du bouton App Store dans le héros ; l’action de fin est le formulaire de liste d’attente.
 - **Ghost:** fond transparent, ivoire 76 %, hairline 1px. Lien GitHub uniquement.
 - **Hover / Focus:** pas de lift. `:focus-visible` = anneau or 2px / offset 3px.
 
@@ -224,7 +224,7 @@ Pas de cards sur la landing. Listes à filets. Téléphone : fond `#111`, hairli
 
 ### Inputs / Fields
 
-Aucun champ texte sur la landing. Sur iOS, les choix (packs, plans) sont des surfaces 16px, pas des text fields — selected = stroke or 1,5 px.
+Le seul champ texte de la landing est l’adresse email de la liste d’attente, dans la section finale. Sur iOS, les choix (packs, plans) sont des surfaces 16px, pas des text fields — selected = stroke or 1,5 px.
 
 ### Navigation
 
