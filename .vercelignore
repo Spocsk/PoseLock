@@ -1,0 +1,11 @@
+# Only the website is needed by the Vercel project (rootDirectory: docs).
+app-store-screenshots/
+PoseLock/
+PoseLock.xcodeproj/
+PoseLockTests/
+Scripts/
+/video/**
+.cursor/
+.impeccable/
+.playwright-cli/
+*.md

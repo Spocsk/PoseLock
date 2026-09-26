@@ -50,3 +50,6 @@ fastlane/test_output
 *.p12
 *.mobileprovision
 Secrets.xcconfig
+
+# Local App Store captures and editable exports
+/app-store-screenshots/

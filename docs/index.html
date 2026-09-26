@@ -141,7 +141,7 @@
               <span>01</span>
               <div>
                 <h3>Pose</h3>
-                <p>Cadre tout le corps. Le stickman suit tes angles en direct.</p>
+                <p>Visualise la pose et ses repères, puis cadre tout le corps avant de commencer.</p>
               </div>
             </li>
             <li class="story-step" data-story-step="1">
@@ -159,26 +159,26 @@
               </div>
             </li>
           </ol>
+          <p class="example-note">Démonstration · scores d’exemple</p>
           <div class="story-progress" aria-hidden="true"><span data-story-progress></span></div>
         </div>
 
         <div class="story-stage" aria-hidden="true">
           <div class="phone-shell">
-            <div class="phone-island"></div>
             <picture class="story-screen is-active" data-story-screen="0">
-              <source srcset="assets/screens/coach-setup-600.webp 600w, assets/screens/coach-setup-1000.webp 1000w" type="image/webp">
-              <img src="assets/screens/coach-setup.png" alt="" width="1206" height="2622">
+              <source srcset="assets/screens/current/coach-pose-600.webp 600w, assets/screens/current/coach-pose-1000.webp 1000w" sizes="(max-width: 640px) 28vh, 36vh" type="image/webp">
+              <img src="assets/screens/current/coach-pose-1000.webp" alt="" width="1320" height="2868">
             </picture>
             <picture class="story-screen" data-story-screen="1">
-              <source srcset="assets/screens/camera-live-600.webp 600w, assets/screens/camera-live-1000.webp 1000w" type="image/webp">
-              <img src="assets/screens/camera-live.png" alt="" width="1206" height="2622">
+              <source srcset="assets/screens/current/camera-live-600.webp 600w, assets/screens/current/camera-live-1000.webp 1000w" sizes="(max-width: 640px) 28vh, 36vh" type="image/webp">
+              <img src="assets/screens/current/camera-live-1000.webp" alt="" width="1320" height="2868">
             </picture>
             <picture class="story-screen" data-story-screen="2">
-              <source srcset="assets/screens/camera-lock-600.webp 600w, assets/screens/camera-lock-1000.webp 1000w" type="image/webp">
-              <img src="assets/screens/camera-lock.png" alt="" width="1206" height="2622">
+              <source srcset="assets/screens/current/camera-lock-600.webp 600w, assets/screens/current/camera-lock-1000.webp 1000w" sizes="(max-width: 640px) 28vh, 36vh" type="image/webp">
+              <img src="assets/screens/current/camera-lock-1000.webp" alt="" width="1320" height="2868">
             </picture>
           </div>
-          <p class="story-state"><span data-story-state>CADRE TA POSE</span><i></i></p>
+          <p class="story-state"><span data-story-state>PRÉPARE TA POSE</span><i></i></p>
         </div>
       </div>
     </section>
@@ -189,37 +189,51 @@
           <p class="eyebrow">LE PRODUIT, POUR DE VRAI</p>
           <h2 id="product-title">Ta ligne.<br>Ta progression.</h2>
         </div>
-        <p>Pas une promesse abstraite : la pose du jour, le score, le recul d’un mois et une carte prête à partager.</p>
+        <p>Des repères pour poser, un score en direct et une photo à garder ou à partager. Découvre les six étapes dans l’app.</p>
       </header>
 
-      <div class="screen-gallery" aria-label="Captures de l’application PoseLock">
-        <figure class="screen-shot" data-tilt data-reveal>
+      <div class="screen-gallery" role="region" tabindex="0" aria-label="Six captures de l’application PoseLock, à faire défiler sur mobile">
+        <figure class="screen-shot" data-reveal>
           <picture>
-            <source srcset="assets/screens/home-600.webp 600w, assets/screens/home-1000.webp 1000w" type="image/webp">
-            <img src="assets/screens/home.png" alt="Accueil PoseLock avec pose du jour, score et évolution" width="1206" height="2622" loading="lazy">
+            <source srcset="assets/screens/app-store/01-camera-600.webp 600w, assets/screens/app-store/01-camera-1000.webp 1000w" sizes="(max-width: 640px) 76vw, (max-width: 980px) 42vw, 30vw" type="image/webp">
+            <img src="assets/screens/app-store/01-camera-1000.webp" alt="Caméra PoseLock avec squelette de suivi et score de démonstration" width="1320" height="2868" loading="lazy" decoding="async">
           </picture>
-          <figcaption><span>01</span>Ta pose du jour</figcaption>
+          <figcaption><span>01</span>Le score en direct</figcaption>
         </figure>
-        <figure class="screen-shot screen-shot--lower" data-tilt data-reveal>
+        <figure class="screen-shot" data-reveal>
           <picture>
-            <source srcset="assets/screens/proof-600.webp 600w, assets/screens/proof-1000.webp 1000w" type="image/webp">
-            <img src="assets/screens/proof.png" alt="Comparatif exemple de la même pose à un mois d’écart" width="1206" height="2622" loading="lazy">
+            <source srcset="assets/screens/app-store/02-conseils-600.webp 600w, assets/screens/app-store/02-conseils-1000.webp 1000w" sizes="(max-width: 640px) 76vw, (max-width: 980px) 42vw, 30vw" type="image/webp">
+            <img src="assets/screens/app-store/02-conseils-1000.webp" alt="Conseils et repère visuel pour travailler le front double biceps" width="1320" height="2868" loading="lazy" decoding="async">
           </picture>
-          <figcaption><span>02</span>Le même angle, J‑30</figcaption>
+          <figcaption><span>02</span>Les repères de la pose</figcaption>
         </figure>
-        <figure class="screen-shot" data-tilt data-reveal>
+        <figure class="screen-shot" data-reveal>
           <picture>
-            <source srcset="assets/screens/journal-detail-600.webp 600w, assets/screens/journal-detail-1000.webp 1000w" type="image/webp">
-            <img src="assets/screens/journal-detail.png" alt="Détail d’une prise Front double biceps dans le journal" width="1206" height="2622" loading="lazy">
+            <source srcset="assets/screens/app-store/03-lock-600.webp 600w, assets/screens/app-store/03-lock-1000.webp 1000w" sizes="(max-width: 640px) 76vw, (max-width: 980px) 42vw, 30vw" type="image/webp">
+            <img src="assets/screens/app-store/03-lock-1000.webp" alt="Photo verrouillée dans PoseLock avec un score d’exemple de 93" width="1320" height="2868" loading="lazy" decoding="async">
           </picture>
-          <figcaption><span>03</span>Chaque prise, gardée</figcaption>
+          <figcaption><span>03</span>Le bon moment, gardé</figcaption>
         </figure>
-        <figure class="screen-shot screen-shot--lower" data-tilt data-reveal>
+        <figure class="screen-shot" data-reveal>
           <picture>
-            <source srcset="assets/screens/share-card-600.webp 600w, assets/screens/share-card-1000.webp 1000w" type="image/webp">
-            <img src="assets/screens/share-card.png" alt="Carte PoseLock prête à être partagée sur Instagram ou TikTok" width="1206" height="2622" loading="lazy">
+            <source srcset="assets/screens/app-store/04-journal-600.webp 600w, assets/screens/app-store/04-journal-1000.webp 1000w" sizes="(max-width: 640px) 76vw, (max-width: 980px) 42vw, 30vw" type="image/webp">
+            <img src="assets/screens/app-store/04-journal-1000.webp" alt="Journal PoseLock et détail agrandi de la même prise de démonstration" width="1320" height="2868" loading="lazy" decoding="async">
           </picture>
-          <figcaption><span>04</span>Prête à partager</figcaption>
+          <figcaption><span>04</span>Tes prises dans le journal</figcaption>
+        </figure>
+        <figure class="screen-shot" data-reveal>
+          <picture>
+            <source srcset="assets/screens/app-store/05-catalogue-600.webp 600w, assets/screens/app-store/05-catalogue-1000.webp 1000w" sizes="(max-width: 640px) 76vw, (max-width: 980px) 42vw, 30vw" type="image/webp">
+            <img src="assets/screens/app-store/05-catalogue-1000.webp" alt="Catalogue des poses du pack Scène dans PoseLock" width="1320" height="2868" loading="lazy" decoding="async">
+          </picture>
+          <figcaption><span>05</span>Une pose à travailler</figcaption>
+        </figure>
+        <figure class="screen-shot" data-reveal>
+          <picture>
+            <source srcset="assets/screens/app-store/06-partage-600.webp 600w, assets/screens/app-store/06-partage-1000.webp 1000w" sizes="(max-width: 640px) 76vw, (max-width: 980px) 42vw, 30vw" type="image/webp">
+            <img src="assets/screens/app-store/06-partage-1000.webp" alt="Carte photo et score d’exemple avec la signature PoseLock" width="1320" height="2868" loading="lazy" decoding="async">
+          </picture>
+          <figcaption><span>06</span>Ta carte à partager</figcaption>
         </figure>
       </div>
       <p class="example-note">Les scores montrés sont des exemples de démonstration.</p>

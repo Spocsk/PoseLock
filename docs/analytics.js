@@ -1,11 +1,6 @@
 (function () {
   "use strict";
 
-  if (location.hostname === "spocsk.github.io" && (location.pathname === "/PoseLock" || location.pathname.indexOf("/PoseLock/") === 0)) {
-    location.replace("https://poselock.app" + (location.pathname.slice(9) || "/") + location.search + location.hash);
-    return;
-  }
-
   // Token public du projet PoseLock EU uniquement. Jamais de clé API privée.
   var PROJECT_TOKEN = "03ed0cec87dc4b14df0bc46af678fa4d";
   var CONSENT_KEY = "poselock_mixpanel_consent_v2";

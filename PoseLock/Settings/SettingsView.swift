@@ -193,7 +193,7 @@ struct SettingsView: View {
     }
 
     private var privacyURL: URL {
-        URL(string: "https://www.apple.com/legal/privacy/")!
+        URL(string: "https://poselock.vercel.app/confidentialite/")!
     }
 
     private var eulaURL: URL {

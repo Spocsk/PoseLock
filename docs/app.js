@@ -5,7 +5,7 @@
   var header = document.querySelector("[data-header]");
   var story = document.querySelector("[data-story]");
   var prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  var storyLabels = ["CADRE TA POSE", "93 · TIENS LA LIGNE", "LOCK · PHOTO GARDÉE"];
+  var storyLabels = ["PRÉPARE TA POSE", "93 · TIENS LA LIGNE", "LOCK · PHOTO GARDÉE"];
   var ticking = false;
   var lastStoryIndex = -1;
 
