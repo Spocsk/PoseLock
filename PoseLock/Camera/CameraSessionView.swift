@@ -139,7 +139,12 @@ struct CameraSessionView: View {
         func degrees(_ feature: PoseFeature) -> String {
             ScoringEngine.extract(feature, from: model.bodyFrame).map { "\(Int($0.rounded()))°" } ?? "–"
         }
-        return "yaw \(degrees(.bodyYaw)) · twist \(degrees(.torsoTwist))"
+        func ratio(_ feature: PoseFeature) -> String {
+            ScoringEngine.extract(feature, from: model.bodyFrame).map { String(format: "%.2f", $0) } ?? "–"
+        }
+        // vTaper / chestOpen : les cibles des lat spreads et des poses Zyzz
+        // supposent un ratio épaules / hanches Vision proche de 2, à confirmer.
+        return "yaw \(degrees(.bodyYaw)) · twist \(degrees(.torsoTwist)) · vT \(ratio(.vTaper)) · ch \(ratio(.chestOpen))"
         #else
         return nil
         #endif

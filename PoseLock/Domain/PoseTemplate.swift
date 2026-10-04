@@ -228,6 +228,9 @@ enum TemplateLibrary {
             return [
                 t(.bodyYaw, 38, 16, 1.3, "Trois-quarts. Montre le lat.", .torso),
                 t(.leftShoulderAbduction, 70, 18, 1.1, "Ouvre le bras avant.", .leftArm),
+                t(.leftElbow, 85, 20, 1.0, "Plie le bras avant, poing fermé.", .leftArm),
+                t(.leftWristHeight, 0.18, 0.18, 0.8, "Monte le poing avant.", .leftArm),
+                t(.rightElbow, 100, 20, 0.8, "Main arrière à la hanche.", .rightArm),
                 t(.chestOpen, 0.46, 0.12, 1.2, "Lat étalé, taille étroite.", .shoulders),
                 t(.vTaper, 1.92, 0.28, 1.1, "V-taper. Écarte le haut.", .torso),
                 t(.spineInclination, 8, 12, 0.8, "Poitrine haute.", .torso)
@@ -513,6 +516,10 @@ enum PosePreviewBuilder {
             joints[.leftWrist] = joints[.neck]! + SIMD3(-0.05, 0.06, -0.12)
             joints[.rightWrist] = joints[.neck]! + SIMD3(0.05, 0.06, -0.12)
             joints[.leftAnkle]!.z += 0.22
+        case .threeQuarterLat:
+            // Bras avant fléchi, poing levé ; main arrière à la hanche.
+            joints[.leftElbow] = SIMD3(-0.48, 0.62, 0.05)
+            joints[.leftWrist] = SIMD3(-0.50, 0.92, 0.12)
         case .frontDoubleBiceps:
             joints[.leftAnkle]!.z += 0.18
         case .backDoubleBiceps, .backLatSpread:
