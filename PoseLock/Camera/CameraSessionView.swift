@@ -167,10 +167,21 @@ struct CameraSessionView: View {
         .background(Theme.background.opacity(0.92))
     }
 
+    /// La photo propre, sauf après un lock forcé hors démo : rien n'a été vu en
+    /// direct, donc la carte montre la photo avec son squelette.
+    private var lockCardImage: UIImage? {
+        #if DEBUG
+        if model.lastLockWasForced, model.demoPreviewImage == nil {
+            return model.lastOverlay ?? model.lastClean
+        }
+        #endif
+        return model.lastClean
+    }
+
     private var lockOverlay: some View {
         VStack(spacing: 16) {
-            if let clean = model.lastClean {
-                Image(uiImage: clean)
+            if let shown = lockCardImage {
+                Image(uiImage: shown)
                     .resizable()
                     .scaledToFit()
                     .frame(maxHeight: 360)

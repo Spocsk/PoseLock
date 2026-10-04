@@ -371,10 +371,10 @@ enum ScreenBank {
     }
 
     static var usesDemoCamera: Bool {
-        // Tout build DEBUG travaille sur la photo embarquée : le simulateur et
-        // un iPhone de développement donnent ainsi exactement la même détection
-        // Vision, sans demander ni démarrer la caméra physique.
-        return true
+        // Seulement pour les captures marketing lancées par argument. Un run
+        // DEBUG ordinaire garde la vraie caméra ; la photo embarquée n'apparaît
+        // qu'au lock forcé (`CameraViewModel.debugForceLock`).
+        current != nil || videoDemoScene != nil
     }
 
     static func markReady(_ scene: ScreenBankScene) {

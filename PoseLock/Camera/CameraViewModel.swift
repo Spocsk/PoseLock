@@ -77,6 +77,13 @@ final class CameraViewModel {
         holdStart = nil
         smoother.reset()
         sessionStartedAt = Date()
+        // Sinon le squelette du lock reste dessiné sur le flux jusqu'à la
+        // prochaine détection.
+        bodyFrame = .empty
+        evaluation = .hidden
+        #if DEBUG
+        lastLockWasForced = false
+        #endif
     }
 
     func notePoseChange(_ poseID: PoseID) {
@@ -164,8 +171,12 @@ final class CameraViewModel {
     }
 
     #if DEBUG
-    /// Photo de démonstration, tête floutée. Remplace le fond uni du simulateur.
+    /// Aperçu démo des captures marketing (`ScreenBank.usesDemoCamera`) : la
+    /// photo remplace le flux caméra. Nil pour un run DEBUG ordinaire.
     var demoPreviewImage: UIImage?
+    /// Le dernier lock vient du bouton dev : la carte montre alors la photo avec
+    /// son squelette, puisqu'il n'y a rien eu à voir en direct.
+    var lastLockWasForced = false
 
     /// Aperçu hors caméra : la photo démo + le skeleton détecté dessus.
     func startDemoPreview(poseID: PoseID, front: Bool) {
@@ -191,27 +202,36 @@ final class CameraViewModel {
     /// Lock forcé, réservé au debug : traverse lock → journal dans le simulateur,
     /// qui n'a ni caméra ni pose à tenir.
     ///
-    /// Le score est estampillé, pas mesuré. La photo démo (`DebugDemoPose`) porte
-    /// un skeleton Vision réel ; le chiffre qui l'accompagne reste posé d'autorité
-    /// parce que la mesure d'une silhouette cible ne survit pas aux poses tournées
-    /// (`backLatSpread` score 0). Compilé hors release, jamais dans un build distribué.
+    /// Le score est estampillé, pas mesuré. La photo démo (`DebugDemoPose`) est un
+    /// front double biceps : elle ne sert que pour cette pose (ou en aperçu démo),
+    /// sinon le journal rangerait un double biceps sous « back lat spread ». Les
+    /// autres poses gardent la silhouette cible sur fond uni. Compilé hors
+    /// release, jamais dans un build distribué.
     func debugForceLock() async {
         guard !locking, !didLock else { return }
-        let standIn = DebugDemoPose.image ?? Self.debugBackdrop()
-        applyForcedDemo(on: DebugDemoPose.image)
-        await lockNow(standIn: standIn, preferStandIn: true)
+        let usesPhoto = demoPreviewImage != nil || poseID == DebugDemoPose.poseID
+        let photo = usesPhoto ? DebugDemoPose.image : nil
+        if let photo {
+            applyForcedDemo(on: photo)
+        } else {
+            applyForced(frame: BodyFrame.preview(for: poseID))
+        }
+        lastLockWasForced = true
+        await lockNow(standIn: photo ?? Self.debugBackdrop(), preferStandIn: true)
     }
 
     private func applyForcedDemo(on image: UIImage?) {
-        let frame: BodyFrame
         if let image,
            let detected = PoseDetector().detect(image: image, isFront: false),
            detected.handsVisible,
            detected.feetVisible {
-            frame = detected
+            applyForced(frame: detected)
         } else {
-            frame = DebugDemoPose.fallbackFrame
+            applyForced(frame: DebugDemoPose.fallbackFrame)
         }
+    }
+
+    private func applyForced(frame: BodyFrame) {
         var forced = ScoringEngine.evaluate(frame: frame, template: TemplateLibrary.template(for: poseID))
         forced.gate = .ok
         forced.rawScore = DebugDemoPose.stampedScore
@@ -239,6 +259,8 @@ final class CameraViewModel {
 #if DEBUG
 enum DebugDemoPose {
     static let imageName = "DebugDemoPose"
+    /// La pose tenue sur la photo.
+    static let poseID: PoseID = .frontDoubleBiceps
     /// 85 + 8 : le score de la prise de démonstration, aligné sur la carte partagée.
     static let stampedScore: Float = ScoringConstants.lockScore + 8
     static var image: UIImage? { UIImage(named: imageName) }
