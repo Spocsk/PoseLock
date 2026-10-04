@@ -43,6 +43,10 @@ final class CaptureSessionController: NSObject, AVCaptureVideoDataOutputSampleBu
 
     var isFront: Bool { currentPosition == .front }
 
+    /// Largeur / hauteur des frames analysées une fois orientées en portrait
+    /// (preset `.hd1280x720`). Sert au cadrage du squelette sur l'aperçu.
+    static let portraitAspect: CGFloat = 720.0 / 1280.0
+
     func start(front: Bool, completion: @escaping (Bool) -> Void) {
         queue.async { [weak self] in
             guard let self else { return }

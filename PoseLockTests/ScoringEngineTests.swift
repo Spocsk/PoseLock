@@ -233,6 +233,60 @@ final class ScoringEngineTests: XCTestCase {
         let stand2D = stand.joints2D[.leftWrist]!
         XCTAssertLessThan(biceps2D.y, stand2D.y - 0.08, "2D: biceps doit monter les poignets")
     }
+
+    // MARK: - Côté montré
+
+    /// La même pose vue dans un miroir : x inversé et étiquettes gauche/droite
+    /// échangées. C'est un side chest montré côté droit au lieu du gauche.
+    private func reflected(_ frame: BodyFrame) -> BodyFrame {
+        func side(_ joint: Joint) -> Joint {
+            let name = joint.rawValue
+            if name.hasPrefix("left") { return Joint(rawValue: "right" + name.dropFirst(4))! }
+            if name.hasPrefix("right") { return Joint(rawValue: "left" + name.dropFirst(5))! }
+            return joint
+        }
+        var out = frame
+        out.joints3D = Dictionary(uniqueKeysWithValues: frame.joints3D.map { (side($0.key), SIMD3(-$0.value.x, $0.value.y, $0.value.z)) })
+        out.joints2D = Dictionary(uniqueKeysWithValues: frame.joints2D.map { (side($0.key), SIMD2(1 - $0.value.x, $0.value.y)) })
+        return out
+    }
+
+    func testSidePosesScoreTheSameWhicheverSideFacesTheCamera() {
+        for pose in PoseID.allCases where TemplateLibrary.template(for: pose).hasSide {
+            let frame = BodyFrame.preview(for: pose)
+            let template = TemplateLibrary.template(for: pose)
+            let shown = ScoringEngine.evaluate(frame: frame, template: template).rawScore
+            let other = ScoringEngine.evaluate(frame: reflected(frame), template: template).rawScore
+            XCTAssertEqual(shown, other, accuracy: 0.5, pose.rawValue)
+        }
+    }
+
+    func testMirroredTemplateSwapsLimbsAndOnlyBodySideWords() {
+        let mirrored = TemplateLibrary.template(for: .sideTriceps).mirrored
+        let original = TemplateLibrary.template(for: .sideTriceps)
+        XCTAssertEqual(mirrored.features.map(\.feature), original.features.map(\.feature.mirrored))
+        XCTAssertEqual(mirrored.mirrored, original)
+
+        XCTAssertEqual(SideWording.swap("Plie le bras gauche."), "Plie le bras droit.")
+        XCTAssertEqual(SideWording.swap("Main droite derrière la tête."), "Main gauche derrière la tête.")
+        XCTAssertEqual(SideWording.swap("Garde la jambe droite tendue."), "Garde la jambe gauche tendue.")
+        XCTAssertEqual(SideWording.swap("Même écart à gauche."), "Même écart à droite.")
+        XCTAssertEqual(SideWording.swap("Face caméra. Buste droit."), "Face caméra. Buste droit.")
+        XCTAssertEqual(SideWording.swap("Bassin droit."), "Bassin droit.")
+    }
+
+    func testTwoDimensionalFallbackReadsAFacingBodyAsFacing() {
+        // Corps face à la caméra arrière : sa gauche est à droite de l'image.
+        let joints: [Joint: SIMD3<Float>] = [
+            .leftHip: BodyFrame.fallback3D(visionX: 0.56, visionY: 0.45, aspect: 0.5625),
+            .rightHip: BodyFrame.fallback3D(visionX: 0.44, visionY: 0.45, aspect: 0.5625),
+            .leftShoulder: BodyFrame.fallback3D(visionX: 0.60, visionY: 0.70, aspect: 0.5625),
+            .rightShoulder: BodyFrame.fallback3D(visionX: 0.40, visionY: 0.70, aspect: 0.5625)
+        ]
+        var frame = BodyFrame.standingPreview()
+        frame.joints3D = joints
+        XCTAssertEqual(ScoringEngine.extract(.bodyYaw, from: frame)!, 0, accuracy: 1)
+    }
 }
 
 #if DEBUG

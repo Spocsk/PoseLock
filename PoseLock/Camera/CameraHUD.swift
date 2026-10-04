@@ -3,10 +3,14 @@ import SwiftUI
 struct SkeletonOverlay: View {
     var frame: BodyFrame
     var evaluation: PoseEvaluation
+    /// Largeur / hauteur de l'image analysée quand la vue la montre en aspect fill
+    /// (aperçu caméra). Nil quand la vue a déjà exactement la taille de l'image.
+    var contentAspect: CGFloat? = nil
 
     var body: some View {
         Canvas { context, size in
             guard !frame.joints2D.isEmpty else { return }
+            let map = Self.aspectFillMapping(view: size, contentAspect: contentAspect)
             var joints: Set<Joint> = []
             for bone in Bone.all {
                 guard let a = frame.imagePoint(bone.from), let b = frame.imagePoint(bone.to) else { continue }
@@ -16,8 +20,8 @@ struct SkeletonOverlay: View {
                 let green = evaluation.isGloballyGreen
                     || (SkeletonRenderer.region(for: bone).map { evaluation.greenRegions.contains($0) } ?? false)
                 var path = Path()
-                path.move(to: CGPoint(x: CGFloat(a.x) * size.width, y: CGFloat(a.y) * size.height))
-                path.addLine(to: CGPoint(x: CGFloat(b.x) * size.width, y: CGFloat(b.y) * size.height))
+                path.move(to: map(a))
+                path.addLine(to: map(b))
                 context.stroke(
                     path,
                     with: .color(green ? Theme.lockGreen : Theme.ivory.opacity(0.42)),
@@ -32,13 +36,31 @@ struct SkeletonOverlay: View {
             }
             for joint in joints {
                 guard let p = frame.imagePoint(joint) else { continue }
-                let center = CGPoint(x: CGFloat(p.x) * size.width, y: CGFloat(p.y) * size.height)
+                let center = map(p)
                 let radius = Theme.skeletonJoint / 2
                 let dot = Path(ellipseIn: CGRect(x: center.x - radius, y: center.y - radius, width: radius * 2, height: radius * 2))
                 context.fill(dot, with: .color(Theme.ivory.opacity(0.9)))
             }
         }
         .allowsHitTesting(false)
+    }
+
+    /// Même cadrage que `AVLayerVideoGravity.resizeAspectFill` : l'image remplit la
+    /// vue et déborde, centrée. Sans ça les joints proches des bords tombent à
+    /// côté du corps.
+    static func aspectFillMapping(view: CGSize, contentAspect: CGFloat?) -> (SIMD2<Float>) -> CGPoint {
+        guard let contentAspect, contentAspect > 0, view.width > 0, view.height > 0 else {
+            return { CGPoint(x: CGFloat($0.x) * view.width, y: CGFloat($0.y) * view.height) }
+        }
+        let scale = max(view.width / contentAspect, view.height)
+        let drawn = CGSize(width: contentAspect * scale, height: scale)
+        let origin = CGPoint(x: (view.width - drawn.width) / 2, y: (view.height - drawn.height) / 2)
+        return {
+            CGPoint(
+                x: origin.x + CGFloat($0.x) * drawn.width,
+                y: origin.y + CGFloat($0.y) * drawn.height
+            )
+        }
     }
 }
 
@@ -93,6 +115,9 @@ struct CameraHUD: View {
     var onBubble: () -> Void
     /// Nil hors DEBUG : l'appelant ne le fournit pas, et le bouton n'existe pas.
     var onForceLock: (() -> Void)?
+    /// Mesures brutes d'orientation, DEBUG seulement, pour vérifier sur iPhone
+    /// que face / profil / dos donnent bien ~0 / ~80 / ~175.
+    var debugReadout: String? = nil
 
     var body: some View {
         ZStack {
@@ -156,6 +181,12 @@ struct CameraHUD: View {
             }
 
             #if DEBUG
+            if let debugReadout, ScreenBank.current == nil, ScreenBank.videoDemoScene == nil {
+                Text(debugReadout)
+                    .font(Theme.captionFont.monospacedDigit())
+                    .foregroundStyle(Theme.gold)
+                    .padding(.bottom, 4)
+            }
             if let onForceLock, ScreenBank.current == nil, ScreenBank.videoDemoScene == nil {
                 DevForceLockButton(action: onForceLock)
                     .padding(.bottom, 12)

@@ -79,6 +79,15 @@ struct BodyFrame: Sendable, Equatable {
         joints2D[joint]
     }
 
+    /// Point 3D de repli quand Vision 3D ne donne pas ce joint : coordonnées image
+    /// Vision (origine en bas à gauche) ramenées dans le repère des templates.
+    /// x est remis à l'échelle de y (image non carrée) et inversé : un corps face
+    /// caméra a sa gauche à droite de l'image, et doit lire `bodyYaw` ≈ 0, pas 180.
+    /// Profondeur inconnue : un profil ne se distingue pas d'une face ici.
+    static func fallback3D(visionX: Float, visionY: Float, aspect: Float) -> SIMD3<Float> {
+        SIMD3((0.5 - visionX) * aspect, visionY - 0.5, 0)
+    }
+
     /// Silhouette face, bras le long du corps — preview coaching et tests.
     static func standingPreview() -> BodyFrame {
         let joints: [Joint: SIMD3<Float>] = [

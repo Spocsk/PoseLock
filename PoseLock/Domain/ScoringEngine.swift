@@ -49,7 +49,17 @@ enum ScoringEngine {
         return (.ok, [])
     }
 
+    /// Note la pose des deux côtés quand le template en a un (side chest, side
+    /// triceps, ¾…) et garde le meilleur : `bodyYaw` ne sait pas quel flanc fait
+    /// face, et la caméra avant inverse gauche et droite.
     static func evaluate(frame: BodyFrame, template: PoseTemplate) -> PoseEvaluation {
+        let asTemplated = evaluateSide(frame: frame, template: template)
+        guard template.hasSide else { return asTemplated }
+        let mirrored = evaluateSide(frame: frame, template: template.mirrored)
+        return mirrored.rawScore > asTemplated.rawScore ? mirrored : asTemplated
+    }
+
+    private static func evaluateSide(frame: BodyFrame, template: PoseTemplate) -> PoseEvaluation {
         let (gate, missing) = gate(frame)
         guard gate == .ok || gate == .missingLimbs else {
             var ev = PoseEvaluation.hidden

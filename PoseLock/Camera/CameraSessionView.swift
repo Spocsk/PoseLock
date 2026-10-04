@@ -40,7 +40,8 @@ struct CameraSessionView: View {
                 onClose: { session.showCamera = false },
                 onSelectFront: selectCamera,
                 onBubble: { showLibrary = true },
-                onForceLock: forceLockAction
+                onForceLock: forceLockAction,
+                debugReadout: debugReadout
             )
             .padding(.top, 8)
             Color.white.opacity(model.flashOpacity)
@@ -86,8 +87,12 @@ struct CameraSessionView: View {
         ZStack {
             CameraPreviewRepresentable(session: model.capture.session, isFront: model.isFront)
                 .ignoresSafeArea()
-            SkeletonOverlay(frame: model.bodyFrame, evaluation: model.evaluation)
-                .ignoresSafeArea()
+            SkeletonOverlay(
+                frame: model.bodyFrame,
+                evaluation: model.evaluation,
+                contentAspect: CaptureSessionController.portraitAspect
+            )
+            .ignoresSafeArea()
         }
     }
 
@@ -126,6 +131,18 @@ struct CameraSessionView: View {
         }
         #endif
         model.setCamera(front: front)
+    }
+
+    private var debugReadout: String? {
+        #if DEBUG
+        guard !model.bodyFrame.joints3D.isEmpty else { return nil }
+        func degrees(_ feature: PoseFeature) -> String {
+            ScoringEngine.extract(feature, from: model.bodyFrame).map { "\(Int($0.rounded()))°" } ?? "–"
+        }
+        return "yaw \(degrees(.bodyYaw)) · twist \(degrees(.torsoTwist))"
+        #else
+        return nil
+        #endif
     }
 
     /// Le lock forcé n'existe qu'en debug : en release il n'y a pas de fermeture à

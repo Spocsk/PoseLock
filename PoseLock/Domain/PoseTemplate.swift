@@ -15,6 +15,93 @@ struct PoseTemplate: Sendable, Equatable {
     let poseID: PoseID
     let version: String
     let features: [FeatureTarget]
+
+    /// Le même template, côté gauche et côté droit échangés. Un side chest se
+    /// montre des deux côtés, et la caméra avant (image miroir) inverse ce que
+    /// Vision appelle gauche et droite : le scoring garde le meilleur des deux.
+    var mirrored: PoseTemplate {
+        PoseTemplate(poseID: poseID, version: version, features: features.map(\.mirrored))
+    }
+
+    /// Faux pour un template symétrique : rien à gagner à le noter deux fois.
+    var hasSide: Bool { mirrored != self }
+}
+
+extension FeatureTarget {
+    var mirrored: FeatureTarget {
+        FeatureTarget(
+            feature: feature.mirrored,
+            target: target,
+            tolerance: tolerance,
+            weight: weight,
+            cue: SideWording.swap(cue),
+            region: region.mirrored
+        )
+    }
+}
+
+extension PoseFeature {
+    var mirrored: PoseFeature {
+        switch self {
+        case .leftElbow: return .rightElbow
+        case .rightElbow: return .leftElbow
+        case .leftKnee: return .rightKnee
+        case .rightKnee: return .leftKnee
+        case .leftShoulderAbduction: return .rightShoulderAbduction
+        case .rightShoulderAbduction: return .leftShoulderAbduction
+        case .leftWristHeight: return .rightWristHeight
+        case .rightWristHeight: return .leftWristHeight
+        default: return self
+        }
+    }
+}
+
+extension SkeletonRegion {
+    var mirrored: SkeletonRegion {
+        switch self {
+        case .leftArm: return .rightArm
+        case .rightArm: return .leftArm
+        case .leftLeg: return .rightLeg
+        case .rightLeg: return .leftLeg
+        default: return self
+        }
+    }
+}
+
+/// Échange « gauche » et « droit(e) » seulement quand ils désignent un côté du
+/// corps : « Buste droit » ou « Bassin droit » veulent dire rectiligne.
+enum SideWording {
+    private static let pairs: [(String, String)] = [
+        ("bras gauche", "bras droit"),
+        ("jambe gauche", "jambe droite"),
+        ("poignet gauche", "poignet droit"),
+        ("coude gauche", "coude droit"),
+        ("main gauche", "main droite"),
+        ("à gauche", "à droite")
+    ]
+
+    static func swap(_ text: String) -> String {
+        var out = text
+        var placeholders: [(String, String)] = []
+        for (index, (left, right)) in pairs.enumerated() {
+            for (a, b) in [(left, right), (right, left)] {
+                for (from, to) in [(a, b), (a.capitalizedFirst, b.capitalizedFirst)] {
+                    let token = "\u{1}\(index)\(placeholders.count)\u{1}"
+                    guard out.contains(from) else { continue }
+                    out = out.replacingOccurrences(of: from, with: token)
+                    placeholders.append((token, to))
+                }
+            }
+        }
+        for (token, to) in placeholders {
+            out = out.replacingOccurrences(of: token, with: to)
+        }
+        return out
+    }
+}
+
+private extension String {
+    var capitalizedFirst: String { prefix(1).uppercased() + dropFirst() }
 }
 
 /// Templates gold v1 — une variante par pose, tolérances larges.

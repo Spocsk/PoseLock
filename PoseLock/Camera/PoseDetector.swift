@@ -13,9 +13,12 @@ final class PoseDetector: @unchecked Sendable {
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return nil }
         // Buffers bruts (non miroir). Front = leftMirrored pour coller au preview selfie.
         let orientation: CGImagePropertyOrientation = isFront ? .leftMirrored : .right
+        // Buffer paysage tourné en portrait : largeur et hauteur s'échangent.
+        let aspect = Float(CVPixelBufferGetHeight(pixelBuffer)) / Float(max(CVPixelBufferGetWidth(pixelBuffer), 1))
         return detect(
             handler3D: VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: orientation, options: [:]),
-            handler2D: VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: orientation, options: [:])
+            handler2D: VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: orientation, options: [:]),
+            aspect: aspect
         )
     }
 
@@ -24,11 +27,14 @@ final class PoseDetector: @unchecked Sendable {
         let orientation: CGImagePropertyOrientation = isFront ? .upMirrored : .up
         return detect(
             handler3D: VNImageRequestHandler(cgImage: cgImage, orientation: orientation, options: [:]),
-            handler2D: VNImageRequestHandler(cgImage: cgImage, orientation: orientation, options: [:])
+            handler2D: VNImageRequestHandler(cgImage: cgImage, orientation: orientation, options: [:]),
+            aspect: Float(cgImage.width) / Float(max(cgImage.height, 1))
         )
     }
 
-    private func detect(handler3D: VNImageRequestHandler, handler2D: VNImageRequestHandler) -> BodyFrame? {
+    /// `aspect` = largeur / hauteur de l'image analysée, pour que le repli 2D
+    /// garde des angles justes.
+    private func detect(handler3D: VNImageRequestHandler, handler2D: VNImageRequestHandler, aspect: Float) -> BodyFrame? {
         // Une requête 3D non disponible (notamment sur certains Simulators) ne
         // doit jamais empêcher la projection 2D de tourner. Des handlers séparés
         // évitent qu'un échec 3D laisse le handler d'image dans un état inutilisable.
@@ -60,7 +66,11 @@ final class PoseDetector: @unchecked Sendable {
                 if let point = all[name], point.confidence > 0.08 {
                     joints2D[joint] = SIMD2(Float(point.location.x), Float(1 - point.location.y))
                     if joints3D[joint] == nil {
-                        joints3D[joint] = SIMD3(Float(point.location.x) - 0.5, Float(point.location.y) - 0.5, 0)
+                        joints3D[joint] = BodyFrame.fallback3D(
+                            visionX: Float(point.location.x),
+                            visionY: Float(point.location.y),
+                            aspect: aspect
+                        )
                     }
                     confidences.append(Float(point.confidence))
                 }
@@ -76,6 +86,12 @@ final class PoseDetector: @unchecked Sendable {
                     }
                 }
             }
+        }
+
+        // Vision 2D n'a pas de joint colonne : sans lui les os root–spine–neck
+        // ne sont jamais dessinés et torse / épaules ne passent jamais au vert.
+        if joints2D[.spine] == nil, let root = joints2D[.root], let neck = joints2D[.neck] {
+            joints2D[.spine] = (root + neck) / 2
         }
 
         guard !joints3D.isEmpty || !joints2D.isEmpty else { return nil }
