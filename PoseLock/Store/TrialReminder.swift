@@ -6,21 +6,34 @@ import UserNotifications
 enum TrialReminder {
     static let identifier = "poselock.trial.reminder"
 
-    /// `renewalDate` vient de la transaction vérifiée, donc de la fin d'essai réelle.
-    static func schedule(before renewalDate: Date?) async {
-        let center = UNUserNotificationCenter.current()
-        center.removePendingNotificationRequests(withIdentifiers: [identifier])
+    static func cancel() {
+        UNUserNotificationCenter.current()
+            .removePendingNotificationRequests(withIdentifiers: [identifier])
+    }
 
-        guard let renewalDate,
-              let fireDate = Calendar.current.date(byAdding: .day, value: -1, to: renewalDate),
-              fireDate > Date(),
+    static func fireDate(
+        before renewalDate: Date?,
+        isTrialActive: Bool,
+        now: Date = Date()
+    ) -> Date? {
+        guard isTrialActive, let renewalDate else { return nil }
+        let fireDate = renewalDate.addingTimeInterval(-24 * 60 * 60)
+        return fireDate > now ? fireDate : nil
+    }
+
+    /// `renewalDate` vient de la transaction vérifiée, donc de la fin d'essai réelle.
+    static func schedule(before renewalDate: Date?, isTrialActive: Bool) async {
+        let center = UNUserNotificationCenter.current()
+        cancel()
+
+        guard let fireDate = fireDate(before: renewalDate, isTrialActive: isTrialActive),
               let granted = try? await center.requestAuthorization(options: [.alert, .sound]),
               granted
         else { return }
 
         let content = UNMutableNotificationContent()
-        content.title = "Ton essai se termine demain"
-        content.body = "L’abonnement démarre dans 24 h. Tu peux encore annuler depuis l’App Store."
+        content.title = "Ton essai devient payant demain"
+        content.body = "Sans renouvellement : \(ScoringConstants.freeLocksPerDay) locks/jour, ton pack d’origine et pas de comparaison J-30."
         content.sound = .default
 
         let components = Calendar.current.dateComponents(

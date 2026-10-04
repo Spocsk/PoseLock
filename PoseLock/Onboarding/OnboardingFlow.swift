@@ -42,9 +42,16 @@ enum OnboardingStep: Int, CaseIterable, Comparable {
 
 struct OnboardingFlow: View {
     @Bindable var settings: AppSettings
+    var initialStep: OnboardingStep = .splash
     @Environment(StoreManager.self) private var store
-    @State private var step: OnboardingStep = .splash
+    @State private var step: OnboardingStep
     @State private var goingBack = false
+
+    init(settings: AppSettings, initialStep: OnboardingStep = .splash) {
+        self.settings = settings
+        self.initialStep = initialStep
+        _step = State(initialValue: initialStep)
+    }
 
     var body: some View {
         ZStack {
@@ -66,6 +73,9 @@ struct OnboardingFlow: View {
                     }
                 }
             }
+        }
+        .onAppear {
+            if step == .splash { PoseLockAnalytics.capture(.onboardingStarted) }
         }
     }
 
@@ -146,6 +156,10 @@ struct OnboardingFlow: View {
     private func advance(to next: OnboardingStep) {
         guard next != step else { return }
         goingBack = next < step
+        if !goingBack {
+            PoseLockAnalytics.completedOnboardingStep(step)
+            if next == .paywall { PoseLockAnalytics.capture(.paywallViewed) }
+        }
         PoseLockHaptics.selection(enabled: settings.hapticsEnabled)
         withAnimation(.spring(response: 0.48, dampingFraction: 0.84)) { step = next }
     }
@@ -159,7 +173,13 @@ struct OnboardingFlow: View {
     /// pour ne pas empiler l'alerte système sur la feuille Apple.
     private func finish() {
         let renewalDate = store.renewalDate
-        Task { await TrialReminder.schedule(before: renewalDate) }
+        let isTrialActive = store.isInTrial
+        Task {
+            await TrialReminder.schedule(
+                before: renewalDate,
+                isTrialActive: isTrialActive
+            )
+        }
         PoseLockHaptics.lockClick(enabled: settings.hapticsEnabled)
         settings.onboardingDone = true
     }
@@ -177,6 +197,9 @@ struct StaggeredAppear: ViewModifier {
             .opacity(appeared ? 1 : 0)
             .offset(y: appeared ? 0 : 14)
             .onAppear {
+                #if DEBUG
+                if ScreenBank.current != nil { appeared = true; return }
+                #endif
                 if reduceMotion { appeared = true; return }
                 withAnimation(
                     .spring(response: 0.55, dampingFraction: 0.86)
@@ -377,6 +400,17 @@ struct OnboardingPainView: View {
             OnboardingHeader(title: resolved.painTitle, detail: resolved.painDetail)
                 .staggeredAppear(0)
 
+            // La pose sans mesure : aucun angle vert, aucun score. Elle
+            // illustre désormais la slide avant les arguments détaillés.
+            PoseReferenceImage(poseID: resolved.suggestedPack.defaultPoseID)
+                .frame(maxWidth: .infinity)
+                .frame(height: 200)
+                .opacity(0.48)
+                .padding(.horizontal, 36)
+                .padding(.bottom, 22)
+                .accessibilityHidden(true)
+                .staggeredAppear(1)
+
             VStack(alignment: .leading, spacing: 14) {
                 ForEach(Array(resolved.painPoints.enumerated()), id: \.offset) { index, point in
                     HStack(alignment: .top, spacing: 12) {
@@ -390,21 +424,10 @@ struct OnboardingPainView: View {
                             .fixedSize(horizontal: false, vertical: true)
                         Spacer(minLength: 0)
                     }
-                    .staggeredAppear(1 + index)
+                    .staggeredAppear(2 + index)
                 }
             }
             .padding(.horizontal, 24)
-
-            Spacer(minLength: 12)
-
-            // La pose sans mesure : aucun angle vert, aucun score. C'est le point
-            // de départ que l'écran suivant vient contredire.
-            PosePreviewSkeleton(poseID: resolved.suggestedPack.defaultPoseID)
-                .frame(height: 150)
-                .opacity(0.35)
-                .padding(.horizontal, 64)
-                .accessibilityHidden(true)
-                .staggeredAppear(1 + resolved.painPoints.count)
 
             Spacer(minLength: 12)
 
@@ -507,14 +530,14 @@ struct OnboardingProofView: View {
                     label: "Il y a un mois",
                     score: Self.beforeScore,
                     color: Theme.ivoryMuted,
-                    highlight: .none
+                    variant: .plain
                 )
 
                 column(
                     label: "Aujourd’hui",
                     score: Self.afterScore,
                     color: Theme.lockGreen,
-                    highlight: .allGreen
+                    variant: .guided
                 )
             }
             // En overlay, le trait prend la hauteur des colonnes ; posé dans la
@@ -537,14 +560,14 @@ struct OnboardingProofView: View {
         label: String,
         score: Int,
         color: Color,
-        highlight: PoseCoachStep.Highlight
+        variant: PoseReferenceVariant
     ) -> some View {
         VStack(spacing: 10) {
             Text(label)
                 .font(Theme.supportFont)
                 .foregroundStyle(Theme.ivoryMuted)
 
-            PosePreviewSkeleton(poseID: pack.defaultPoseID, highlight: highlight)
+            PoseReferenceImage(poseID: pack.defaultPoseID, variant: variant)
                 .frame(height: 130)
 
             Text("\(score)")
@@ -614,7 +637,7 @@ struct OnboardingCameraView: View {
             RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .fill(Theme.elevated)
             VStack(spacing: 12) {
-                PosePreviewSkeleton(poseID: .frontDoubleBiceps, highlight: .allGreen)
+                PoseReferenceImage(poseID: .frontDoubleBiceps, variant: .guided)
                     .frame(height: 150)
                     .padding(.top, 20)
                 HStack(spacing: 8) {
@@ -728,7 +751,7 @@ struct OnboardingRecapView: View {
             .padding(.horizontal, 24)
             .staggeredAppear(1)
 
-            PosePreviewSkeleton(poseID: pack.defaultPoseID)
+            PoseReferenceImage(poseID: pack.defaultPoseID)
                 .frame(height: 160)
                 .padding(.horizontal, 48)
                 .padding(.top, 28)

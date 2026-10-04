@@ -8,12 +8,31 @@
 	<string>PoseLock</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>UIApplicationShortcutItems</key>
+	<array>
+		<dict>
+			<key>UIApplicationShortcutItemIconType</key>
+			<string>UIApplicationShortcutIconTypeMessage</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>Signaler un problème</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>com.spocsk.PoseLock.reportProblem</string>
+		</dict>
+	</array>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>instagram-stories</string>
+		<string>instagram</string>
+		<string>tiktok</string>
+	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>PoseLock utilise la caméra pour noter ta pose sur l’appareil. La vidéo de session ne quitte pas l’iPhone.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>PoseLock peut enregistrer une copie des photos lockées dans l’album Photos, uniquement si tu l’actives dans Réglages.</string>
 	<key>RCPublicAPIKey</key>
-	<string></string>
+	<string>appl_mZoElowsCrudoOGDpTqKGZkgaRf</string>
+	<key>MixpanelProjectToken</key>
+	<string>03ed0cec87dc4b14df0bc46af678fa4d</string>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>

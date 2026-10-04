@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "debug-demo-pose.jpg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

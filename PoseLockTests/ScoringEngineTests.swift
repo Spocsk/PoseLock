@@ -163,11 +163,11 @@ final class ScoringEngineTests: XCTestCase {
             XCTAssertEqual(steps.count, 3, pose.rawValue)
             XCTAssertFalse(steps[1].detail.isEmpty, pose.rawValue)
             let setup = PoseCoachCopy.setupCues(for: pose)
-            XCTAssertFalse(setup.cues.isEmpty, pose.rawValue)
+            XCTAssertFalse(setup.isEmpty, pose.rawValue)
         }
         let zyzz = PoseCoachCopy.setupCues(for: .zyzzClassic)
-        XCTAssertGreaterThanOrEqual(zyzz.cues.count, 3)
-        XCTAssertEqual(Set(zyzz.cues).count, zyzz.cues.count, "cues Zyzz dupliqués")
+        XCTAssertGreaterThanOrEqual(zyzz.count, 3)
+        XCTAssertEqual(Set(zyzz).count, zyzz.count, "cues Zyzz dupliqués")
     }
 
     func testZyzzClassicRaisesBothHandsAboveTheHead() {
@@ -241,6 +241,17 @@ final class ScoringEngineTests: XCTestCase {
 /// ce que `persistLock` exige — un score lockable, une image, un squelette.
 @MainActor
 final class DebugForceLockTests: XCTestCase {
+    func testDemoFallbackFrameCoversThePhotographedBody() {
+        let frame = DebugDemoPose.fallbackFrame
+        XCTAssertTrue(frame.handsVisible)
+        XCTAssertTrue(frame.feetVisible)
+        XCTAssertGreaterThan(frame.joints2D.count, 12)
+        XCTAssertLessThan(frame.joints2D[.leftWrist]!.y, frame.joints2D[.leftShoulder]!.y)
+        XCTAssertLessThan(frame.joints2D[.rightWrist]!.y, frame.joints2D[.rightShoulder]!.y)
+        XCTAssertGreaterThan(frame.joints2D[.leftAnkle]!.y, frame.joints2D[.leftHip]!.y)
+        XCTAssertGreaterThan(frame.joints2D[.rightAnkle]!.y, frame.joints2D[.rightHip]!.y)
+    }
+
     func testForcedLockProducesEverythingTheJournalNeeds() async throws {
         let model = CameraViewModel()
         model.poseID = .backLatSpread // La pose dont la silhouette note 0 : cas le pire.
@@ -250,7 +261,7 @@ final class DebugForceLockTests: XCTestCase {
         XCTAssertTrue(model.didLock)
         XCTAssertGreaterThan(model.lastScore, ScoringConstants.lockScore)
         XCTAssertTrue(model.evaluation.isGloballyGreen)
-        // Sans flux caméra le fond de substitution prend le relais, sinon
+        // Sans flux caméra la photo démo (ou le fond de substitution) prend le relais, sinon
         // `persistLock` abandonnerait et rien n'atteindrait le journal.
         XCTAssertNotNil(model.lastClean)
         XCTAssertNotNil(model.lastOverlay)
@@ -560,5 +571,135 @@ final class SharedProjectionTests: XCTestCase {
         let a = try XCTUnwrap(straight[0][.leftWrist])
         let b = try XCTUnwrap(turned[0][.leftWrist])
         XCTAssertGreaterThan(simd_length(a - b), 0.01)
+    }
+}
+
+final class FeedbackMailTests: XCTestCase {
+    func testBodyCarriesTheMessageAndBuildMetadata() {
+        let text = FeedbackMail.body(
+            message: "  Le score freeze.  ",
+            version: "1.2",
+            build: "8",
+            systemVersion: "17.5"
+        )
+        XCTAssertTrue(text.contains("Le score freeze."))
+        XCTAssertTrue(text.contains("PoseLock 1.2 (8)"))
+        XCTAssertTrue(text.contains("iOS 17.5"))
+        XCTAssertFalse(text.localizedCaseInsensitiveContains("jpg"))
+        XCTAssertFalse(text.localizedCaseInsensitiveContains("photo"))
+    }
+
+    func testMailtoPointsAtTheSupportAddress() throws {
+        let url = try XCTUnwrap(
+            FeedbackMail.mailtoURL(
+                message: "Le score freeze",
+                version: "1.0",
+                build: "2",
+                systemVersion: "17.0"
+            )
+        )
+        XCTAssertEqual(url.scheme, "mailto")
+        XCTAssertTrue(url.absoluteString.hasPrefix("mailto:apps@dylan-cdo.fr"))
+        XCTAssertEqual(FeedbackMail.supportAddress, "apps@dylan-cdo.fr")
+        let decoded = url.absoluteString.removingPercentEncoding ?? url.absoluteString
+        XCTAssertTrue(decoded.contains("Le score freeze"))
+        XCTAssertTrue(decoded.contains(FeedbackMail.subject))
+    }
+}
+
+final class TrialReminderTests: XCTestCase {
+    func testReminderIsExactlyOneDayBeforeTrialEnd() throws {
+        let now = Date(timeIntervalSince1970: 1_700_000_000)
+        let renewal = now.addingTimeInterval(3 * 24 * 60 * 60)
+        let fireDate = try XCTUnwrap(
+            TrialReminder.fireDate(before: renewal, isTrialActive: true, now: now)
+        )
+
+        XCTAssertEqual(fireDate, renewal.addingTimeInterval(-24 * 60 * 60))
+    }
+
+    func testReminderRequiresAnActiveTrialAndAFutureFireDate() {
+        let now = Date(timeIntervalSince1970: 1_700_000_000)
+        let renewal = now.addingTimeInterval(3 * 24 * 60 * 60)
+
+        XCTAssertNil(TrialReminder.fireDate(before: nil, isTrialActive: true, now: now))
+        XCTAssertNil(TrialReminder.fireDate(before: renewal, isTrialActive: false, now: now))
+        XCTAssertNil(TrialReminder.fireDate(
+            before: now.addingTimeInterval(12 * 60 * 60),
+            isTrialActive: true,
+            now: now
+        ))
+    }
+
+    func testStoreTrialStateExcludesPaidAndInactivePeriods() {
+        XCTAssertTrue(StoreManager.isActiveTrial(isActive: true, periodIsTrial: true))
+        XCTAssertFalse(StoreManager.isActiveTrial(isActive: true, periodIsTrial: false))
+        XCTAssertFalse(StoreManager.isActiveTrial(isActive: false, periodIsTrial: true))
+    }
+}
+
+final class HomeScreenQuickActionTests: XCTestCase {
+    func testReportShortcutMatchesInfoPlist() throws {
+        let items = try XCTUnwrap(
+            Bundle.main.object(forInfoDictionaryKey: "UIApplicationShortcutItems")
+                as? [[String: Any]]
+        )
+        let types = items.compactMap { $0["UIApplicationShortcutItemType"] as? String }
+
+        XCTAssertTrue(types.contains(HomeScreenQuickAction.reportProblem.rawValue))
+        XCTAssertEqual(
+            HomeScreenQuickAction(shortcutItemType: HomeScreenQuickAction.reportProblem.rawValue),
+            .reportProblem
+        )
+    }
+}
+
+final class SocialShareTests: XCTestCase {
+    func testStoriesPasteboardHoldsJPEGBackgroundData() {
+        let image = UIGraphicsImageRenderer(size: CGSize(width: 8, height: 8)).image { context in
+            UIColor.black.setFill()
+            context.fill(CGRect(x: 0, y: 0, width: 8, height: 8))
+        }
+        let items = SocialShare.storiesPasteboardItems(for: image)
+        XCTAssertEqual(items.count, 1)
+        let data = items.first?[SocialShare.storiesPasteboardKey] as? Data
+        XCTAssertNotNil(data)
+        XCTAssertGreaterThan(data?.count ?? 0, 0)
+    }
+
+    func testAvailabilityUsesTheDeclaredSchemes() {
+        XCTAssertTrue(SocialShare.isInstagramAvailable(canOpen: { $0 == SocialShare.instagramStoriesURL }))
+        XCTAssertTrue(SocialShare.isInstagramAvailable(canOpen: { $0 == SocialShare.instagramURL }))
+        XCTAssertFalse(SocialShare.isInstagramAvailable(canOpen: { _ in false }))
+        XCTAssertTrue(SocialShare.isTikTokAvailable(canOpen: { $0 == SocialShare.tiktokURL }))
+        XCTAssertFalse(SocialShare.isTikTokAvailable(canOpen: { _ in false }))
+    }
+
+    func testOpenStoriesWritesPasteboardThenOpensTheScheme() {
+        let image = UIGraphicsImageRenderer(size: CGSize(width: 8, height: 8)).image { _ in }
+        var pasted: [[String: Any]] = []
+        var opened: URL?
+        let ok = SocialShare.openInstagramStories(
+            image: image,
+            canOpen: { $0 == SocialShare.instagramStoriesURL },
+            setPasteboard: { pasted = $0 },
+            open: { opened = $0 }
+        )
+        XCTAssertTrue(ok)
+        XCTAssertEqual(pasted.count, 1)
+        XCTAssertEqual(opened, SocialShare.instagramStoriesURL)
+    }
+
+    func testOpenStoriesFailsWhenInstagramIsMissing() {
+        let image = UIGraphicsImageRenderer(size: CGSize(width: 8, height: 8)).image { _ in }
+        var opened: URL?
+        let ok = SocialShare.openInstagramStories(
+            image: image,
+            canOpen: { _ in false },
+            setPasteboard: { _ in XCTFail("pasteboard") },
+            open: { opened = $0 }
+        )
+        XCTAssertFalse(ok)
+        XCTAssertNil(opened)
     }
 }

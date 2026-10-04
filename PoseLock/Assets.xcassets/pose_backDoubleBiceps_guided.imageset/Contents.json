@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "pose_backDoubleBiceps_guided.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

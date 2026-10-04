@@ -140,13 +140,14 @@ final class CameraViewModel {
 
     /// `standIn` ne sert qu'au lock forcé de debug, quand il n'y a pas de flux
     /// caméra à photographier. Nil en production, donc comportement inchangé.
-    private func lockNow(standIn: UIImage? = nil) async {
+    private func lockNow(standIn: UIImage? = nil, preferStandIn: Bool = false) async {
         guard !locking, !didLock else { return }
         locking = true
         durationToLock = Date().timeIntervalSince(sessionStartedAt)
         lastScore = smoothedScore
         lastSkeleton = SkeletonSnapshot(frame: bodyFrame, evaluation: evaluation)
-        let image = latestPixelBuffer.flatMap { FrameImage.uiImage(pixelBuffer: $0, isFront: isFront) } ?? standIn
+        let captured = latestPixelBuffer.flatMap { FrameImage.uiImage(pixelBuffer: $0, isFront: isFront) }
+        let image = preferStandIn ? (standIn ?? captured) : (captured ?? standIn)
         lastClean = image
         if let image {
             lastOverlay = SkeletonRenderer.overlayImage(
@@ -163,33 +164,68 @@ final class CameraViewModel {
     }
 
     #if DEBUG
+    /// Photo de démonstration, tête floutée. Remplace le fond uni du simulateur.
+    var demoPreviewImage: UIImage?
+
+    /// Aperçu hors caméra : la photo démo + le skeleton détecté dessus.
+    func startDemoPreview(poseID: PoseID, front: Bool) {
+        self.poseID = poseID
+        isFront = front
+        guard let image = DebugDemoPose.image else {
+            demoPreviewImage = nil
+            return
+        }
+        demoPreviewImage = image
+        applyForcedDemo(on: image)
+    }
+
+    /// Le sélecteur avant/arrière reste testable en démo sans démarrer une
+    /// `AVCaptureSession`. L'aperçu SwiftUI applique lui-même le miroir selfie.
+    func setDemoCamera(front: Bool) {
+        isFront = front
+        capture.onFrame = nil
+        capture.stop()
+        latestPixelBuffer = nil
+    }
+
     /// Lock forcé, réservé au debug : traverse lock → journal dans le simulateur,
     /// qui n'a ni caméra ni pose à tenir.
     ///
-    /// Le score est estampillé, pas mesuré. Injecter la silhouette cible ne suffit
-    /// pas : reconstruite depuis les cibles du template, elle ne repasse pas la
-    /// mesure pour les poses tournées ou de dos — de 0 à 70 selon la pose. Le
-    /// squelette stocké reste donc la pose cible, mais la note qui l'accompagne est
-    /// posée d'autorité. Compilé hors release, jamais dans un build distribué.
+    /// Le score est estampillé, pas mesuré. La photo démo (`DebugDemoPose`) porte
+    /// un skeleton Vision réel ; le chiffre qui l'accompagne reste posé d'autorité
+    /// parce que la mesure d'une silhouette cible ne survit pas aux poses tournées
+    /// (`backLatSpread` score 0). Compilé hors release, jamais dans un build distribué.
     func debugForceLock() async {
         guard !locking, !didLock else { return }
-        let frame = BodyFrame.preview(for: poseID)
+        let standIn = DebugDemoPose.image ?? Self.debugBackdrop()
+        applyForcedDemo(on: DebugDemoPose.image)
+        await lockNow(standIn: standIn, preferStandIn: true)
+    }
+
+    private func applyForcedDemo(on image: UIImage?) {
+        let frame: BodyFrame
+        if let image,
+           let detected = PoseDetector().detect(image: image, isFront: false),
+           detected.handsVisible,
+           detected.feetVisible {
+            frame = detected
+        } else {
+            frame = DebugDemoPose.fallbackFrame
+        }
         var forced = ScoringEngine.evaluate(frame: frame, template: TemplateLibrary.template(for: poseID))
         forced.gate = .ok
-        forced.rawScore = ScoringConstants.lockScore + 7
+        forced.rawScore = DebugDemoPose.stampedScore
         forced.greenRegions = Set(SkeletonRegion.allCases)
         forced.missingJoints = []
-        forced.worstCue = "Lock forcé (dev)"
-        // Pas de lissage : sur une frame unique l'EMA ramènerait le score vers zéro.
+        forced.worstCue = "Tiens la ligne."
         smoother.reset()
         smoothedScore = forced.rawScore
         bodyFrame = frame
         evaluation = forced
-        await lockNow(standIn: Self.debugBackdrop())
     }
 
     /// Sans image, `persistLock` abandonne et rien n'atteint le journal. Ce fond
-    /// uni tient la place du flux caméra absent en simulateur.
+    /// uni reste le repli si `DebugDemoPose` est absent du bundle.
     private static func debugBackdrop() -> UIImage {
         let size = CGSize(width: 1080, height: 1440)
         return UIGraphicsImageRenderer(size: size).image { context in
@@ -199,6 +235,46 @@ final class CameraViewModel {
     }
     #endif
 }
+
+#if DEBUG
+enum DebugDemoPose {
+    static let imageName = "DebugDemoPose"
+    /// 85 + 8 : le score de la prise de démonstration, aligné sur la carte partagée.
+    static let stampedScore: Float = ScoringConstants.lockScore + 8
+    static var image: UIImage? { UIImage(named: imageName) }
+
+    /// Projection extraite une fois de la photo avec Vision 2D. Le runtime du
+    /// Simulator ne livre pas toujours les poids Vision, donc ces coordonnées
+    /// gardent le skeleton collé à la vraie silhouette plutôt que de revenir à
+    /// la silhouette théorique du template.
+    static var fallbackFrame: BodyFrame {
+        var frame = BodyFrame.preview(for: .frontDoubleBiceps)
+        frame.joints2D = [
+            .root: SIMD2(0.489329, 0.519682),
+            .spine: SIMD2(0.485464, 0.430315),
+            .neck: SIMD2(0.481598, 0.340947),
+            .head: SIMD2(0.481598, 0.257000),
+            .leftShoulder: SIMD2(0.572467, 0.341084),
+            .rightShoulder: SIMD2(0.390729, 0.340809),
+            .leftElbow: SIMD2(0.732034, 0.365971),
+            .rightElbow: SIMD2(0.233554, 0.360948),
+            .leftWrist: SIMD2(0.711672, 0.291230),
+            .rightWrist: SIMD2(0.259118, 0.287844),
+            .leftHip: SIMD2(0.560411, 0.519650),
+            .rightHip: SIMD2(0.418246, 0.519715),
+            .leftKnee: SIMD2(0.590312, 0.675409),
+            .rightKnee: SIMD2(0.395140, 0.658670),
+            .leftAnkle: SIMD2(0.620747, 0.811348),
+            .rightAnkle: SIMD2(0.351612, 0.794403)
+        ]
+        frame.confidence = 0.65
+        frame.subjectHeightRatio = 0.554
+        frame.handsVisible = true
+        frame.feetVisible = true
+        return frame
+    }
+}
+#endif
 
 enum FrameImage {
     static func uiImage(pixelBuffer: CVPixelBuffer, isFront: Bool) -> UIImage? {

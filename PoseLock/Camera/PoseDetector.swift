@@ -13,13 +13,27 @@ final class PoseDetector: @unchecked Sendable {
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return nil }
         // Buffers bruts (non miroir). Front = leftMirrored pour coller au preview selfie.
         let orientation: CGImagePropertyOrientation = isFront ? .leftMirrored : .right
-        let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: orientation, options: [:])
-        do {
-            try handler.perform([request3D, request2D])
-        } catch {
-            do { try handler.perform([request3D]) } catch { }
-            do { try handler.perform([request2D]) } catch { }
-        }
+        return detect(
+            handler3D: VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: orientation, options: [:]),
+            handler2D: VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: orientation, options: [:])
+        )
+    }
+
+    func detect(image: UIImage, isFront: Bool) -> BodyFrame? {
+        guard let cgImage = image.cgImage else { return nil }
+        let orientation: CGImagePropertyOrientation = isFront ? .upMirrored : .up
+        return detect(
+            handler3D: VNImageRequestHandler(cgImage: cgImage, orientation: orientation, options: [:]),
+            handler2D: VNImageRequestHandler(cgImage: cgImage, orientation: orientation, options: [:])
+        )
+    }
+
+    private func detect(handler3D: VNImageRequestHandler, handler2D: VNImageRequestHandler) -> BodyFrame? {
+        // Une requête 3D non disponible (notamment sur certains Simulators) ne
+        // doit jamais empêcher la projection 2D de tourner. Des handlers séparés
+        // évitent qu'un échec 3D laisse le handler d'image dans un état inutilisable.
+        do { try handler3D.perform([request3D]) } catch { }
+        do { try handler2D.perform([request2D]) } catch { }
 
         let observation3D = request3D.results?.first
         let observation2D = request2D.results?.first

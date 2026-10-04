@@ -17,6 +17,7 @@ final class AppSession {
     var showCoach = false
     var showPaywall = false
     var showPoseLibrary = false
+    var showFeedback = false
     var paywallReason: PaywallReason = .generic
     var pendingPack: Pack?
 
@@ -37,6 +38,12 @@ final class AppSession {
             return
         }
         showCoach = true
+    }
+
+    func presentFeedback(hapticsEnabled: Bool) {
+        guard !showFeedback else { return }
+        PoseLockHaptics.selection(enabled: hapticsEnabled)
+        showFeedback = true
     }
 
     func beginCameraFromCoach() {
@@ -64,6 +71,7 @@ final class AppSession {
         showCoach = false
         showPaywall = false
         showPoseLibrary = false
+        showFeedback = false
         pendingPack = nil
         selectedTab = .home
         selectedPoseID = Pack.scene.defaultPoseID

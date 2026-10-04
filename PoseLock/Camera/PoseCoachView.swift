@@ -1,22 +1,16 @@
 import SwiftUI
 
 struct PoseCoachStep: Equatable {
-    enum Highlight: Equatable {
-        case none
-        case regions(Set<SkeletonRegion>)
-        case allGreen
-    }
-
     var title: String
     var detail: String
     var symbolName: String
-    var highlight: Highlight
+    var referenceVariant: PoseReferenceVariant
     var cues: [String] = []
 }
 
 enum PoseCoachCopy {
     static func steps(for poseID: PoseID) -> [PoseCoachStep] {
-        let setup = setupCues(for: poseID)
+        let cues = setupCues(for: poseID)
         let hold = ScoringConstants.lockHoldSeconds
         let holdText = hold.truncatingRemainder(dividingBy: 1) == 0
             ? "\(Int(hold))"
@@ -26,26 +20,26 @@ enum PoseCoachCopy {
                 title: "Corps entier",
                 detail: "Recule. Chevilles et mains dans l’image.",
                 symbolName: "figure.stand",
-                highlight: .none
+                referenceVariant: .plain
             ),
             PoseCoachStep(
                 title: poseID.displayName,
-                detail: setup.cues.joined(separator: " "),
+                detail: cues.joined(separator: " "),
                 symbolName: poseID.symbolName,
-                highlight: .regions(setup.regions),
-                cues: setup.cues
+                referenceVariant: .guided,
+                cues: cues
             ),
             PoseCoachStep(
                 title: "Tiens la ligne",
                 detail: "Garde la pose \(holdText) s jusqu’au vert. Score ≥ \(Int(ScoringConstants.lockScore)).",
                 symbolName: "checkmark.circle",
-                highlight: .allGreen
+                referenceVariant: .guided
             )
         ]
     }
 
     /// Un cue par groupe de mise en place (buste, bras, tête), pas les deux premières features collées.
-    static func setupCues(for poseID: PoseID) -> (cues: [String], regions: Set<SkeletonRegion>) {
+    static func setupCues(for poseID: PoseID) -> [String] {
         let features = TemplateLibrary.features(for: poseID)
         let groups: [[SkeletonRegion]] = [
             [.torso, .hips],
@@ -56,35 +50,29 @@ enum PoseCoachCopy {
             [.leftLeg, .rightLeg]
         ]
         var cues: [String] = []
-        var regions: Set<SkeletonRegion> = []
         for group in groups {
             guard cues.count < 4 else { break }
             guard let feature = features.first(where: { group.contains($0.region) }) else { continue }
             guard !cues.contains(feature.cue) else { continue }
             cues.append(feature.cue)
-            regions.insert(feature.region)
         }
         if cues.count < 3 {
             for feature in features {
                 guard cues.count < 4 else { break }
                 guard !cues.contains(feature.cue) else { continue }
                 cues.append(feature.cue)
-                regions.insert(feature.region)
             }
         }
-        return (cues, regions)
+        return cues
     }
 }
 
 struct PoseCoachView: View {
     var poseID: PoseID
     var onStart: () -> Void
+    var initialPage: Int = 0
 
     @State private var page = 0
-    @State private var assemble: CGFloat = 0
-    @State private var yaw: Float = 0
-    @State private var yawAtDragStart: Float?
-
     private var steps: [PoseCoachStep] { PoseCoachCopy.steps(for: poseID) }
 
     var body: some View {
@@ -93,7 +81,7 @@ struct PoseCoachView: View {
                 TabView(selection: $page) {
                     ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
                         ScrollView {
-                            coachPage(step, index: index).padding(.bottom, 36)
+                            coachPage(step).padding(.bottom, 36)
                         }
                         .tag(index)
                     }
@@ -123,36 +111,28 @@ struct PoseCoachView: View {
                 }
             }
             .toolbarBackground(Theme.background, for: .navigationBar)
-            .onChange(of: page) { _, new in
-                syncAssemble(for: new)
+            .onAppear {
+                page = initialPage
             }
         }
         .preferredColorScheme(.dark)
         .tint(Theme.gold)
+        .poseLockFeedback()
     }
 
-    private func coachPage(_ step: PoseCoachStep, index: Int) -> some View {
+    private func coachPage(_ step: PoseCoachStep) -> some View {
         VStack(spacing: 20) {
             Spacer(minLength: 12)
             Image(systemName: step.symbolName)
                 .font(Theme.emblemFont)
                 .foregroundStyle(Theme.gold)
                 .symbolEffect(.pulse, options: .nonRepeating, value: page)
-            PosePreviewSkeleton(
+            PoseReferenceImage(
                 poseID: poseID,
-                highlight: step.highlight,
-                assemble: index == 0 ? 0 : assemble,
-                yaw: index == 0 ? 0 : yaw
+                variant: step.referenceVariant
             )
             .frame(height: 280)
             .padding(.horizontal, 32)
-            .contentShape(Rectangle())
-            .modifier(CoachYawModifier(enabled: index > 0, gesture: rotateGesture))
-            if index > 0 {
-                Text("Glisse pour tourner.")
-                    .font(Theme.captionFont)
-                    .foregroundStyle(Theme.ivoryFaint)
-            }
             Text(step.title)
                 .font(Theme.titleFont)
                 .foregroundStyle(Theme.ivory)
@@ -188,44 +168,4 @@ struct PoseCoachView: View {
         }
     }
 
-    private var rotateGesture: some Gesture {
-        DragGesture()
-            .onChanged { value in
-                let start = yawAtDragStart ?? yaw
-                yawAtDragStart = start
-                yaw = start + Float(value.translation.width) * 0.6
-            }
-            .onEnded { _ in
-                yawAtDragStart = nil
-            }
-    }
-
-    private func syncAssemble(for page: Int) {
-        if page == 0 {
-            assemble = 0
-            yaw = 0
-            return
-        }
-        if page == 1 {
-            assemble = 0
-            withAnimation(.easeInOut(duration: 1.2)) {
-                assemble = 1
-            }
-            return
-        }
-        assemble = 1
-    }
-}
-
-private struct CoachYawModifier<G: Gesture>: ViewModifier {
-    var enabled: Bool
-    var gesture: G
-
-    func body(content: Content) -> some View {
-        if enabled {
-            content.highPriorityGesture(gesture)
-        } else {
-            content
-        }
-    }
 }

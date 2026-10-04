@@ -5,7 +5,9 @@ import RevenueCat
 @Observable
 final class StoreManager {
     private(set) var isPro = false
-    /// Fin de la période en cours — donc fin de l'essai juste après l'achat.
+    private(set) var isInTrial = false
+    /// Fin de la période en cours. C'est la fin réelle de l'essai quand
+    /// `isInTrial` est vrai.
     private(set) var renewalDate: Date?
     /// Ce que le paywall affiche, prix et essai compris. Vide : il n'y a rien à
     /// vendre, et le paywall doit montrer sa sortie de secours.
@@ -23,7 +25,10 @@ final class StoreManager {
         #if DEBUG
         Purchases.logLevel = .info
         #endif
-        Purchases.configure(withAPIKey: RevenueCatConfig.apiKey)
+        let configuration = Configuration.Builder(withAPIKey: RevenueCatConfig.apiKey)
+            .with(showStoreMessagesAutomatically: true)
+            .build()
+        Purchases.configure(with: configuration)
     }
 
     func load() async {
@@ -65,6 +70,7 @@ final class StoreManager {
             // Le Test Store peut renvoyer un customerInfo sans entitlement
             // encore actif : un second fetch débloque le paywall.
             await refreshEntitlements()
+            if isPro { PoseLockAnalytics.capture(.purchaseCompleted) }
         } catch {
             purchaseError = "L’achat n’a pas abouti."
         }
@@ -94,7 +100,20 @@ final class StoreManager {
     private func apply(_ info: CustomerInfo) {
         let entitlement = info.entitlements[RevenueCatConfig.proEntitlement]
         isPro = entitlement?.isActive == true
+        isInTrial = entitlement.map {
+            Self.isActiveTrial(
+                isActive: $0.isActive,
+                periodIsTrial: $0.periodType == .trial
+            )
+        } ?? false
         renewalDate = entitlement?.expirationDate
+        if !isInTrial {
+            TrialReminder.cancel()
+        }
+    }
+
+    nonisolated static func isActiveTrial(isActive: Bool, periodIsTrial: Bool) -> Bool {
+        isActive && periodIsTrial
     }
 
     /// Couvre le renouvellement et l'expiration, que l'app ne verrait pas sinon.

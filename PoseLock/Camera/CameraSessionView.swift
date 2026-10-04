@@ -18,17 +18,27 @@ struct CameraSessionView: View {
         @Bindable var session = session
         ZStack {
             Theme.background.ignoresSafeArea()
-            CameraPreviewRepresentable(session: model.capture.session, isFront: model.isFront)
-                .ignoresSafeArea()
-            SkeletonOverlay(frame: model.bodyFrame, evaluation: model.evaluation)
-                .ignoresSafeArea()
+            #if DEBUG
+            if let demo = model.demoPreviewImage {
+                DemoPosePreview(
+                    image: demo,
+                    frame: model.bodyFrame,
+                    evaluation: model.evaluation,
+                    isFront: model.isFront
+                )
+            } else {
+                livePreview
+            }
+            #else
+            livePreview
+            #endif
             CameraHUD(
                 pose: PoseCatalog.definition(for: session.selectedPoseID),
                 evaluation: model.evaluation,
                 score: model.smoothedScore,
                 isFront: model.isFront,
                 onClose: { session.showCamera = false },
-                onSelectFront: { model.setCamera(front: $0) },
+                onSelectFront: selectCamera,
                 onBubble: { showLibrary = true },
                 onForceLock: forceLockAction
             )
@@ -48,7 +58,7 @@ struct CameraSessionView: View {
         .statusBarHidden()
         .onAppear {
             model.poseID = session.selectedPoseID
-            model.start(front: settings.cameraFront)
+            startSession()
         }
         .onDisappear {
             model.stop()
@@ -69,6 +79,53 @@ struct CameraSessionView: View {
         .sheet(isPresented: $session.showPaywall) {
             PaywallSheet(reason: session.paywallReason)
         }
+        .poseLockFeedback()
+    }
+
+    private var livePreview: some View {
+        ZStack {
+            CameraPreviewRepresentable(session: model.capture.session, isFront: model.isFront)
+                .ignoresSafeArea()
+            SkeletonOverlay(frame: model.bodyFrame, evaluation: model.evaluation)
+                .ignoresSafeArea()
+        }
+    }
+
+    private func startSession() {
+        #if DEBUG
+        if ScreenBank.usesDemoCamera {
+            model.startDemoPreview(
+                poseID: session.selectedPoseID,
+                front: settings.cameraFront
+            )
+            if ScreenBank.videoDemoScene == .cameraLock {
+                Task {
+                    // Laisse le temps de voir le skeleton, le 93 et « Tiens la
+                    // ligne. » avant le flash et la photo lockée.
+                    try? await Task.sleep(for: .milliseconds(1800))
+                    await model.debugForceLock()
+                }
+            } else if ScreenBank.current?.locksOnAppear == true {
+                Task {
+                    try? await Task.sleep(for: .milliseconds(280))
+                    await model.debugForceLock()
+                }
+            }
+            return
+        }
+        #endif
+        model.start(front: settings.cameraFront)
+        PoseLockAnalytics.capture(.cameraSessionStarted)
+    }
+
+    private func selectCamera(front: Bool) {
+        #if DEBUG
+        if model.demoPreviewImage != nil {
+            model.setDemoCamera(front: front)
+            return
+        }
+        #endif
+        model.setCamera(front: front)
     }
 
     /// Le lock forcé n'existe qu'en debug : en release il n'y a pas de fermeture à
@@ -178,6 +235,7 @@ struct CameraSessionView: View {
                 skeletonData: model.lastSkeleton.flatMap { try? JSONEncoder().encode($0) }
             )
             modelContext.insert(entry)
+            PoseLockAnalytics.capture(.lockSaved)
             if settings.saveToPhotos {
                 // Signée seulement pour sortir : le fichier gardé par PhotoStore, que
                 // le journal et les cartes relisent, reste sans marque.
@@ -215,12 +273,7 @@ struct PoseLibrarySheet: View {
                                 choose(pose.poseID, pack: listed)
                             } label: {
                                 HStack {
-                                    PosePreviewSkeleton(
-                                        poseID: pose.poseID,
-                                        highlight: .regions([.leftArm, .rightArm, .shoulders]),
-                                        lineWidth: 1.8,
-                                        jointSize: 3
-                                    )
+                                    PoseReferenceImage(poseID: pose.poseID, variant: .guided)
                                     .frame(width: 36, height: 48)
                                     Text(pose.displayName)
                                         .foregroundStyle(Theme.ivory)

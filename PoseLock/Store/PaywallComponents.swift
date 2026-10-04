@@ -46,7 +46,7 @@ struct TrialTimeline: View {
             (
                 "bell",
                 "24 h avant la fin",
-                "PoseLock te prévient sur l’iPhone qu’il reste un jour pour annuler."
+                "Si tu autorises les notifications, PoseLock te prévient qu’il reste un jour pour annuler."
             ),
             (
                 "creditcard",
@@ -202,7 +202,7 @@ struct PaywallHero: View {
                 .fill(Theme.elevated)
 
             VStack(spacing: 12) {
-                PosePreviewSkeleton(poseID: .frontDoubleBiceps, highlight: .allGreen)
+                PoseReferenceImage(poseID: .frontDoubleBiceps, variant: .guided)
                     .frame(height: 100)
                     .padding(.top, 20)
 

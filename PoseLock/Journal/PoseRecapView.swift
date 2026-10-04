@@ -15,7 +15,11 @@ struct PoseRecapView: View {
     var body: some View {
         Group {
             if recaps.isEmpty {
-                emptyState
+                JournalEmptyState(
+                    systemImage: "figure.stand",
+                    title: "Aucune pose travaillée",
+                    detail: "Un lock, et le récap se remplit."
+                )
             } else {
                 ScrollView {
                     LazyVStack(spacing: 16) {
@@ -35,18 +39,6 @@ struct PoseRecapView: View {
         .sheet(item: $shared) { wrapper in
             PoseRecapShareView(entry: wrapper.entry, yaw: wrapper.yaw)
         }
-    }
-
-    private var emptyState: some View {
-        VStack(spacing: 8) {
-            Text("Aucune pose travaillée.")
-                .font(Theme.bodyFont)
-                .foregroundStyle(Theme.ivory)
-            Text("Un lock, et le récap se remplit.")
-                .font(Theme.captionFont)
-                .foregroundStyle(Theme.ivoryMuted)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private func bestEntry(for recap: PoseRecap) -> LockEntry? {
@@ -189,18 +181,8 @@ struct PoseRecapShareView: View {
                     .padding(24)
                 Spacer()
                 if let rendered {
-                    ShareLink(
-                        item: JPEGTransfer(image: rendered),
-                        preview: SharePreview(
-                            entry.poseID.displayName,
-                            image: Image(uiImage: rendered)
-                        )
-                    ) {
-                        Text("Exporter")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(PrimaryButtonStyle())
-                    .padding(.horizontal, 24)
+                    ShareDestinationBar(image: rendered, title: entry.poseID.displayName)
+                        .padding(.horizontal, 24)
                 }
             }
             .padding(.bottom, 24)

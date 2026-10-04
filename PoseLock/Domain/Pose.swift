@@ -1,5 +1,10 @@
 import Foundation
 
+enum PoseReferenceVariant: String, CaseIterable, Sendable {
+    case plain
+    case guided
+}
+
 /// Identifiants stables. Ne pas renommer : ils sont persistés dans le journal.
 enum PoseID: String, Codable, CaseIterable, Identifiable, Sendable {
     // Scène — Classic Physique
@@ -87,7 +92,42 @@ enum PoseID: String, Codable, CaseIterable, Identifiable, Sendable {
         }
     }
 
-    /// Icône de pack. La pose elle-même est dessinée par `PoseFigure`, pas un asset.
+    var referenceAssetStem: String {
+        switch self {
+        case .quarterTurnFace: return "pose_quarterTurnFace"
+        case .quarterTurnProfile: return "pose_quarterTurnProfile"
+        case .quarterTurnBack: return "pose_quarterTurnBack"
+        case .frontDoubleBiceps: return "pose_frontDoubleBiceps"
+        case .frontLatSpread: return "pose_frontLatSpread"
+        case .sideChest: return "pose_sideChest"
+        case .backDoubleBiceps: return "pose_backDoubleBiceps"
+        case .backLatSpread: return "pose_backLatSpread"
+        case .sideTriceps: return "pose_sideTriceps"
+        case .absAndThigh: return "pose_absAndThigh"
+        case .mostMuscular: return "pose_mostMuscular"
+        case .threeQuarterLat: return "pose_threeQuarterLat"
+        case .sideChestMirror: return "pose_sideChestMirror"
+        case .mostMuscularCrop: return "pose_mostMuscularCrop"
+        case .vacuum: return "pose_vacuum"
+        case .backDoubleThreeQuarter: return "pose_backDoubleThreeQuarter"
+        case .handsOnHips: return "pose_handsOnHips"
+        case .frontPosture: return "pose_frontPosture"
+        case .profilePosture: return "pose_profilePosture"
+        case .shoulderToWaist: return "pose_shoulderToWaist"
+        case .clavicleOpen: return "pose_clavicleOpen"
+        case .shoulderSymmetry: return "pose_shoulderSymmetry"
+        case .twistThreeQuarter: return "pose_twistThreeQuarter"
+        case .zyzzClassic: return "pose_zyzzClassic"
+        case .zyzzVacuum: return "pose_zyzzVacuum"
+        case .zyzzTwist: return "pose_zyzzTwist"
+        }
+    }
+
+    func referenceAssetName(for variant: PoseReferenceVariant) -> String {
+        "\(referenceAssetStem)_\(variant.rawValue)"
+    }
+
+    /// Icône de pack. La pose elle-même utilise une référence low-poly dédiée.
     var symbolName: String {
         switch pack {
         case .scene: return "figure.stand"

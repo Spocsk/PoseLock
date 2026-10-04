@@ -10,9 +10,12 @@
 		A00000000000000000000022 /* PoseLockApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000021 /* PoseLockApp.swift */; };
 		A00000000000000000000024 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000023 /* RootView.swift */; };
 		A00000000000000000000026 /* AppSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000025 /* AppSession.swift */; };
+		E11A00000000000000000002 /* ScreenBank.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11A00000000000000000001 /* ScreenBank.swift */; };
+		C9A100000000000000000002 /* PoseLockAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A100000000000000000001 /* PoseLockAnalytics.swift */; };
 		A00000000000000000000028 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000027 /* Theme.swift */; };
 		B00000000000000000000021 /* ShareMark.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000020 /* ShareMark.swift */; };
-		D11A00000000000000000002 /* PoseFigure.swift in Sources */ = {isa = PBXBuildFile; fileRef = D11A00000000000000000001 /* PoseFigure.swift */; };
+		D11A00000000000000000002 /* PoseReferenceImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D11A00000000000000000001 /* PoseReferenceImage.swift */; };
+		E52A00000000000000000002 /* PoseReferenceAssetsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E52A00000000000000000001 /* PoseReferenceAssetsTests.swift */; };
 		A0000000000000000000002A /* Pack.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000029 /* Pack.swift */; };
 		A0000000000000000000002C /* Pose.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000002B /* Pose.swift */; };
 		A0000000000000000000002E /* BodyFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000002D /* BodyFrame.swift */; };
@@ -50,6 +53,10 @@
 		C00000000000000000000002 /* ScoreTrendView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000001 /* ScoreTrendView.swift */; };
 		C00000000000000000000004 /* CompetitionDeadline.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000003 /* CompetitionDeadline.swift */; };
 		C00000000000000000000006 /* CompetitionReminder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000005 /* CompetitionReminder.swift */; };
+		F00000000000000000000002 /* FeedbackSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000001 /* FeedbackSheet.swift */; };
+		F00000000000000000000004 /* FeedbackMail.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000003 /* FeedbackMail.swift */; };
+		F00000000000000000000006 /* ShakeDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000005 /* ShakeDetector.swift */; };
+		F00000000000000000000008 /* SocialShare.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000007 /* SocialShare.swift */; };
 		B00000000000000000000004 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = B00000000000000000000002 /* RevenueCat */; };
 /* End PBXBuildFile section */
 
@@ -69,9 +76,12 @@
 		A00000000000000000000021 /* PoseLockApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PoseLockApp.swift; sourceTree = "<group>"; };
 		A00000000000000000000023 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		A00000000000000000000025 /* AppSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSession.swift; sourceTree = "<group>"; };
+		E11A00000000000000000001 /* ScreenBank.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenBank.swift; sourceTree = "<group>"; };
+		C9A100000000000000000001 /* PoseLockAnalytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PoseLockAnalytics.swift; sourceTree = "<group>"; };
 		A00000000000000000000027 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		B00000000000000000000020 /* ShareMark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareMark.swift; sourceTree = "<group>"; };
-		D11A00000000000000000001 /* PoseFigure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PoseFigure.swift; sourceTree = "<group>"; };
+		D11A00000000000000000001 /* PoseReferenceImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PoseReferenceImage.swift; sourceTree = "<group>"; };
+		E52A00000000000000000001 /* PoseReferenceAssetsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PoseReferenceAssetsTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000029 /* Pack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pack.swift; sourceTree = "<group>"; };
 		A0000000000000000000002B /* Pose.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pose.swift; sourceTree = "<group>"; };
 		A0000000000000000000002D /* BodyFrame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BodyFrame.swift; sourceTree = "<group>"; };
@@ -111,6 +121,10 @@
 		C00000000000000000000001 /* ScoreTrendView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreTrendView.swift; sourceTree = "<group>"; };
 		C00000000000000000000003 /* CompetitionDeadline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompetitionDeadline.swift; sourceTree = "<group>"; };
 		C00000000000000000000005 /* CompetitionReminder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompetitionReminder.swift; sourceTree = "<group>"; };
+		F00000000000000000000001 /* FeedbackSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackSheet.swift; sourceTree = "<group>"; };
+		F00000000000000000000003 /* FeedbackMail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackMail.swift; sourceTree = "<group>"; };
+		F00000000000000000000005 /* ShakeDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShakeDetector.swift; sourceTree = "<group>"; };
+		F00000000000000000000007 /* SocialShare.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialShare.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -170,6 +184,7 @@
 			children = (
 				A0000000000000000000004D /* ScoringEngineTests.swift */,
 				A00000000000000000000069 /* StoreConfigurationTests.swift */,
+				E52A00000000000000000001 /* PoseReferenceAssetsTests.swift */,
 			);
 			path = PoseLockTests;
 			sourceTree = "<group>";
@@ -179,6 +194,8 @@
 			children = (
 				A00000000000000000000023 /* RootView.swift */,
 				A00000000000000000000025 /* AppSession.swift */,
+				E11A00000000000000000001 /* ScreenBank.swift */,
+				C9A100000000000000000001 /* PoseLockAnalytics.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -188,7 +205,7 @@
 			children = (
 				A00000000000000000000027 /* Theme.swift */,
 				B00000000000000000000020 /* ShareMark.swift */,
-				D11A00000000000000000001 /* PoseFigure.swift */,
+				D11A00000000000000000001 /* PoseReferenceImage.swift */,
 			);
 			path = Design;
 			sourceTree = "<group>";
@@ -256,6 +273,7 @@
 				A00000000000000000000047 /* JournalView.swift */,
 				A00000000000000000000059 /* PoseComparisonSkeleton.swift */,
 				A0000000000000000000005B /* PoseRecapView.swift */,
+				F00000000000000000000007 /* SocialShare.swift */,
 			);
 			path = Journal;
 			sourceTree = "<group>";
@@ -264,6 +282,9 @@
 			isa = PBXGroup;
 			children = (
 				A00000000000000000000049 /* SettingsView.swift */,
+				F00000000000000000000001 /* FeedbackSheet.swift */,
+				F00000000000000000000003 /* FeedbackMail.swift */,
+				F00000000000000000000005 /* ShakeDetector.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -384,9 +405,11 @@
 				A00000000000000000000022 /* PoseLockApp.swift in Sources */,
 				A00000000000000000000024 /* RootView.swift in Sources */,
 				A00000000000000000000026 /* AppSession.swift in Sources */,
+				E11A00000000000000000002 /* ScreenBank.swift in Sources */,
+				C9A100000000000000000002 /* PoseLockAnalytics.swift in Sources */,
 				A00000000000000000000028 /* Theme.swift in Sources */,
 				B00000000000000000000021 /* ShareMark.swift in Sources */,
-				D11A00000000000000000002 /* PoseFigure.swift in Sources */,
+				D11A00000000000000000002 /* PoseReferenceImage.swift in Sources */,
 				A0000000000000000000002A /* Pack.swift in Sources */,
 				A0000000000000000000002C /* Pose.swift in Sources */,
 				A0000000000000000000002E /* BodyFrame.swift in Sources */,
@@ -419,6 +442,10 @@
 				C00000000000000000000002 /* ScoreTrendView.swift in Sources */,
 				C00000000000000000000004 /* CompetitionDeadline.swift in Sources */,
 				C00000000000000000000006 /* CompetitionReminder.swift in Sources */,
+				F00000000000000000000002 /* FeedbackSheet.swift in Sources */,
+				F00000000000000000000004 /* FeedbackMail.swift in Sources */,
+				F00000000000000000000006 /* ShakeDetector.swift in Sources */,
+				F00000000000000000000008 /* SocialShare.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -428,6 +455,7 @@
 			files = (
 				A0000000000000000000004E /* ScoringEngineTests.swift in Sources */,
 				A0000000000000000000006A /* StoreConfigurationTests.swift in Sources */,
+				E52A00000000000000000002 /* PoseReferenceAssetsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

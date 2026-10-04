@@ -8,6 +8,7 @@ struct OnboardingPersonalizationView: View {
     var hapticsEnabled: Bool
     var onContinue: () -> Void
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var percent = 0
     @State private var isDone = false
 
@@ -162,6 +163,18 @@ struct OnboardingPersonalizationView: View {
     }
 
     private func run() async {
+        if reduceMotion {
+            percent = 100
+            isDone = true
+            return
+        }
+        #if DEBUG
+        if ScreenBank.current != nil {
+            percent = 100
+            isDone = true
+            return
+        }
+        #endif
         for stage in Self.ramp {
             try? await Task.sleep(for: .milliseconds(stage.pause))
             let crossed = lines.contains { $0.threshold > percent && $0.threshold <= stage.value }

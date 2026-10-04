@@ -140,15 +140,10 @@ struct PoseCardView: View {
             Button(action: onBrowse) {
                 HStack(spacing: 16) {
                     if !dynamicTypeSize.isAccessibilitySize {
-                    PosePreviewSkeleton(
-                        poseID: pose.poseID,
-                        highlight: .regions([.leftArm, .rightArm, .shoulders, .torso]),
-                        lineWidth: 2.6,
-                        jointSize: 4
-                    )
-                    .frame(width: 100, height: 140)
-                    .background(Theme.background.opacity(0.35))
-                    .clipShape(RoundedRectangle(cornerRadius: Theme.continuousCorner, style: .continuous))
+                        PoseReferenceImage(poseID: pose.poseID, variant: .guided)
+                            .frame(width: 100, height: 140)
+                            .background(Theme.background.opacity(0.35))
+                            .clipShape(RoundedRectangle(cornerRadius: Theme.continuousCorner, style: .continuous))
                     }
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Pose à travailler")

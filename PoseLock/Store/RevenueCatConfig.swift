@@ -13,8 +13,7 @@ enum RevenueCatConfig {
 
     /// Clé publique SDK, jamais la clé secrète. En debug, le Test Store : il rend
     /// les prix dans le simulateur sans passer par l'App Store. En release, la clé
-    /// `appl_` de l'app App Store Connect, absente jusqu'au compte payant — d'où
-    /// la lecture dans `Info.plist` plutôt qu'une constante à remplacer.
+    /// `appl_` de l'app App Store Connect, lue depuis `Info.plist`.
     static var apiKey: String {
         #if DEBUG
         return "test_qzbgtpPkyssgCzmLkgrJMqyTYaq"

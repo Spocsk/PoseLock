@@ -9,7 +9,7 @@ ios
 ## Stack
 
 Application : Swift / SwiftUI, Xcode, iOS 17+, bundle `com.spocsk.PoseLock`.
-Landing marketing : HTML/CSS/JS statique dans `docs/`, GitHub Pages, sans build Node. Motion : GSAP (ScrollTrigger), anime.js, snippets CSS [transitions.dev](https://transitions.dev). Choix confirmé pour l’hébergement « pour le moment ».
+Landing marketing : HTML/CSS/JS statique dans `docs/`, Vercel avec fonctions Node pour la liste d’attente. Pas de build frontend Node.
 
 ## Users
 
@@ -32,12 +32,12 @@ Séance caméra plein écran (hors tab bar). Accueil, journal, réglages. Packs 
 - Seuil de lock : 85 / 100, hold 1,5 s.
 - Gratuit : 3 locks par jour, un pack parmi Scène / Contenu / Physique.
 - Pro (entitlement RevenueCat `pro`) : locks illimités, les trois packs, comparatif J-30, rappels d’échéance, catalogue Zyzz.
-- Aucun serveur applicatif. Le seul réseau est RevenueCat (historique d’achat). Pas d’analytics, pas de crash reporter.
+- Aucun serveur applicatif. RevenueCat traite l’état de l’abonnement. Mixpanel EU est prévu pour quelques événements d’usage sans compte, uniquement après accord explicite et configuration d’un projet PoseLock dédié ; aucun média, pose ou score ne lui est envoyé. Pas de crash reporter.
 - Overlay caméra = stickman. Previews de poses = silhouette capsule 2D (`PoseFigure`), jamais une photo d’autrui ni un perso 3D.
 - Vacuum : consigne coach, Vision ne le score pas.
 - Compte Apple skippable ; entitlement Sign in with Apple absent tant qu’il n’y a pas d’équipe payante.
 - Prix, durées d’essai : jamais écrits en dur ; ils viennent du Store.
-- Landing : pas de fiche App Store à ce jour. CTA = « Bientôt sur l’App Store », sans lien.
+- Landing : pas de fiche App Store à ce jour. Le bouton Store reste inactif ; le CTA de fin propose une inscription confirmée par email pour la sortie et les actualités.
 
 ## Brand Commitments
 

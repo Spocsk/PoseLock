@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "pose_quarterTurnProfile_plain.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

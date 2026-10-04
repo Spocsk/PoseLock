@@ -106,6 +106,7 @@ struct PaywallSheet: View {
             }
         }
         .preferredColorScheme(.dark)
+        .onAppear { PoseLockAnalytics.capture(.paywallViewed) }
     }
 
     private var footer: some View {

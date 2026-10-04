@@ -13,70 +13,18 @@ struct RootView: View {
     var body: some View {
         @Bindable var session = session
         Group {
-            if let settings, settings.onboardingDone {
-                TabView(selection: $session.selectedTab) {
-                    HomeView(settings: settings, entries: entries)
-                        .tabItem { Label("Accueil", systemImage: "square.grid.2x2") }
-                        .tag(RootTab.home)
-                    JournalView(entries: entries, isPro: store.isPro)
-                        .tabItem { Label("Journal", systemImage: "rectangle.stack") }
-                        .tag(RootTab.journal)
-                    SettingsView(settings: settings, entries: entries)
-                        .tabItem { Label("Réglages", systemImage: "gearshape") }
-                        .tag(RootTab.settings)
-                }
-                .tint(Theme.gold)
-                .fullScreenCover(isPresented: $session.showCoach) {
-                    PoseCoachView(poseID: session.selectedPoseID) {
-                        session.beginCameraFromCoach()
-                    }
-                }
-                .fullScreenCover(isPresented: $session.showCamera) {
-                    CameraSessionView(settings: settings, entries: entries)
-                }
-                .sheet(isPresented: $session.showPaywall) {
-                    PaywallSheet(reason: session.paywallReason)
-                }
-                .onAppear {
-                    session.syncPoseOfTheDay(pack: settings.pack, entries: entries)
-                }
-                .onChange(of: settings.pack) { _, newPack in
-                    session.syncPoseOfTheDay(pack: newPack, entries: entries)
-                    if store.isPro, settings.competitionRemindersEnabled, let date = settings.competitionDate {
-                        Task {
-                            await CompetitionReminder.schedule(
-                                date: date,
-                                place: settings.competitionPlace,
-                                pack: newPack,
-                                entries: entries.map(\.snapshot)
-                            )
-                        }
-                    }
-                }
-                .onChange(of: store.isPro) { _, isPro in
-                    if !isPro {
-                        CompetitionReminder.cancel()
-                        if settings.pack == .zyzz {
-                            let fallback = settings.goal?.suggestedPack ?? .scene
-                            settings.pack = fallback
-                            session.syncPoseOfTheDay(pack: fallback, entries: entries)
-                        }
-                    } else if settings.competitionRemindersEnabled, let date = settings.competitionDate {
-                        Task {
-                            await CompetitionReminder.schedule(
-                                date: date,
-                                place: settings.competitionPlace,
-                                pack: settings.pack,
-                                entries: entries.map(\.snapshot)
-                            )
-                        }
-                    }
-                }
+            #if DEBUG
+            if let scene = ScreenBank.videoDemoScene ?? ScreenBank.current {
+                ScreenBankRoot(scene: scene)
             } else {
-                OnboardingFlow(settings: ensureSettings())
+                appRoot
             }
+            #else
+            appRoot
+            #endif
         }
         .background(Theme.background.ignoresSafeArea())
+        .poseLockFeedback()
         .task {
             _ = ensureSettings()
             await store.load()
@@ -84,6 +32,73 @@ struct RootView: View {
         .onAppear { styleTabBar() }
         .transaction { transaction in
             if reduceMotion { transaction.disablesAnimations = true }
+        }
+    }
+
+    @ViewBuilder
+    private var appRoot: some View {
+        @Bindable var session = session
+        if let settings, settings.onboardingDone {
+            TabView(selection: $session.selectedTab) {
+                HomeView(settings: settings, entries: entries)
+                    .tabItem { Label("Accueil", systemImage: "square.grid.2x2") }
+                    .tag(RootTab.home)
+                JournalView(entries: entries, isPro: store.isPro)
+                    .tabItem { Label("Journal", systemImage: "rectangle.stack") }
+                    .tag(RootTab.journal)
+                SettingsView(settings: settings, entries: entries)
+                    .tabItem { Label("Réglages", systemImage: "gearshape") }
+                    .tag(RootTab.settings)
+            }
+            .tint(Theme.gold)
+            .fullScreenCover(isPresented: $session.showCoach) {
+                PoseCoachView(poseID: session.selectedPoseID) {
+                    session.beginCameraFromCoach()
+                }
+            }
+            .fullScreenCover(isPresented: $session.showCamera) {
+                CameraSessionView(settings: settings, entries: entries)
+            }
+            .sheet(isPresented: $session.showPaywall) {
+                PaywallSheet(reason: session.paywallReason)
+            }
+            .onAppear {
+                session.syncPoseOfTheDay(pack: settings.pack, entries: entries)
+            }
+            .onChange(of: settings.pack) { _, newPack in
+                session.syncPoseOfTheDay(pack: newPack, entries: entries)
+                if store.isPro, settings.competitionRemindersEnabled, let date = settings.competitionDate {
+                    Task {
+                        await CompetitionReminder.schedule(
+                            date: date,
+                            place: settings.competitionPlace,
+                            pack: newPack,
+                            entries: entries.map(\.snapshot)
+                        )
+                    }
+                }
+            }
+            .onChange(of: store.isPro) { _, isPro in
+                if !isPro {
+                    CompetitionReminder.cancel()
+                    if settings.pack == .zyzz {
+                        let fallback = settings.goal?.suggestedPack ?? .scene
+                        settings.pack = fallback
+                        session.syncPoseOfTheDay(pack: fallback, entries: entries)
+                    }
+                } else if settings.competitionRemindersEnabled, let date = settings.competitionDate {
+                    Task {
+                        await CompetitionReminder.schedule(
+                            date: date,
+                            place: settings.competitionPlace,
+                            pack: settings.pack,
+                            entries: entries.map(\.snapshot)
+                        )
+                    }
+                }
+            }
+        } else {
+            OnboardingFlow(settings: ensureSettings())
         }
     }
 

@@ -24,6 +24,8 @@ enum Theme {
     // 22 / 15 / 13 / 11 points à la taille standard.
     static let wordmarkFont: Font = .system(.largeTitle, design: .default, weight: .bold)
     static let scoreFont: Font = .system(size: 64, weight: .light)
+    /// Cue live, lu à 2–3 m — exception comme `scoreFont`, pas une 5e marche d’échelle.
+    static let distanceCueFont: Font = .system(size: 28, weight: .semibold)
     static let metricFont: Font = .system(.title, design: .default, weight: .light)
     static let titleFont: Font = .system(.title2)
     static let bodyFont: Font = .system(.subheadline)

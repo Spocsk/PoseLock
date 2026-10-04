@@ -20,6 +20,7 @@ struct JournalView: View {
     @Environment(AppSession.self) private var session
     var entries: [LockEntry]
     var isPro: Bool
+    var initialTab: JournalTab = .takes
     @State private var selectedID: UUID?
     @State private var tab: JournalTab = .takes
 
@@ -54,21 +55,20 @@ struct JournalView: View {
             }
         }
         .preferredColorScheme(.dark)
+        .onAppear { tab = initialTab }
     }
 
     @ViewBuilder
     private var takesGrid: some View {
         if entries.isEmpty {
-            ContentUnavailableView {
-                Label("Ton journal commence ici", systemImage: "photo.on.rectangle.angled")
-            } description: {
-                Text("Travaille une pose et réalise ton premier lock pour retrouver ta photo et ton score.")
-            } actions: {
-                Button("Choisir une pose") { session.selectedTab = .home }
-                    .buttonStyle(PrimaryButtonStyle())
+            JournalEmptyState(
+                systemImage: "photo.on.rectangle.angled",
+                title: "Ton journal commence ici",
+                detail: "Travaille une pose et réalise ton premier lock pour retrouver ta photo et ton score.",
+                actionTitle: "Choisir une pose"
+            ) {
+                session.selectedTab = .home
             }
-            .foregroundStyle(Theme.ivory)
-
         } else {
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 20) {
@@ -84,6 +84,41 @@ struct JournalView: View {
                 .padding(Theme.pageInset)
             }
         }
+    }
+}
+
+struct JournalEmptyState: View {
+    var systemImage: String
+    var title: LocalizedStringKey
+    var detail: LocalizedStringKey
+    var actionTitle: LocalizedStringKey? = nil
+    var action: (() -> Void)? = nil
+
+    var body: some View {
+        VStack(spacing: 10) {
+            Image(systemName: systemImage)
+                .font(Theme.titleFont)
+                .foregroundStyle(Theme.goldMuted)
+                .accessibilityHidden(true)
+
+            Text(title)
+                .font(Theme.bodyFont)
+                .foregroundStyle(Theme.ivory)
+
+            Text(detail)
+                .font(Theme.supportFont)
+                .foregroundStyle(Theme.ivoryMuted)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if let actionTitle, let action {
+                Button(actionTitle, action: action)
+                    .buttonStyle(PrimaryButtonStyle())
+                    .padding(.top, 10)
+            }
+        }
+        .multilineTextAlignment(.center)
+        .padding(.horizontal, 32)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
@@ -127,6 +162,7 @@ struct JournalDetailView: View {
     var entry: LockEntry
     var entries: [LockEntry]
     var isPro: Bool
+    var showOverlayInitially: Bool = false
     @State private var showShare = false
     @State private var showOverlay = false
 
@@ -171,6 +207,7 @@ struct JournalDetailView: View {
         .sheet(isPresented: $showShare) {
             ShareCardView(entry: entry)
         }
+        .onAppear { showOverlay = showOverlayInitially }
     }
 
     @ViewBuilder
@@ -240,15 +277,8 @@ struct ShareCardView: View {
                     .padding(24)
                 Spacer()
                 if let rendered {
-                    ShareLink(
-                        item: JPEGTransfer(image: rendered),
-                        preview: SharePreview(entry.poseID.displayName, image: Image(uiImage: rendered))
-                    ) {
-                        Text("Exporter")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(PrimaryButtonStyle())
-                    .padding(.horizontal, 24)
+                    ShareDestinationBar(image: rendered, title: entry.poseID.displayName)
+                        .padding(.horizontal, 24)
                 }
             }
             .padding(.bottom, 24)

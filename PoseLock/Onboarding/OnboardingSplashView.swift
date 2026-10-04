@@ -10,6 +10,8 @@ struct OnboardingSplashView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var breathing = false
     @State private var revealed = false
+    @State private var showAnalyticsChoice = false
+    @AppStorage("poselock.mixpanelChoiceMade") private var analyticsChoiceMade = false
 
     var body: some View {
         ZStack {
@@ -19,6 +21,21 @@ struct OnboardingSplashView: View {
             grain
             scrim
             copy
+        }
+        .alert("Statistiques facultatives", isPresented: $showAnalyticsChoice) {
+            Button("Continuer sans") {
+                analyticsChoiceMade = true
+                PoseLockAnalytics.setConsent(false)
+                onContinue()
+            }
+            Button("Autoriser") {
+                analyticsChoiceMade = true
+                PoseLockAnalytics.setConsent(true)
+                PoseLockAnalytics.capture(.onboardingStarted)
+                onContinue()
+            }
+        } message: {
+            Text("Aide-nous à améliorer PoseLock avec quelques événements d’usage sans compte. Aucune image, vidéo, pose ou score n’est envoyé. Tu pourras changer d’avis dans Réglages.")
         }
     }
 
@@ -39,6 +56,9 @@ struct OnboardingSplashView: View {
         .allowsHitTesting(false)
         .opacity(revealed ? 1 : 0)
         .onAppear {
+            #if DEBUG
+            if ScreenBank.current != nil { revealed = true; return }
+            #endif
             if reduceMotion { revealed = true; return }
             withAnimation(.easeOut(duration: 0.9)) {
                 revealed = true
@@ -123,7 +143,13 @@ struct OnboardingSplashView: View {
                 .padding(.top, 14)
                 .staggeredAppear(4)
 
-            Button("Commencer", action: onContinue)
+            Button("Commencer") {
+                if PoseLockAnalytics.isConfigured && !analyticsChoiceMade {
+                    showAnalyticsChoice = true
+                } else {
+                    onContinue()
+                }
+            }
                 .buttonStyle(PrimaryButtonStyle())
                 .padding(.top, 32)
                 .staggeredAppear(5)

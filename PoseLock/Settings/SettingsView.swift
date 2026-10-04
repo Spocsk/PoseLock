@@ -12,6 +12,8 @@ struct SettingsView: View {
     @State private var confirmDevReset = false
     @State private var showPrivacy = false
     @State private var showPaywall = false
+    @State private var showManageSubscriptions = false
+    @AppStorage("poselock.mixpanelConsent") private var analyticsConsent = false
 
     private var version: String {
         let short = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
@@ -40,6 +42,9 @@ struct SettingsView: View {
                     }
                     Button("Effacer le journal", role: .destructive) {
                         confirmErase = true
+                    }
+                    Button("Un problème ?") {
+                        session.presentFeedback(hapticsEnabled: settings.hapticsEnabled)
                     }
                     Button("Confidentialité") { showPrivacy = true }
                     LabeledContent("Version", value: version)
@@ -80,8 +85,24 @@ struct SettingsView: View {
                     Button("Restaurer les achats") {
                         Task { await store.restore() }
                     }
+                    if store.isPro {
+                        Button("Gérer l’abonnement") {
+                            showManageSubscriptions = true
+                        }
+                    }
                     Link("Confidentialité", destination: privacyURL)
                     Link("Conditions d’utilisation", destination: eulaURL)
+                }
+                Section {
+                    Toggle("Statistiques d’usage sans compte", isOn: $analyticsConsent)
+                        .disabled(!PoseLockAnalytics.isConfigured)
+                    if !PoseLockAnalytics.isConfigured {
+                        Text("Indisponibles pour le moment.")
+                    }
+                } header: {
+                    Text("Statistiques")
+                } footer: {
+                    Text("Facultatives. Aucun score, pose, image ou vidéo n’est envoyé. Désactive-les ici à tout moment.")
                 }
                 #if DEBUG
                 Section {
@@ -121,6 +142,10 @@ struct SettingsView: View {
             #endif
             .sheet(isPresented: $showPrivacy) { PrivacyView() }
             .sheet(isPresented: $showPaywall) { PaywallSheet(reason: .generic) }
+            .manageSubscriptionsSheet(isPresented: $showManageSubscriptions)
+            .onChange(of: analyticsConsent) { _, granted in
+                PoseLockAnalytics.setConsent(granted)
+            }
         }
     }
 
@@ -241,7 +266,11 @@ enum PrivacyCopy {
 
     Si tu actives « Sauvegarder aussi dans Photos », une copie de la photo clean est écrite dans l’album système.
 
-    Seul l’abonnement sort de l’iPhone : le paiement est géré par Apple, et RevenueCat tient l’état de l’abonnement pour savoir si Pro est actif. Il reçoit l’historique d’achat, jamais tes photos ni tes poses. PoseLock n’a pas de compte social et ne fait aucun suivi publicitaire.
+    Un signalement (secousse ou Réglages) ouvre Mail avec ton texte et la version de l’app. Pas de photo, pas de pose, pas de score.
+
+    L’abonnement est géré par Apple et RevenueCat. RevenueCat reçoit l’historique d’achat nécessaire à l’état de Pro, jamais tes photos ni tes poses.
+
+    Si tu actives les statistiques dans Réglages, PoseLock transmet à Mixpanel EU quelques événements d’usage sans compte (étapes du parcours, caméra démarrée, photo lockée, partage commencé). Un identifiant technique aléatoire distingue les installations consentantes. Sans ton accord, aucune statistique Mixpanel n’est envoyée. Tu peux retirer l’accord dans Réglages ; les envois en cours sont annulés et l’identifiant local effacé. Aucun nom, identifiant Apple, objectif, image, vidéo, pose ou score n’est transmis. Pas de suivi publicitaire ni d’enregistrement de session.
 
     Tu peux effacer le journal dans Réglages.
     """
