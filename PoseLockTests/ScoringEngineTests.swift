@@ -234,6 +234,23 @@ final class ScoringEngineTests: XCTestCase {
         XCTAssertLessThan(biceps2D.y, stand2D.y - 0.08, "2D: biceps doit monter les poignets")
     }
 
+    /// La silhouette cible d'une pose, notée avec son propre template, doit
+    /// pouvoir locker. Sinon le template et la figure décrivent deux poses
+    /// différentes et l'utilisateur ne peut pas atteindre ce qu'on lui montre.
+    func testEveryPoseTargetLocksAgainstItsOwnTemplate() {
+        for pose in PoseID.allCases {
+            let frame = BodyFrame.preview(for: pose)
+            let evaluation = ScoringEngine.evaluate(frame: frame, template: TemplateLibrary.template(for: pose))
+            let off = evaluation.features.filter { !$0.inTolerance }
+                .map { "\($0.feature.rawValue) \($0.value.map { String(format: "%.2f", $0) } ?? "nil") (cible \($0.target))" }
+            XCTAssertGreaterThanOrEqual(
+                evaluation.rawScore,
+                ScoringConstants.lockScore,
+                "\(pose.rawValue) \(Int(evaluation.rawScore)) — \(off.joined(separator: ", "))"
+            )
+        }
+    }
+
     // MARK: - Côté montré
 
     /// La même pose vue dans un miroir : x inversé et étiquettes gauche/droite
@@ -308,11 +325,12 @@ final class DebugForceLockTests: XCTestCase {
 
     func testForcedLockProducesEverythingTheJournalNeeds() async throws {
         let model = CameraViewModel()
-        model.poseID = .backLatSpread // La pose dont la silhouette note 0 : cas le pire.
+        model.poseID = .backLatSpread // Pas la pose de la photo démo : silhouette cible.
 
         await model.debugForceLock()
 
         XCTAssertTrue(model.didLock)
+        XCTAssertTrue(model.lastLockWasForced)
         XCTAssertGreaterThan(model.lastScore, ScoringConstants.lockScore)
         XCTAssertTrue(model.evaluation.isGloballyGreen)
         // Sans flux caméra la photo démo (ou le fond de substitution) prend le relais, sinon
@@ -321,6 +339,32 @@ final class DebugForceLockTests: XCTestCase {
         XCTAssertNotNil(model.lastOverlay)
         let skeleton = try XCTUnwrap(model.lastSkeleton)
         XCTAssertEqual(skeleton.joints.count, Joint.allCases.count)
+    }
+
+    func testForcedLockUsesTheDemoPhotoSkeletonOnlyForItsOwnPose() async {
+        let other = CameraViewModel()
+        other.poseID = .backLatSpread
+        await other.debugForceLock()
+        XCTAssertEqual(other.bodyFrame.joints3D, BodyFrame.preview(for: .backLatSpread).joints3D)
+
+        let own = CameraViewModel()
+        own.poseID = DebugDemoPose.poseID
+        await own.debugForceLock()
+        XCTAssertNotEqual(own.bodyFrame.joints2D, BodyFrame.preview(for: DebugDemoPose.poseID).joints2D)
+    }
+
+    func testReplayClearsTheForcedSkeleton() async {
+        let model = CameraViewModel()
+        await model.debugForceLock()
+        model.resetAfterLock()
+        XCTAssertFalse(model.didLock)
+        XCTAssertFalse(model.lastLockWasForced)
+        XCTAssertTrue(model.bodyFrame.joints2D.isEmpty)
+        XCTAssertEqual(model.evaluation, .hidden)
+    }
+
+    func testOrdinaryDebugRunKeepsTheRealCamera() {
+        XCTAssertFalse(ScreenBank.usesDemoCamera)
     }
 
     func testForcedLockIsIgnoredOnceLocked() async {
