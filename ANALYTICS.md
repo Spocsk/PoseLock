@@ -2,7 +2,7 @@
 
 Le catalogue, les achats et les abonnements restent chez RevenueCat. TelemetryDeck mesure uniquement les usages auxquels la personne a consenti. Il n'y a **pas de liaison d'identité** entre l'installation iOS et l'abonné RevenueCat. Les chiffres d'acquisition (impressions, téléchargements, rétention) restent à lire dans App Store Connect.
 
-Mixpanel EU a été utilisé en septembre 2026 puis remplacé par TelemetryDeck en octobre 2026 (interface plus simple, hébergement UE). Le site `docs/` n'envoie aucun événement.
+Mixpanel EU a été utilisé en septembre 2026 puis remplacé par TelemetryDeck en octobre 2026 (interface plus simple, hébergement UE). Le site (branche `codex/poselock-waitlist`, `docs/analytics.js`) envoie lui aussi, après consentement dans sa bannière, quatre signaux `Web.pageViewed`, `Web.launchVideoPlayed`, `Web.appStoreClicked`, `Web.waitlistRequested` au même App ID, marqués `TelemetryDeck.Device.platform: "Web"` pour les filtrer. Un accord Mixpanel antérieur n'est pas repris. Une app TelemetryDeck « PoseLock Web » séparée éviterait de mêler visiteurs web et utilisateurs iOS dans les compteurs par défaut : il suffira de changer `APP_ID` dans `docs/analytics.js`.
 
 ## Activation
 

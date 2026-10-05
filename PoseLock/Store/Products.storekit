@@ -35,14 +35,29 @@
       "id" : "A0000010",
       "localizations" : [
         {
-          "description" : "Locks illimités, trois packs, journal J-30.",
+          "description" : "Locks illimités, packs, J-30, Zyzz.",
           "displayName" : "PoseLock Pro",
           "locale" : "fr_FR"
         },
         {
-          "description" : "Unlimited locks, all packs, 30-day journal.",
+          "description" : "Unlimited locks, every pack",
           "displayName" : "PoseLock Pro",
           "locale" : "en_US"
+        },
+        {
+          "description" : "Locks ilimitados, todos los packs",
+          "displayName" : "PoseLock Pro",
+          "locale" : "es_ES"
+        },
+        {
+          "description" : "Unbegrenzte Locks, alle Packs",
+          "displayName" : "PoseLock Pro",
+          "locale" : "de_DE"
+        },
+        {
+          "description" : "Locks ilimitados, todos os packs",
+          "displayName" : "PoseLock Pro",
+          "locale" : "pt_BR"
         }
       ],
       "name" : "PoseLock Pro",
@@ -66,14 +81,29 @@
           },
           "localizations" : [
             {
-              "description" : "Locks illimités, 3 packs, J-30, carte share sans mention.",
-              "displayName" : "PoseLock Pro mensuel",
+              "description" : "Locks illimités, tous les packs",
+              "displayName" : "PoseLock Pro — Mensuel",
               "locale" : "fr_FR"
             },
             {
-              "description" : "Unlimited locks, 3 packs, 30-day compare, unmarked share card.",
-              "displayName" : "PoseLock Pro monthly",
+              "description" : "Unlimited locks, every pack",
+              "displayName" : "PoseLock Pro — Monthly",
               "locale" : "en_US"
+            },
+            {
+              "description" : "Locks ilimitados, todos los packs",
+              "displayName" : "PoseLock Pro — Mensual",
+              "locale" : "es_ES"
+            },
+            {
+              "description" : "Unbegrenzte Locks, alle Packs",
+              "displayName" : "PoseLock Pro – Monatlich",
+              "locale" : "de_DE"
+            },
+            {
+              "description" : "Locks ilimitados, todos os packs",
+              "displayName" : "PoseLock Pro — Mensal",
+              "locale" : "pt_BR"
             }
           ],
           "productID" : "poselock.pro.monthly",
@@ -104,14 +134,29 @@
           },
           "localizations" : [
             {
-              "description" : "Une saison entière. Même accès Pro, au meilleur prix.",
-              "displayName" : "PoseLock Pro annuel",
+              "description" : "Locks illimités, tous les packs",
+              "displayName" : "PoseLock Pro — Annuel",
               "locale" : "fr_FR"
             },
             {
-              "description" : "A full season. Same Pro access, best price.",
-              "displayName" : "PoseLock Pro yearly",
+              "description" : "Unlimited locks, every pack",
+              "displayName" : "PoseLock Pro — Yearly",
               "locale" : "en_US"
+            },
+            {
+              "description" : "Locks ilimitados, todos los packs",
+              "displayName" : "PoseLock Pro — Anual",
+              "locale" : "es_ES"
+            },
+            {
+              "description" : "Unbegrenzte Locks, alle Packs",
+              "displayName" : "PoseLock Pro – Jährlich",
+              "locale" : "de_DE"
+            },
+            {
+              "description" : "Locks ilimitados, todos os packs",
+              "displayName" : "PoseLock Pro — Anual",
+              "locale" : "pt_BR"
             }
           ],
           "productID" : "poselock.pro.yearly",

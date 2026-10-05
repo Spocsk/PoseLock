@@ -9410,6 +9410,40 @@
         }
       }
     },
+    "https://poselock.vercel.app/confidentialite/" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "https://poselock.vercel.app/confidentialite/"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "https://poselock.vercel.app/en/privacy/"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "https://poselock.vercel.app/es/privacidad/"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "https://poselock.vercel.app/de/datenschutz/"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "https://poselock.vercel.app/pt-br/privacidade/"
+          }
+        }
+      }
+    },
     "lockable" : {
       "localizations" : {
         "en" : {

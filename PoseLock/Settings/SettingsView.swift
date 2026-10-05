@@ -218,7 +218,8 @@ struct SettingsView: View {
     }
 
     private var privacyURL: URL {
-        URL(string: "https://www.apple.com/legal/privacy/")!
+        // L'adresse est traduite dans le catalogue : chaque langue ouvre sa page.
+        URL(string: String(localized: "https://poselock.vercel.app/confidentialite/"))!
     }
 
     private var eulaURL: URL {

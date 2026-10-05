@@ -12,7 +12,7 @@ La fiche n'est pas publiée. Les propositions ci-dessous ne sont pas des classem
 
 ## Recherche à compléter avec RespectASO ou Apple Ads
 
-Storefront FR d'abord, CA ensuite : `posing bodybuilding`, `bodybuilding posing`, `posing coach`, `pose bodybuilding`, `posing musculation`, `front double biceps`, `préparation compétition`. Comparer popularité, difficulté, opportunité, top apps et pertinence produit ; ne pas confondre l'ordre de recherche iTunes avec le volume de requêtes. US/GB seulement après localisation anglaise complète.
+Storefront FR d'abord, CA ensuite : `posing bodybuilding`, `bodybuilding posing`, `posing coach`, `pose bodybuilding`, `posing musculation`, `front double biceps`, `préparation compétition`. Comparer popularité, difficulté, opportunité, top apps et pertinence produit ; ne pas confondre l'ordre de recherche iTunes avec le volume de requêtes. L'app est localisée (en, es, de, pt-BR) depuis octobre 2026 : fiches prêtes à coller dans `app-store-screenshots/metadata/<locale>.md` (source `listings.json`, limites vérifiées par `scripts/build-metadata.py`), captures dans `app-store-screenshots/PoseLock-serie-<locale>.zip`. Mots-clés rédigés sans données de volume : à revalider par storefront (US, GB, ES, MX, DE, BR) dès que RespectASO Pro est actif.
 
 Comparables visibles dans l'API iTunes FR au 22 septembre 2026 : Bodybuilding Posing & Photo (`6793125833`), Posing AI Coach (`6780828867`), Stage Ready AI (`6758803703`). Les données peuvent changer.
 
