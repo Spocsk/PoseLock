@@ -525,3 +525,8 @@ a { color: inherit; }
   .hero-enter, .has-js [data-reveal], .hero-art { opacity: 1; transform: none; }
   .screen-shot { transform: none !important; }
 }
+
+.lang-switch { display: flex; flex-wrap: wrap; gap: 6px 18px; grid-column: 1 / -1; padding-top: 22px; border-top: 1px solid var(--line); }
+.lang-switch a { color: var(--ink-faint); font-size: .76rem; text-decoration: none; }
+.lang-switch a:hover, .lang-switch a[aria-current="page"] { color: var(--ink); }
+.confirmation-page .lang-switch { margin-top: 28px; }

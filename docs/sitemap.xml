@@ -1,9 +1,243 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://poselock.app/</loc></url>
-  <url><loc>https://poselock.app/guides/posing-bodybuilding/</loc></url>
-  <url><loc>https://poselock.app/guides/front-double-biceps/</loc></url>
-  <url><loc>https://poselock.app/guides/poser-seul/</loc></url>
-  <url><loc>https://poselock.app/confidentialite/</loc></url>
-  <url><loc>https://poselock.app/support/</loc></url>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url><loc>https://poselock.app/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://poselock.app/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://poselock.app/en/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://poselock.app/es/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://poselock.app/de/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://poselock.app/pt-br/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://poselock.app/en/"/>
+  </url>
+  <url><loc>https://poselock.app/en/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://poselock.app/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://poselock.app/en/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://poselock.app/es/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://poselock.app/de/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://poselock.app/pt-br/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://poselock.app/en/"/>
+  </url>
+  <url><loc>https://poselock.app/es/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://poselock.app/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://poselock.app/en/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://poselock.app/es/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://poselock.app/de/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://poselock.app/pt-br/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://poselock.app/en/"/>
+  </url>
+  <url><loc>https://poselock.app/de/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://poselock.app/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://poselock.app/en/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://poselock.app/es/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://poselock.app/de/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://poselock.app/pt-br/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://poselock.app/en/"/>
+  </url>
+  <url><loc>https://poselock.app/pt-br/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://poselock.app/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://poselock.app/en/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://poselock.app/es/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://poselock.app/de/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://poselock.app/pt-br/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://poselock.app/en/"/>
+  </url>
+  <url><loc>https://poselock.app/confidentialite/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://poselock.app/confidentialite/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://poselock.app/en/privacy/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://poselock.app/es/privacidad/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://poselock.app/de/datenschutz/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://poselock.app/pt-br/privacidade/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://poselock.app/en/privacy/"/>
+  </url>
+  <url><loc>https://poselock.app/en/privacy/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://poselock.app/confidentialite/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://poselock.app/en/privacy/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://poselock.app/es/privacidad/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://poselock.app/de/datenschutz/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://poselock.app/pt-br/privacidade/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://poselock.app/en/privacy/"/>
+  </url>
+  <url><loc>https://poselock.app/es/privacidad/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://poselock.app/confidentialite/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://poselock.app/en/privacy/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://poselock.app/es/privacidad/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://poselock.app/de/datenschutz/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://poselock.app/pt-br/privacidade/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://poselock.app/en/privacy/"/>
+  </url>
+  <url><loc>https://poselock.app/de/datenschutz/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://poselock.app/confidentialite/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://poselock.app/en/privacy/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://poselock.app/es/privacidad/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://poselock.app/de/datenschutz/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://poselock.app/pt-br/privacidade/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://poselock.app/en/privacy/"/>
+  </url>
+  <url><loc>https://poselock.app/pt-br/privacidade/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://poselock.app/confidentialite/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://poselock.app/en/privacy/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://poselock.app/es/privacidad/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://poselock.app/de/datenschutz/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://poselock.app/pt-br/privacidade/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://poselock.app/en/privacy/"/>
+  </url>
+  <url><loc>https://poselock.app/support/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://poselock.app/support/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://poselock.app/en/support/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://poselock.app/es/soporte/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://poselock.app/de/hilfe/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://poselock.app/pt-br/suporte/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://poselock.app/en/support/"/>
+  </url>
+  <url><loc>https://poselock.app/en/support/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://poselock.app/support/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://poselock.app/en/support/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://poselock.app/es/soporte/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://poselock.app/de/hilfe/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://poselock.app/pt-br/suporte/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://poselock.app/en/support/"/>
+  </url>
+  <url><loc>https://poselock.app/es/soporte/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://poselock.app/support/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://poselock.app/en/support/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://poselock.app/es/soporte/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://poselock.app/de/hilfe/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://poselock.app/pt-br/suporte/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://poselock.app/en/support/"/>
+  </url>
+  <url><loc>https://poselock.app/de/hilfe/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://poselock.app/support/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://poselock.app/en/support/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://poselock.app/es/soporte/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://poselock.app/de/hilfe/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://poselock.app/pt-br/suporte/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://poselock.app/en/support/"/>
+  </url>
+  <url><loc>https://poselock.app/pt-br/suporte/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://poselock.app/support/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://poselock.app/en/support/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://poselock.app/es/soporte/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://poselock.app/de/hilfe/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://poselock.app/pt-br/suporte/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://poselock.app/en/support/"/>
+  </url>
+  <url><loc>https://poselock.app/guides/posing-bodybuilding/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://poselock.app/guides/posing-bodybuilding/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://poselock.app/en/guides/bodybuilding-posing/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://poselock.app/es/guias/posing-culturismo/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://poselock.app/de/ratgeber/bodybuilding-posing/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://poselock.app/pt-br/guias/posing-fisiculturismo/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://poselock.app/en/guides/bodybuilding-posing/"/>
+  </url>
+  <url><loc>https://poselock.app/en/guides/bodybuilding-posing/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://poselock.app/guides/posing-bodybuilding/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://poselock.app/en/guides/bodybuilding-posing/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://poselock.app/es/guias/posing-culturismo/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://poselock.app/de/ratgeber/bodybuilding-posing/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://poselock.app/pt-br/guias/posing-fisiculturismo/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://poselock.app/en/guides/bodybuilding-posing/"/>
+  </url>
+  <url><loc>https://poselock.app/es/guias/posing-culturismo/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://poselock.app/guides/posing-bodybuilding/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://poselock.app/en/guides/bodybuilding-posing/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://poselock.app/es/guias/posing-culturismo/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://poselock.app/de/ratgeber/bodybuilding-posing/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://poselock.app/pt-br/guias/posing-fisiculturismo/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://poselock.app/en/guides/bodybuilding-posing/"/>
+  </url>
+  <url><loc>https://poselock.app/de/ratgeber/bodybuilding-posing/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://poselock.app/guides/posing-bodybuilding/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://poselock.app/en/guides/bodybuilding-posing/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://poselock.app/es/guias/posing-culturismo/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://poselock.app/de/ratgeber/bodybuilding-posing/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://poselock.app/pt-br/guias/posing-fisiculturismo/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://poselock.app/en/guides/bodybuilding-posing/"/>
+  </url>
+  <url><loc>https://poselock.app/pt-br/guias/posing-fisiculturismo/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://poselock.app/guides/posing-bodybuilding/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://poselock.app/en/guides/bodybuilding-posing/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://poselock.app/es/guias/posing-culturismo/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://poselock.app/de/ratgeber/bodybuilding-posing/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://poselock.app/pt-br/guias/posing-fisiculturismo/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://poselock.app/en/guides/bodybuilding-posing/"/>
+  </url>
+  <url><loc>https://poselock.app/guides/front-double-biceps/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://poselock.app/guides/front-double-biceps/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://poselock.app/en/guides/front-double-biceps/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://poselock.app/es/guias/front-double-biceps/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://poselock.app/de/ratgeber/front-double-biceps/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://poselock.app/pt-br/guias/front-double-biceps/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://poselock.app/en/guides/front-double-biceps/"/>
+  </url>
+  <url><loc>https://poselock.app/en/guides/front-double-biceps/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://poselock.app/guides/front-double-biceps/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://poselock.app/en/guides/front-double-biceps/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://poselock.app/es/guias/front-double-biceps/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://poselock.app/de/ratgeber/front-double-biceps/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://poselock.app/pt-br/guias/front-double-biceps/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://poselock.app/en/guides/front-double-biceps/"/>
+  </url>
+  <url><loc>https://poselock.app/es/guias/front-double-biceps/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://poselock.app/guides/front-double-biceps/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://poselock.app/en/guides/front-double-biceps/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://poselock.app/es/guias/front-double-biceps/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://poselock.app/de/ratgeber/front-double-biceps/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://poselock.app/pt-br/guias/front-double-biceps/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://poselock.app/en/guides/front-double-biceps/"/>
+  </url>
+  <url><loc>https://poselock.app/de/ratgeber/front-double-biceps/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://poselock.app/guides/front-double-biceps/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://poselock.app/en/guides/front-double-biceps/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://poselock.app/es/guias/front-double-biceps/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://poselock.app/de/ratgeber/front-double-biceps/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://poselock.app/pt-br/guias/front-double-biceps/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://poselock.app/en/guides/front-double-biceps/"/>
+  </url>
+  <url><loc>https://poselock.app/pt-br/guias/front-double-biceps/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://poselock.app/guides/front-double-biceps/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://poselock.app/en/guides/front-double-biceps/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://poselock.app/es/guias/front-double-biceps/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://poselock.app/de/ratgeber/front-double-biceps/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://poselock.app/pt-br/guias/front-double-biceps/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://poselock.app/en/guides/front-double-biceps/"/>
+  </url>
+  <url><loc>https://poselock.app/guides/poser-seul/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://poselock.app/guides/poser-seul/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://poselock.app/en/guides/posing-alone/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://poselock.app/es/guias/posar-solo/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://poselock.app/de/ratgeber/allein-posen/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://poselock.app/pt-br/guias/posar-sozinho/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://poselock.app/en/guides/posing-alone/"/>
+  </url>
+  <url><loc>https://poselock.app/en/guides/posing-alone/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://poselock.app/guides/poser-seul/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://poselock.app/en/guides/posing-alone/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://poselock.app/es/guias/posar-solo/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://poselock.app/de/ratgeber/allein-posen/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://poselock.app/pt-br/guias/posar-sozinho/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://poselock.app/en/guides/posing-alone/"/>
+  </url>
+  <url><loc>https://poselock.app/es/guias/posar-solo/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://poselock.app/guides/poser-seul/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://poselock.app/en/guides/posing-alone/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://poselock.app/es/guias/posar-solo/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://poselock.app/de/ratgeber/allein-posen/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://poselock.app/pt-br/guias/posar-sozinho/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://poselock.app/en/guides/posing-alone/"/>
+  </url>
+  <url><loc>https://poselock.app/de/ratgeber/allein-posen/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://poselock.app/guides/poser-seul/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://poselock.app/en/guides/posing-alone/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://poselock.app/es/guias/posar-solo/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://poselock.app/de/ratgeber/allein-posen/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://poselock.app/pt-br/guias/posar-sozinho/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://poselock.app/en/guides/posing-alone/"/>
+  </url>
+  <url><loc>https://poselock.app/pt-br/guias/posar-sozinho/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://poselock.app/guides/poser-seul/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://poselock.app/en/guides/posing-alone/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://poselock.app/es/guias/posar-solo/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://poselock.app/de/ratgeber/allein-posen/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://poselock.app/pt-br/guias/posar-sozinho/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://poselock.app/en/guides/posing-alone/"/>
+  </url>
 </urlset>

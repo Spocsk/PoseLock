@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#070809">
+  <!-- i18n:head --><link rel="canonical" href="https://poselock.app/en/confirm/"><!-- /i18n:head -->
+  <title>Confirm your email | PoseLock</title>
+  <link rel="icon" href="/assets/app-icon.png">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="confirmation-page">
+  <main class="confirmation-page__content">
+    <a class="footer-brand" href="/en/"><img src="/assets/app-icon.png" alt="" width="52" height="52"><span>PoseLock</span></a>
+    <p class="eyebrow">WAITLIST</p>
+    <h1>One more click.</h1>
+    <p data-confirm-message>Confirm your address to hear about the PoseLock launch and news.</p>
+    <button type="button" data-confirm-button>Confirm my sign-up</button>
+    <p><a href="/en/">Back to home</a></p>
+    <!-- i18n:switcher --><nav class="lang-switch" aria-label="Language"><a href="/confirmation/" hreflang="fr" lang="fr">Français</a><a href="/en/confirm/" hreflang="en" lang="en" aria-current="page">English</a><a href="/es/confirmar/" hreflang="es" lang="es">Español</a><a href="/de/bestaetigen/" hreflang="de" lang="de">Deutsch</a><a href="/pt-br/confirmar/" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></nav><!-- /i18n:switcher -->
+  </main>
+  <script>
+    (function () {
+      var token = new URLSearchParams(location.search).get("token");
+      var button = document.querySelector("[data-confirm-button]");
+      var message = document.querySelector("[data-confirm-message]");
+      history.replaceState(null, "", location.pathname);
+      if (!token) {
+        button.hidden = true;
+        message.textContent = "This link is invalid. Sign up again from the home page.";
+        return;
+      }
+      button.addEventListener("click", async function () {
+        button.disabled = true;
+        message.textContent = "Confirming…";
+        try {
+          var response = await fetch("/api/confirm", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token: token, locale: document.documentElement.lang })
+          });
+          var result = await response.json();
+          if (!response.ok) throw new Error(result.error || "Confirmation failed.");
+          button.hidden = true;
+          message.textContent = result.status === "unsubscribed"
+            ? "This address is unsubscribed. Write to apps@dylan-cdo.fr if you want to sign it up again."
+            : "Address confirmed. We’ll let you know when PoseLock launches.";
+        } catch (error) {
+          message.textContent = error.message || "Confirmation failed. Please try again later.";
+          button.disabled = false;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

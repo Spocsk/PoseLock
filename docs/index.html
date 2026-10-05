@@ -5,7 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#070809">
   <meta name="description" content="PoseLock note ta pose en direct sur l’iPhone. Pose. Score. Lock. La vidéo de séance ne quitte jamais l’appareil.">
-  <link rel="canonical" href="https://poselock.app/">
+  <!-- i18n:head --><link rel="canonical" href="https://poselock.app/">
+  <link rel="alternate" hreflang="fr" href="https://poselock.app/">
+  <link rel="alternate" hreflang="en" href="https://poselock.app/en/">
+  <link rel="alternate" hreflang="es" href="https://poselock.app/es/">
+  <link rel="alternate" hreflang="de" href="https://poselock.app/de/">
+  <link rel="alternate" hreflang="pt-BR" href="https://poselock.app/pt-br/">
+  <link rel="alternate" hreflang="x-default" href="https://poselock.app/en/"><!-- /i18n:head -->
   <meta property="og:title" content="PoseLock — Pose. Score. Lock.">
   <meta property="og:description" content="Ta pose notée en direct, sur l’iPhone. La vidéo n’en sort jamais.">
   <meta property="og:type" content="website">
@@ -19,8 +25,8 @@
   <meta name="twitter:image" content="https://poselock.app/assets/hero-desktop.jpg">
   <title>PoseLock — Pose. Score. Lock.</title>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"PoseLock","url":"https://poselock.app/","inLanguage":"fr-FR","description":"Application iPhone de posing bodybuilding avec score en direct et photo verrouillée sur l’appareil."}</script>
-  <link rel="icon" href="assets/app-icon.png">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="/assets/app-icon.png">
+  <link rel="stylesheet" href="/styles.css">
   <script>document.documentElement.classList.add('has-js');</script>
 </head>
 <body>
@@ -29,8 +35,8 @@
   <header class="site-header" data-header>
     <a class="nav-brand" href="#top" aria-label="PoseLock — retour en haut">
       <picture>
-        <source srcset="assets/app-icon-256.webp" type="image/webp">
-        <img src="assets/app-icon.png" alt="" width="40" height="40">
+        <source srcset="/assets/app-icon-256.webp" type="image/webp">
+        <img src="/assets/app-icon.png" alt="" width="40" height="40">
       </picture>
       <span>PoseLock</span>
     </a>
@@ -48,14 +54,14 @@
       <div class="hero-aura" aria-hidden="true"></div>
       <div class="hero-art" data-hero-art aria-hidden="true">
         <picture>
-          <source media="(max-width: 720px)" srcset="assets/hero-mobile.webp" type="image/webp">
-          <source media="(max-width: 720px)" srcset="assets/hero-mobile.jpg" type="image/jpeg">
-          <source media="(min-width: 721px) and (max-width: 1100px) and (orientation: portrait)" srcset="assets/hero-tablet-portrait.webp" type="image/webp">
-          <source media="(min-width: 721px) and (max-width: 1100px) and (orientation: portrait)" srcset="assets/hero-tablet-portrait.jpg" type="image/jpeg">
-          <source media="(max-width: 1100px)" srcset="assets/hero-tablet-landscape.webp" type="image/webp">
-          <source media="(max-width: 1100px)" srcset="assets/hero-tablet-landscape.jpg" type="image/jpeg">
-          <source srcset="assets/hero-desktop.webp" type="image/webp">
-          <img src="assets/hero-desktop.jpg" alt="" width="1792" height="1008" fetchpriority="high">
+          <source media="(max-width: 720px)" srcset="/assets/hero-mobile.webp" type="image/webp">
+          <source media="(max-width: 720px)" srcset="/assets/hero-mobile.jpg" type="image/jpeg">
+          <source media="(min-width: 721px) and (max-width: 1100px) and (orientation: portrait)" srcset="/assets/hero-tablet-portrait.webp" type="image/webp">
+          <source media="(min-width: 721px) and (max-width: 1100px) and (orientation: portrait)" srcset="/assets/hero-tablet-portrait.jpg" type="image/jpeg">
+          <source media="(max-width: 1100px)" srcset="/assets/hero-tablet-landscape.webp" type="image/webp">
+          <source media="(max-width: 1100px)" srcset="/assets/hero-tablet-landscape.jpg" type="image/jpeg">
+          <source srcset="/assets/hero-desktop.webp" type="image/webp">
+          <img src="/assets/hero-desktop.jpg" alt="" width="1792" height="1008" fetchpriority="high">
         </picture>
       </div>
 
@@ -107,6 +113,7 @@
       </ol>
     </section>
 
+    <!-- fr-only: le film de lancement n’existe qu’en français -->
     <section class="launch-film section-shell" aria-labelledby="film-title">
       <header class="section-heading launch-film__heading" data-reveal>
         <div>
@@ -121,15 +128,16 @@
           muted
           playsinline
           preload="metadata"
-          poster="assets/video/poselock-launch-poster.jpg"
+          poster="/assets/video/poselock-launch-poster.jpg"
           aria-label="Vidéo de présentation de PoseLock"
         >
-          <source src="assets/video/poselock-launch-landing.mp4" type="video/mp4">
+          <source src="/assets/video/poselock-launch-landing.mp4" type="video/mp4">
           Ton navigateur ne peut pas lire cette vidéo.
         </video>
       </div>
       <p class="launch-film__caption">Séquence de démonstration · scores d’exemple</p>
     </section>
+    <!-- /fr-only -->
 
     <section class="story" id="methode" data-story aria-labelledby="story-title">
       <div class="story-sticky">
@@ -166,16 +174,16 @@
         <div class="story-stage" aria-hidden="true">
           <div class="phone-shell">
             <picture class="story-screen is-active" data-story-screen="0">
-              <source srcset="assets/screens/current/coach-pose-600.webp 600w, assets/screens/current/coach-pose-1000.webp 1000w" sizes="(max-width: 640px) 28vh, 36vh" type="image/webp">
-              <img src="assets/screens/current/coach-pose-1000.webp" alt="" width="1320" height="2868">
+              <source srcset="/assets/screens/current/coach-pose-600.webp 600w, /assets/screens/current/coach-pose-1000.webp 1000w" sizes="(max-width: 640px) 28vh, 36vh" type="image/webp">
+              <img src="/assets/screens/current/coach-pose-1000.webp" alt="" width="1320" height="2868">
             </picture>
             <picture class="story-screen" data-story-screen="1">
-              <source srcset="assets/screens/current/camera-live-600.webp 600w, assets/screens/current/camera-live-1000.webp 1000w" sizes="(max-width: 640px) 28vh, 36vh" type="image/webp">
-              <img src="assets/screens/current/camera-live-1000.webp" alt="" width="1320" height="2868">
+              <source srcset="/assets/screens/current/camera-live-600.webp 600w, /assets/screens/current/camera-live-1000.webp 1000w" sizes="(max-width: 640px) 28vh, 36vh" type="image/webp">
+              <img src="/assets/screens/current/camera-live-1000.webp" alt="" width="1320" height="2868">
             </picture>
             <picture class="story-screen" data-story-screen="2">
-              <source srcset="assets/screens/current/camera-lock-600.webp 600w, assets/screens/current/camera-lock-1000.webp 1000w" sizes="(max-width: 640px) 28vh, 36vh" type="image/webp">
-              <img src="assets/screens/current/camera-lock-1000.webp" alt="" width="1320" height="2868">
+              <source srcset="/assets/screens/current/camera-lock-600.webp 600w, /assets/screens/current/camera-lock-1000.webp 1000w" sizes="(max-width: 640px) 28vh, 36vh" type="image/webp">
+              <img src="/assets/screens/current/camera-lock-1000.webp" alt="" width="1320" height="2868">
             </picture>
           </div>
           <p class="story-state"><span data-story-state>PRÉPARE TA POSE</span><i></i></p>
@@ -195,43 +203,43 @@
       <div class="screen-gallery" role="region" tabindex="0" aria-label="Six captures de l’application PoseLock, à faire défiler sur mobile">
         <figure class="screen-shot" data-reveal>
           <picture>
-            <source srcset="assets/screens/app-store/01-camera-600.webp 600w, assets/screens/app-store/01-camera-1000.webp 1000w" sizes="(max-width: 640px) 76vw, (max-width: 980px) 42vw, 30vw" type="image/webp">
-            <img src="assets/screens/app-store/01-camera-1000.webp" alt="Caméra PoseLock avec squelette de suivi et score de démonstration" width="1320" height="2868" loading="lazy" decoding="async">
+            <source srcset="/assets/screens/app-store/01-camera-600.webp 600w, /assets/screens/app-store/01-camera-1000.webp 1000w" sizes="(max-width: 640px) 76vw, (max-width: 980px) 42vw, 30vw" type="image/webp">
+            <img src="/assets/screens/app-store/01-camera-1000.webp" alt="Caméra PoseLock avec squelette de suivi et score de démonstration" width="1320" height="2868" loading="lazy" decoding="async">
           </picture>
           <figcaption><span>01</span>Le score en direct</figcaption>
         </figure>
         <figure class="screen-shot" data-reveal>
           <picture>
-            <source srcset="assets/screens/app-store/02-conseils-600.webp 600w, assets/screens/app-store/02-conseils-1000.webp 1000w" sizes="(max-width: 640px) 76vw, (max-width: 980px) 42vw, 30vw" type="image/webp">
-            <img src="assets/screens/app-store/02-conseils-1000.webp" alt="Conseils et repère visuel pour travailler le front double biceps" width="1320" height="2868" loading="lazy" decoding="async">
+            <source srcset="/assets/screens/app-store/02-conseils-600.webp 600w, /assets/screens/app-store/02-conseils-1000.webp 1000w" sizes="(max-width: 640px) 76vw, (max-width: 980px) 42vw, 30vw" type="image/webp">
+            <img src="/assets/screens/app-store/02-conseils-1000.webp" alt="Conseils et repère visuel pour travailler le front double biceps" width="1320" height="2868" loading="lazy" decoding="async">
           </picture>
           <figcaption><span>02</span>Les repères de la pose</figcaption>
         </figure>
         <figure class="screen-shot" data-reveal>
           <picture>
-            <source srcset="assets/screens/app-store/03-lock-600.webp 600w, assets/screens/app-store/03-lock-1000.webp 1000w" sizes="(max-width: 640px) 76vw, (max-width: 980px) 42vw, 30vw" type="image/webp">
-            <img src="assets/screens/app-store/03-lock-1000.webp" alt="Photo verrouillée dans PoseLock avec un score d’exemple de 93" width="1320" height="2868" loading="lazy" decoding="async">
+            <source srcset="/assets/screens/app-store/03-lock-600.webp 600w, /assets/screens/app-store/03-lock-1000.webp 1000w" sizes="(max-width: 640px) 76vw, (max-width: 980px) 42vw, 30vw" type="image/webp">
+            <img src="/assets/screens/app-store/03-lock-1000.webp" alt="Photo verrouillée dans PoseLock avec un score d’exemple de 93" width="1320" height="2868" loading="lazy" decoding="async">
           </picture>
           <figcaption><span>03</span>Le bon moment, gardé</figcaption>
         </figure>
         <figure class="screen-shot" data-reveal>
           <picture>
-            <source srcset="assets/screens/app-store/04-journal-600.webp 600w, assets/screens/app-store/04-journal-1000.webp 1000w" sizes="(max-width: 640px) 76vw, (max-width: 980px) 42vw, 30vw" type="image/webp">
-            <img src="assets/screens/app-store/04-journal-1000.webp" alt="Journal PoseLock et détail agrandi de la même prise de démonstration" width="1320" height="2868" loading="lazy" decoding="async">
+            <source srcset="/assets/screens/app-store/04-journal-600.webp 600w, /assets/screens/app-store/04-journal-1000.webp 1000w" sizes="(max-width: 640px) 76vw, (max-width: 980px) 42vw, 30vw" type="image/webp">
+            <img src="/assets/screens/app-store/04-journal-1000.webp" alt="Journal PoseLock et détail agrandi de la même prise de démonstration" width="1320" height="2868" loading="lazy" decoding="async">
           </picture>
           <figcaption><span>04</span>Tes prises dans le journal</figcaption>
         </figure>
         <figure class="screen-shot" data-reveal>
           <picture>
-            <source srcset="assets/screens/app-store/05-catalogue-600.webp 600w, assets/screens/app-store/05-catalogue-1000.webp 1000w" sizes="(max-width: 640px) 76vw, (max-width: 980px) 42vw, 30vw" type="image/webp">
-            <img src="assets/screens/app-store/05-catalogue-1000.webp" alt="Catalogue des poses du pack Scène dans PoseLock" width="1320" height="2868" loading="lazy" decoding="async">
+            <source srcset="/assets/screens/app-store/05-catalogue-600.webp 600w, /assets/screens/app-store/05-catalogue-1000.webp 1000w" sizes="(max-width: 640px) 76vw, (max-width: 980px) 42vw, 30vw" type="image/webp">
+            <img src="/assets/screens/app-store/05-catalogue-1000.webp" alt="Catalogue des poses du pack Scène dans PoseLock" width="1320" height="2868" loading="lazy" decoding="async">
           </picture>
           <figcaption><span>05</span>Une pose à travailler</figcaption>
         </figure>
         <figure class="screen-shot" data-reveal>
           <picture>
-            <source srcset="assets/screens/app-store/06-partage-600.webp 600w, assets/screens/app-store/06-partage-1000.webp 1000w" sizes="(max-width: 640px) 76vw, (max-width: 980px) 42vw, 30vw" type="image/webp">
-            <img src="assets/screens/app-store/06-partage-1000.webp" alt="Carte photo et score d’exemple avec la signature PoseLock" width="1320" height="2868" loading="lazy" decoding="async">
+            <source srcset="/assets/screens/app-store/06-partage-600.webp 600w, /assets/screens/app-store/06-partage-1000.webp 1000w" sizes="(max-width: 640px) 76vw, (max-width: 980px) 42vw, 30vw" type="image/webp">
+            <img src="/assets/screens/app-store/06-partage-1000.webp" alt="Carte photo et score d’exemple avec la signature PoseLock" width="1320" height="2868" loading="lazy" decoding="async">
           </picture>
           <figcaption><span>06</span>Ta carte à partager</figcaption>
         </figure>
@@ -250,7 +258,7 @@
           <li><strong>02</strong><span>Les photos lockées restent dans le stockage local.</span></li>
           <li><strong>03</strong><span>Aucun compte n’est nécessaire pour commencer.</span></li>
         </ul>
-        <p>Les statistiques d’usage sans compte sont facultatives et ne partent qu’après ton accord. <a href="confidentialite/">Lire la confidentialité</a>.</p>
+        <p>Les statistiques d’usage sans compte sont facultatives et ne partent qu’après ton accord. <a href="/confidentialite/">Lire la confidentialité</a>.</p>
       </div>
     </section>
 
@@ -261,9 +269,9 @@
         <p>Trois méthodes courtes pour t’entraîner seul, cadrer ton corps et comparer une pose dans le temps.</p>
       </header>
       <div class="resource-grid">
-        <a href="guides/posing-bodybuilding/"><span>01 · MÉTHODE</span><strong>Commencer le posing bodybuilding</strong><small>Repères, rythme et retour visuel.</small></a>
-        <a href="guides/front-double-biceps/"><span>02 · POSE</span><strong>Front double biceps</strong><small>Cadrage, symétrie et corrections.</small></a>
-        <a href="guides/poser-seul/"><span>03 · PRATIQUE</span><strong>S’entraîner à poser seul</strong><small>Installer l’iPhone et comparer ses prises.</small></a>
+        <a href="/guides/posing-bodybuilding/"><span>01 · MÉTHODE</span><strong>Commencer le posing bodybuilding</strong><small>Repères, rythme et retour visuel.</small></a>
+        <a href="/guides/front-double-biceps/"><span>02 · POSE</span><strong>Front double biceps</strong><small>Cadrage, symétrie et corrections.</small></a>
+        <a href="/guides/poser-seul/"><span>03 · PRATIQUE</span><strong>S’entraîner à poser seul</strong><small>Installer l’iPhone et comparer ses prises.</small></a>
       </div>
     </section>
 
@@ -288,7 +296,7 @@
         <p class="eyebrow">PRÊT À LOCKER TA LIGNE ?</p>
         <h2 id="closing-title">Pose. Score.<br>Lock.</h2>
         <p>PoseLock arrive bientôt sur iPhone. Reçois la sortie et quelques nouvelles du projet.</p>
-        <form class="waitlist-form" data-waitlist-form method="post" action="api/subscribe">
+        <form class="waitlist-form" data-waitlist-form method="post" action="/api/subscribe">
           <label for="waitlist-email">Préviens-moi à la sortie</label>
           <div class="waitlist-form__row">
             <input id="waitlist-email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="ton@email.fr" required maxlength="254">
@@ -299,7 +307,7 @@
             <span>J’accepte de recevoir l’annonce de sortie et des actualités occasionnelles de PoseLock. Désinscription à tout moment.</span>
           </label>
           <input class="waitlist-form__trap" name="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
-          <p class="waitlist-form__note">Ton email sert uniquement à ces envois. <a href="confidentialite/">Confidentialité</a></p>
+          <p class="waitlist-form__note">Ton email sert uniquement à ces envois. <a href="/confidentialite/">Confidentialité</a></p>
           <p class="waitlist-form__status" data-waitlist-status role="status" aria-live="polite"></p>
           <noscript><p class="waitlist-form__note">Active JavaScript pour envoyer ton inscription.</p></noscript>
         </form>
@@ -310,8 +318,8 @@
   <footer class="site-footer">
     <a class="footer-brand" href="#top">
       <picture>
-        <source srcset="assets/app-icon-256.webp" type="image/webp">
-        <img src="assets/app-icon.png" alt="" width="52" height="52" loading="lazy">
+        <source srcset="/assets/app-icon-256.webp" type="image/webp">
+        <img src="/assets/app-icon.png" alt="" width="52" height="52" loading="lazy">
       </picture>
       <span>PoseLock</span>
     </a>
@@ -319,15 +327,16 @@
     <div class="footer-links">
       <a href="https://github.com/Spocsk/PoseLock">GitHub</a>
       <a href="mailto:apps@dylan-cdo.fr">Support</a>
-      <a href="confidentialite/">Confidentialité</a>
-      <a href="support/">Aide</a>
+      <a href="/confidentialite/">Confidentialité</a>
+      <a href="/support/">Aide</a>
       <button type="button" data-analytics-preferences hidden>Statistiques</button>
     </div>
+    <!-- i18n:switcher --><nav class="lang-switch" aria-label="Langue"><a href="/" hreflang="fr" lang="fr" aria-current="page">Français</a><a href="/en/" hreflang="en" lang="en">English</a><a href="/es/" hreflang="es" lang="es">Español</a><a href="/de/" hreflang="de" lang="de">Deutsch</a><a href="/pt-br/" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></nav><!-- /i18n:switcher -->
     <p class="copyright">© <span data-year>2026</span> PoseLock</p>
   </footer>
 
-  <script src="app.js" defer></script>
-  <script src="analytics.js" defer></script>
-  <script src="waitlist.js" defer></script>
+  <script src="/app.js" defer></script>
+  <script src="/analytics.js" defer></script>
+  <script src="/waitlist.js" defer></script>
 </body>
 </html>

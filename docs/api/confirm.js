@@ -1,22 +1,24 @@
 "use strict";
 
 const { json, requestBody, open, resend, contactProperties } = require("./_lib/waitlist");
+const { messages } = require("./_lib/i18n");
 
 module.exports = async function confirm(req, res) {
-  if (req.method !== "POST") return json(res, 405, { error: "Méthode non autorisée." });
-  if (Number(req.headers["content-length"] || 0) > 2500) return json(res, 413, { error: "Requête trop longue." });
+  const body = requestBody(req);
+  const t = messages(body && body.locale);
+  if (req.method !== "POST") return json(res, 405, { error: t.method });
+  if (Number(req.headers["content-length"] || 0) > 2500) return json(res, 413, { error: t.tooLong });
   const origin = req.headers.origin;
   const host = req.headers.host;
   if (origin && host && origin !== `https://${host}` && origin !== `http://${host}`) {
-    return json(res, 403, { error: "Origine non autorisée." });
+    return json(res, 403, { error: t.origin });
   }
-  const body = requestBody(req);
-  if (!body) return json(res, 400, { error: "Requête invalide." });
+  if (!body) return json(res, 400, { error: t.invalid });
   const payload = open(body.token);
-  if (!payload) return json(res, 400, { error: "Ce lien est invalide." });
-  if (payload.expired) return json(res, 410, { error: "Ce lien a expiré. Inscris-toi à nouveau." });
+  if (!payload) return json(res, 400, { error: t.badLink });
+  if (payload.expired) return json(res, 410, { error: t.expired });
   if (!process.env.RESEND_API_KEY || !process.env.RESEND_SEGMENT_ID) {
-    return json(res, 503, { error: "La confirmation est momentanément indisponible." });
+    return json(res, 503, { error: t.confirmUnavailable });
   }
 
   try {
@@ -51,6 +53,6 @@ module.exports = async function confirm(req, res) {
     return json(res, 200, { status: "confirmed" });
   } catch (error) {
     console.error("Waitlist confirmation failed", error.message || "Error");
-    return json(res, 503, { error: "La confirmation a échoué. Réessaie plus tard." });
+    return json(res, 503, { error: t.confirmFailed });
   }
 };

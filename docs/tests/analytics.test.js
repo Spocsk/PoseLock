@@ -3,16 +3,18 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
+const { webcrypto } = require("node:crypto");
 
 const source = fs.readFileSync(path.join(__dirname, "..", "analytics.js"), "utf8");
+const settle = () => new Promise((resolve) => setImmediate(resolve));
 
-function run(token, initialChoice) {
+function run({ appID = "72790DE8-2D17-4687-A8CD-321CF82831A3", initial = {}, lang = "en", hostname = "localhost" } = {}) {
   const requests = [];
-  const values = new Map();
-  if (initialChoice) values.set("poselock_mixpanel_consent_v2", initialChoice);
+  const values = new Map(Object.entries(initial));
   const preferences = { listeners: {}, addEventListener(name, fn) { this.listeners[name] = fn; } };
   let banner;
   const document = {
+    documentElement: { lang },
     querySelectorAll(selector) { return selector === "[data-analytics-preferences]" ? [preferences] : []; },
     querySelector() { return null; },
     createElement() {
@@ -27,55 +29,76 @@ function run(token, initialChoice) {
     },
     body: { appendChild(node) { banner = node; } }
   };
+  let uuid = 0;
   const context = {
     document,
-    location: { search: "?utm_source=tiktok&utm_campaign=test", pathname: "/", hostname: "localhost" },
-    URLSearchParams,
-    AbortController,
-    Promise,
+    location: { search: "?utm_source=tiktok&utm_campaign=test", pathname: "/en/", hostname },
+    URLSearchParams, AbortController, Promise, TextEncoder, Uint8Array, Array,
     fetch(url, options) { requests.push({ url, options }); return Promise.resolve({ ok: true }); },
-    crypto: { randomUUID() { return "anonymous-test-id"; } },
+    crypto: { randomUUID() { uuid += 1; return `anonymous-test-id-${uuid}`; }, subtle: webcrypto.subtle },
     localStorage: {
-      getItem(key) { return values.get(key) || null; },
+      getItem(key) { return values.has(key) ? values.get(key) : null; },
       setItem(key, value) { values.set(key, value); },
       removeItem(key) { values.delete(key); }
     }
   };
   context.window = context;
-  vm.runInNewContext(source.replace(/var PROJECT_TOKEN = "[^"]*";/, `var PROJECT_TOKEN = "${token}";`), context);
+  vm.runInNewContext(source.replace(/var APP_ID = "[^"]*";/, `var APP_ID = "${appID}";`), context);
   return { requests, preferences, values, get banner() { return banner; } };
 }
 
-test("no project token means no tracking or consent banner", () => {
-  const app = run("");
+test("no valid app ID means no tracking and no consent banner", async () => {
+  const app = run({ appID: "" });
+  await settle();
   assert.deepEqual(app.requests, []);
   assert.equal(app.banner, undefined);
 });
 
-test("refusal never sends Mixpanel requests", () => {
-  const app = run("0123456789abcdef0123456789abcdef");
+test("a Mixpanel consent is not carried over to TelemetryDeck", async () => {
+  const app = run({ initial: { poselock_mixpanel_consent_v2: "yes", poselock_mixpanel_anonymous_id: "old" } });
+  await settle();
   assert.deepEqual(app.requests, []);
-  app.banner.querySelector("[data-decline]").click();
-  assert.deepEqual(app.requests, []);
-  assert.equal(app.values.get("poselock_mixpanel_consent_v2"), "no");
+  assert.equal(app.values.has("poselock_mixpanel_consent_v2"), false);
+  assert.equal(app.values.has("poselock_mixpanel_anonymous_id"), false);
+  assert.ok(app.banner, "the banner asks again");
 });
 
-test("acceptance sends only allowlisted event and revocation clears identity", () => {
-  const app = run("0123456789abcdef0123456789abcdef");
+test("the banner speaks the page language and links to its privacy page", () => {
+  const app = run({ lang: "de" });
+  assert.match(app.banner.innerHTML, /Optionale Statistiken/);
+  assert.match(app.banner.innerHTML, /href="\/de\/datenschutz\/"/);
+});
+
+test("refusal never sends a TelemetryDeck request", async () => {
+  const app = run();
+  app.banner.querySelector("[data-decline]").click();
+  await settle();
+  assert.deepEqual(app.requests, []);
+  assert.equal(app.values.get("poselock_analytics_consent"), "no");
+});
+
+test("acceptance sends one hashed, allowlisted web signal and revocation clears identity", async () => {
+  const app = run();
   app.banner.querySelector("[data-accept]").click();
+  await settle();
   assert.equal(app.requests.length, 1);
-  assert.equal(app.requests[0].url, "https://api-eu.mixpanel.com/track?ip=0");
-  const payload = JSON.parse(decodeURIComponent(app.requests[0].options.body.slice(5)));
-  assert.equal(payload[0].event, "page_viewed");
-  assert.equal(payload[0].properties.source, "tiktok");
-  assert.equal(payload[0].properties.distinct_id, "anonymous-test-id");
+  assert.equal(app.requests[0].url, "https://nom.telemetrydeck.com/v2/");
+  assert.equal(app.requests[0].options.keepalive, undefined);
+  const [signal] = JSON.parse(app.requests[0].options.body);
+  assert.equal(signal.type, "Web.pageViewed");
+  assert.equal(signal.isTestMode, true, "localhost is test mode");
+  assert.match(signal.clientUser, /^[0-9a-f]{64}$/);
+  assert.ok(!app.requests[0].options.body.includes(app.values.get("poselock_analytics_anonymous_id")), "the raw ID never leaves");
+  assert.equal(signal.payload["TelemetryDeck.Device.platform"], "Web");
+  assert.equal(signal.payload["Web.utm.source"], "tiktok");
   app.preferences.listeners.click();
   app.banner.querySelector("[data-decline]").click();
-  assert.equal(app.values.has("poselock_mixpanel_anonymous_id"), false);
-  assert.equal(app.requests[0].options.signal.aborted, true);
+  assert.equal(app.values.has("poselock_analytics_anonymous_id"), false);
 });
 
-test("prior consent sends page view on a new visit", () => {
-  const app = run("0123456789abcdef0123456789abcdef", "yes");
+test("prior TelemetryDeck consent sends a page view on a new visit, in production mode on poselock.app", async () => {
+  const app = run({ initial: { poselock_analytics_consent: "yes" }, hostname: "poselock.app" });
+  await settle();
   assert.equal(app.requests.length, 1);
+  assert.equal(JSON.parse(app.requests[0].options.body)[0].isTestMode, false);
 });

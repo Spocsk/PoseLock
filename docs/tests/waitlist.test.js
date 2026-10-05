@@ -109,3 +109,32 @@ test("expired and invalid links make no Resend request", async () => {
   assert.equal((await invoke(confirm, { token: token("poseur@example.com", Date.now() - waitlist.TOKEN_LIFETIME_MS - 1) })).code, 410);
   assert.equal((await invoke(confirm, { token: crypto.randomBytes(24).toString("base64url") })).code, 400);
 });
+
+test("signup email and confirmation link follow the page language", async () => {
+  const calls = [];
+  global.fetch = async (url, options) => { calls.push({ url, options }); return response(200, { id: "sent" }); };
+  await invoke(subscribe, { email: "poseur@example.com", consent: true, locale: "de" });
+  const sent = JSON.parse(calls[0].options.body);
+  assert.equal(sent.subject, "Bestätige deine Anmeldung bei PoseLock");
+  assert.match(sent.text, /https:\/\/poselock\.app\/de\/bestaetigen\/\?token=/);
+  assert.match(sent.html, /<html lang="de">/);
+  const link = new URL(sent.text.match(/https:\S+/)[0]);
+  assert.equal(waitlist.open(link.searchParams.get("token")).locale, "de");
+});
+
+test("an unknown language falls back to French, never into the template", async () => {
+  const calls = [];
+  global.fetch = async (url, options) => { calls.push({ url, options }); return response(200, { id: "sent" }); };
+  await invoke(subscribe, { email: "poseur@example.com", consent: true, locale: "<script>" });
+  const sent = JSON.parse(calls[0].options.body);
+  assert.equal(sent.subject, "Confirme ton inscription à PoseLock");
+  assert.match(sent.text, /poselock\.app\/confirmation\/\?token=/);
+  assert.doesNotMatch(sent.html, /<script>/);
+});
+
+test("confirmation errors are returned in the visitor's language", async () => {
+  global.fetch = async () => { throw new Error("must not call Resend"); };
+  const result = await invoke(confirm, { token: "bad", locale: "pt-BR" });
+  assert.equal(result.code, 400);
+  assert.equal(result.data.error, "Este link é inválido.");
+});
