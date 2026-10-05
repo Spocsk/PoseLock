@@ -38,7 +38,7 @@ struct PaywallSheet: View {
                             .foregroundStyle(Theme.ivory)
                             .fixedSize(horizontal: false, vertical: true)
 
-                        Text(store.isPro ? "Tous tes avantages sont débloqués." : reason.message)
+                        Text(store.isPro ? String(localized: "Tous tes avantages sont débloqués.") : reason.message)
                             .font(Theme.bodyFont)
                             .foregroundStyle(Theme.ivoryMuted)
                             .fixedSize(horizontal: false, vertical: true)
@@ -54,7 +54,7 @@ struct PaywallSheet: View {
                         VStack(alignment: .leading, spacing: 10) {
                             Text("Ton abonnement Pro est actif.").font(Theme.bodyFont)
                             if let date = store.renewalDate {
-                                Text("Fin de la période en cours : \(date.formatted(.dateTime.day().month().year().locale(Locale(identifier: "fr_FR"))))")
+                                Text("Fin de la période en cours : \(date.formatted(.dateTime.day().month().year()))")
                                     .font(Theme.supportFont).foregroundStyle(Theme.ivoryMuted)
                             }
                         }

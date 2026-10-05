@@ -100,6 +100,18 @@ enum SideWording {
     }
 }
 
+/// Les cues restent des données françaises dans le domaine : `SideWording` les
+/// inverse mot à mot et les tests s'appuient dessus. La traduction n'arrive qu'à
+/// l'affichage, en clé dynamique dans la table `Cues` — chaque cue et son miroir
+/// y ont leur entrée, vérifiée par `LocalizationCatalogTests`.
+enum CueText {
+    static let table = "Cues"
+
+    static func localized(_ cue: String, bundle: Bundle = .main) -> String {
+        bundle.localizedString(forKey: cue, value: cue, table: table)
+    }
+}
+
 private extension String {
     var capitalizedFirst: String { prefix(1).uppercased() + dropFirst() }
 }

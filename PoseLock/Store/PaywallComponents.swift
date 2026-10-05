@@ -5,28 +5,28 @@ import SwiftUI
 /// promet d'essai. Aucune durée ni aucun prix n'est écrit en dur.
 enum PaywallCopy {
     static func title(for offer: PlanOffer?) -> String {
-        guard let trial = offer?.trialLabel else { return "Passe en Pro" }
-        return "Essaie \(trial) gratuitement."
+        guard let trial = offer?.trialLabel else { return String(localized: "Passe en Pro") }
+        return String(localized: "Essaie \(trial) gratuitement.")
     }
 
     static func callToAction(for offer: PlanOffer?) -> String {
-        guard let trial = offer?.trialLabel else { return "Passer en Pro" }
-        return "Essayer \(trial) gratuitement"
+        guard let trial = offer?.trialLabel else { return String(localized: "Passer en Pro") }
+        return String(localized: "Essayer \(trial) gratuitement")
     }
 
     static func reassurance(for offer: PlanOffer?) -> String {
         offer?.trialLabel == nil
-            ? "Sans engagement. Résiliable dans l’App Store."
-            : "Carte demandée, rien de prélevé aujourd’hui."
+            ? String(localized: "Sans engagement. Résiliable dans l’App Store.")
+            : String(localized: "Carte demandée, rien de prélevé aujourd’hui.")
     }
 
     static func fineprint(for offer: PlanOffer?) -> String {
         guard let offer else { return "" }
-        let renewal = "\(offer.priceLabel) / \(offer.periodLabel), renouvelé automatiquement."
+        let renewal = String(localized: "\(offer.priceLabel) / \(offer.periodLabel), renouvelé automatiquement.")
         guard let trial = offer.trialLabel else {
-            return "\(renewal) Résiliable dans l’App Store."
+            return String(localized: "\(renewal) Résiliable dans l’App Store.")
         }
-        return "\(trial) offerte, puis \(renewal) Résiliable dans l’App Store."
+        return String(localized: "Essai gratuit : \(trial), puis \(renewal) Résiliable dans l’App Store.")
     }
 }
 
@@ -40,18 +40,18 @@ struct TrialTimeline: View {
         [
             (
                 "lock.open",
-                "Aujourd’hui",
-                "Tout Pro s’ouvre. Ta carte est enregistrée, rien n’est prélevé."
+                String(localized: "Aujourd’hui"),
+                String(localized: "Tout Pro s’ouvre. Ta carte est enregistrée, rien n’est prélevé.")
             ),
             (
                 "bell",
-                "24 h avant la fin",
-                "Si tu autorises les notifications, PoseLock te prévient qu’il reste un jour pour annuler."
+                String(localized: "24 h avant la fin"),
+                String(localized: "Si tu autorises les notifications, PoseLock te prévient qu’il reste un jour pour annuler.")
             ),
             (
                 "creditcard",
-                "À la fin de l’essai",
-                "\(priceLabel) prélevés, sauf résiliation avant."
+                String(localized: "À la fin de l’essai"),
+                String(localized: "\(priceLabel) prélevés, sauf résiliation avant.")
             )
         ]
     }
@@ -160,7 +160,7 @@ struct PlanCard: View {
                     .font(Theme.titleFont)
                     .foregroundStyle(Theme.ivory)
 
-                Text(offer.monthlyEquivalentLabel.map { "\($0) / mois" } ?? " ")
+                Text(offer.monthlyEquivalentLabel.map { String(localized: "\($0) / mois") } ?? " ")
                     .font(Theme.supportFont)
                     .foregroundStyle(Theme.ivoryMuted)
                     .accessibilityHidden(offer.monthlyEquivalentLabel == nil)

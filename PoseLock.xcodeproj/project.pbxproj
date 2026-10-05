@@ -37,6 +37,9 @@
 		A0000000000000000000004E /* ScoringEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000004D /* ScoringEngineTests.swift */; };
 		A00000000000000000000050 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000004F /* Assets.xcassets */; };
 		A00000000000000000000052 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000051 /* PrivacyInfo.xcprivacy */; };
+		C000000000000000000000A2 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C000000000000000000000A1 /* Localizable.xcstrings */; };
+		C000000000000000000000A4 /* Cues.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C000000000000000000000A3 /* Cues.xcstrings */; };
+		C000000000000000000000A6 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C000000000000000000000A5 /* InfoPlist.xcstrings */; };
 		A00000000000000000000054 /* Products.storekit in Resources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000053 /* Products.storekit */; };
 		A00000000000000000000058 /* PoseCoachView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000057 /* PoseCoachView.swift */; };
 		A0000000000000000000005A /* PoseComparisonSkeleton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000059 /* PoseComparisonSkeleton.swift */; };
@@ -48,6 +51,7 @@
 		A00000000000000000000066 /* OnboardingAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000065 /* OnboardingAccountView.swift */; };
 		A00000000000000000000068 /* TrialReminder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000067 /* TrialReminder.swift */; };
 		A0000000000000000000006A /* StoreConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000069 /* StoreConfigurationTests.swift */; };
+		C000000000000000000000A8 /* LocalizationCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C000000000000000000000A7 /* LocalizationCatalogTests.swift */; };
 		B00000000000000000000011 /* RevenueCatConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000010 /* RevenueCatConfig.swift */; };
 		B00000000000000000000013 /* PaywallComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000012 /* PaywallComponents.swift */; };
 		C00000000000000000000002 /* ScoreTrendView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000001 /* ScoreTrendView.swift */; };
@@ -103,6 +107,9 @@
 		A0000000000000000000004D /* ScoringEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoringEngineTests.swift; sourceTree = "<group>"; };
 		A0000000000000000000004F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A00000000000000000000051 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		C000000000000000000000A1 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		C000000000000000000000A3 /* Cues.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Cues.xcstrings; sourceTree = "<group>"; };
+		C000000000000000000000A5 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		A00000000000000000000053 /* Products.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Products.storekit; sourceTree = "<group>"; };
 		A00000000000000000000055 /* PoseLock.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PoseLock.entitlements; sourceTree = "<group>"; };
 		A00000000000000000000056 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -116,6 +123,7 @@
 		A00000000000000000000065 /* OnboardingAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingAccountView.swift; sourceTree = "<group>"; };
 		A00000000000000000000067 /* TrialReminder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrialReminder.swift; sourceTree = "<group>"; };
 		A00000000000000000000069 /* StoreConfigurationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreConfigurationTests.swift; sourceTree = "<group>"; };
+		C000000000000000000000A7 /* LocalizationCatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationCatalogTests.swift; sourceTree = "<group>"; };
 		B00000000000000000000010 /* RevenueCatConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RevenueCatConfig.swift; sourceTree = "<group>"; };
 		B00000000000000000000012 /* PaywallComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallComponents.swift; sourceTree = "<group>"; };
 		C00000000000000000000001 /* ScoreTrendView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreTrendView.swift; sourceTree = "<group>"; };
@@ -163,6 +171,9 @@
 				A00000000000000000000021 /* PoseLockApp.swift */,
 				A0000000000000000000004F /* Assets.xcassets */,
 				A00000000000000000000051 /* PrivacyInfo.xcprivacy */,
+				C000000000000000000000A1 /* Localizable.xcstrings */,
+				C000000000000000000000A3 /* Cues.xcstrings */,
+				C000000000000000000000A5 /* InfoPlist.xcstrings */,
 				A00000000000000000000055 /* PoseLock.entitlements */,
 				A00000000000000000000056 /* Info.plist */,
 				A00000000000000000000017 /* App */,
@@ -184,6 +195,7 @@
 			children = (
 				A0000000000000000000004D /* ScoringEngineTests.swift */,
 				A00000000000000000000069 /* StoreConfigurationTests.swift */,
+				C000000000000000000000A7 /* LocalizationCatalogTests.swift */,
 				E52A00000000000000000001 /* PoseReferenceAssetsTests.swift */,
 			);
 			path = PoseLockTests;
@@ -368,6 +380,9 @@
 			knownRegions = (
 				en,
 				fr,
+				es,
+				de,
+				"pt-BR",
 				Base,
 			);
 			mainGroup = A00000000000000000000006;
@@ -391,6 +406,9 @@
 			files = (
 				A00000000000000000000050 /* Assets.xcassets in Resources */,
 				A00000000000000000000052 /* PrivacyInfo.xcprivacy in Resources */,
+				C000000000000000000000A2 /* Localizable.xcstrings in Resources */,
+				C000000000000000000000A4 /* Cues.xcstrings in Resources */,
+				C000000000000000000000A6 /* InfoPlist.xcstrings in Resources */,
 				A00000000000000000000054 /* Products.storekit in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -455,6 +473,7 @@
 			files = (
 				A0000000000000000000004E /* ScoringEngineTests.swift in Sources */,
 				A0000000000000000000006A /* StoreConfigurationTests.swift in Sources */,
+				C000000000000000000000A8 /* LocalizationCatalogTests.swift in Sources */,
 				E52A00000000000000000002 /* PoseReferenceAssetsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -585,10 +604,9 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PoseLock/Info.plist;
+				DEVELOPMENT_LANGUAGE = en;
 				INFOPLIST_KEY_CFBundleDisplayName = PoseLock;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
-				INFOPLIST_KEY_NSCameraUsageDescription = "PoseLock utilise la camera pour noter ta pose sur l iPhone.";
-				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "PoseLock peut enregistrer une copie des photos lockees dans l album Photos.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -621,10 +639,9 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PoseLock/Info.plist;
+				DEVELOPMENT_LANGUAGE = en;
 				INFOPLIST_KEY_CFBundleDisplayName = PoseLock;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
-				INFOPLIST_KEY_NSCameraUsageDescription = "PoseLock utilise la camera pour noter ta pose sur l iPhone.";
-				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "PoseLock peut enregistrer une copie des photos lockees dans l album Photos.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

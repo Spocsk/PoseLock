@@ -1,0 +1,114 @@
+{
+  "sourceLanguage" : "fr",
+  "strings" : {
+    "CFBundleDisplayName" : {
+      "shouldTranslate" : false
+    },
+    "CFBundleName" : {
+      "shouldTranslate" : false
+    },
+    "NSCameraUsageDescription" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PoseLock uses the camera to score your pose on the device. Session video never leaves your iPhone."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PoseLock usa la cámara para puntuar tu pose en el dispositivo. El vídeo de la sesión nunca sale del iPhone."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PoseLock nutzt die Kamera, um deine Pose auf dem Gerät zu bewerten. Das Sessionvideo verlässt nie dein iPhone."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O PoseLock usa a câmera para avaliar sua pose no aparelho. O vídeo da sessão nunca sai do iPhone."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PoseLock utilise la caméra pour noter ta pose sur l’appareil. La vidéo de session ne quitte pas l’iPhone."
+          }
+        }
+      }
+    },
+    "NSPhotoLibraryAddUsageDescription" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PoseLock can save a copy of locked photos to your Photos album, only if you turn it on in Settings."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PoseLock puede guardar una copia de las fotos con lock en tu álbum de Fotos, solo si lo activas en Ajustes."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PoseLock kann eine Kopie gelockter Fotos in deinem Fotos-Album sichern, nur wenn du es in den Einstellungen aktivierst."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O PoseLock pode salvar uma cópia das fotos com lock no seu álbum de Fotos, só se você ativar em Ajustes."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PoseLock peut enregistrer une copie des photos lockées dans l’album Photos, uniquement si tu l’actives dans Réglages."
+          }
+        }
+      }
+    },
+    "Signaler un problème" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Report a problem"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Informar de un problema"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Problem melden"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Relatar um problema"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Signaler un problème"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

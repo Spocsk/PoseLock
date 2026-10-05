@@ -41,7 +41,7 @@ final class StoreManager {
 
     func refreshOffers() async {
         guard Purchases.isConfigured else {
-            purchaseError = "Impossible de charger les offres."
+            purchaseError = String(localized: "Impossible de charger les offres.")
             return
         }
         do {
@@ -49,11 +49,11 @@ final class StoreManager {
             let found = offerings.offering(identifier: RevenueCatConfig.defaultOffering) ?? offerings.current
             offering = found
             offers = found.map(PlanOffer.make(from:)) ?? []
-            purchaseError = offers.isEmpty ? "Impossible de charger les offres." : nil
+            purchaseError = offers.isEmpty ? String(localized: "Impossible de charger les offres.") : nil
         } catch {
             offering = nil
             offers = []
-            purchaseError = "Impossible de charger les offres."
+            purchaseError = String(localized: "Impossible de charger les offres.")
         }
     }
 
@@ -72,7 +72,7 @@ final class StoreManager {
             await refreshEntitlements()
             if isPro { PoseLockAnalytics.capture(.purchaseCompleted) }
         } catch {
-            purchaseError = "L’achat n’a pas abouti."
+            purchaseError = String(localized: "L’achat n’a pas abouti.")
         }
     }
 
@@ -84,7 +84,7 @@ final class StoreManager {
         do {
             apply(try await Purchases.shared.restorePurchases())
         } catch {
-            purchaseError = "Restauration impossible."
+            purchaseError = String(localized: "Restauration impossible.")
         }
     }
 
@@ -158,7 +158,7 @@ struct PlanOffer: Identifiable {
 
             return PlanOffer(
                 package: package,
-                periodLabel: product.subscriptionPeriod?.frenchLabel ?? product.localizedTitle,
+                periodLabel: product.subscriptionPeriod?.localizedLabel ?? product.localizedTitle,
                 priceLabel: product.localizedPriceString,
                 monthlyEquivalentLabel: equivalent.flatMap { product.formatted($0) },
                 discountPercent: discount(of: product, against: monthlyReference),
@@ -203,7 +203,7 @@ private extension StoreProduct {
     /// d'introduction payante n'est pas gratuite.
     var freeTrialLabel: String? {
         guard let discount = introductoryDiscount, discount.paymentMode == .freeTrial else { return nil }
-        return discount.subscriptionPeriod.frenchLabel
+        return discount.subscriptionPeriod.localizedLabel
     }
 
     /// Formate dans la devise du produit, sans jamais inventer de symbole.
@@ -213,14 +213,14 @@ private extension StoreProduct {
 }
 
 extension SubscriptionPeriod {
-    /// « 1 mois », « 1 an », « 1 semaine ». Le pluriel suit la valeur, et « mois »
-    /// est invariable.
-    var frenchLabel: String {
+    /// « 1 mois », « 1 an », « 1 semaine ». Le pluriel de chaque langue vit dans
+    /// le catalogue (variantes one/other), pas dans le code.
+    var localizedLabel: String {
         switch unit {
-        case .day: return "\(value) jour\(value > 1 ? "s" : "")"
-        case .week: return "\(value) semaine\(value > 1 ? "s" : "")"
-        case .month: return "\(value) mois"
-        case .year: return value == 1 ? "1 an" : "\(value) ans"
+        case .day: return String(localized: "\(value) jours")
+        case .week: return String(localized: "\(value) semaines")
+        case .month: return String(localized: "\(value) mois")
+        case .year: return String(localized: "\(value) ans")
         @unknown default: return "\(value)"
         }
     }

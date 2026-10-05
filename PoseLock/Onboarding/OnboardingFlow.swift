@@ -263,8 +263,8 @@ struct OnboardingGoalView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             OnboardingHeader(
-                title: "Tu prépares quoi ?",
-                detail: "Ça décide du pack proposé juste après. Rien n’est figé."
+                title: String(localized: "Tu prépares quoi ?"),
+                detail: String(localized: "Ça décide du pack proposé juste après. Rien n’est figé.")
             )
             .staggeredAppear(0)
 
@@ -339,8 +339,8 @@ struct OnboardingPackView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             OnboardingHeader(
-                title: "Quel travail.",
-                detail: "Les trois packs restent là. Celui-ci préremplit la pose du jour."
+                title: String(localized: "Quel travail."),
+                detail: String(localized: "Les trois packs restent là. Celui-ci préremplit la pose du jour.")
             )
             .staggeredAppear(0)
 
@@ -356,7 +356,7 @@ struct OnboardingPackView: View {
                             subtitle: pack.subtitle,
                             symbolName: nil,
                             isSelected: selected == pack,
-                            badge: pack == suggested ? "Suggéré" : nil
+                            badge: pack == suggested ? String(localized: "Suggéré") : nil
                         )
                     }
                     .buttonStyle(.plain)
@@ -366,7 +366,7 @@ struct OnboardingPackView: View {
             .padding(.horizontal, 24)
 
             if touched {
-                OnboardingAcknowledgement(text: "Pose du jour : \(selected.defaultPoseID.displayName).")
+                OnboardingAcknowledgement(text: String(localized: "Pose du jour : \(selected.defaultPoseID.displayName)."))
                     .padding(.horizontal, 24)
                     .padding(.top, 20)
             }
@@ -443,8 +443,8 @@ struct OnboardingPainView: View {
         if let answer {
             OnboardingAcknowledgement(
                 text: answer
-                    ? "On s’en occupe. C’est exactement ce que PoseLock mesure."
-                    : "D’accord. Regarde quand même ce que ça donne."
+                    ? String(localized: "On s’en occupe. C’est exactement ce que PoseLock mesure.")
+                    : String(localized: "D’accord. Regarde quand même ce que ça donne.")
             )
         } else {
             VStack(spacing: 12) {
@@ -485,8 +485,8 @@ struct OnboardingProofView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             OnboardingHeader(
-                title: "Voilà ce que tu vas voir.",
-                detail: "La même pose, un mois d’écart, côte à côte. Le score compare tes angles à la pose cible."
+                title: String(localized: "Voilà ce que tu vas voir."),
+                detail: String(localized: "La même pose, un mois d’écart, côte à côte. Le score compare tes angles à la pose cible.")
             )
             .staggeredAppear(0)
 
@@ -527,14 +527,14 @@ struct OnboardingProofView: View {
 
             HStack(spacing: 0) {
                 column(
-                    label: "Il y a un mois",
+                    label: String(localized: "Il y a un mois"),
                     score: Self.beforeScore,
                     color: Theme.ivoryMuted,
                     variant: .plain
                 )
 
                 column(
-                    label: "Aujourd’hui",
+                    label: String(localized: "Aujourd’hui"),
                     score: Self.afterScore,
                     color: Theme.lockGreen,
                     variant: .guided
@@ -598,8 +598,8 @@ struct OnboardingCameraView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     OnboardingHeader(
-                        title: "La caméra",
-                        detail: "PoseLock lit ta pose image par image et affiche un score en direct. Sans caméra, il n’y a rien à noter.",
+                        title: String(localized: "La caméra"),
+                        detail: String(localized: "PoseLock lit ta pose image par image et affiche un score en direct. Sans caméra, il n’y a rien à noter."),
                         bottomPadding: 0
                     )
                     .staggeredAppear(0)
@@ -609,9 +609,9 @@ struct OnboardingCameraView: View {
                         .staggeredAppear(1)
 
                     VStack(alignment: .leading, spacing: 12) {
-                        privacyRow("cpu", "L’analyse tourne sur l’iPhone, avec Vision.")
-                        privacyRow("wifi.slash", "Aucune image n’est envoyée à un serveur.")
-                        privacyRow("trash", "Tu effaces le journal quand tu veux.")
+                        privacyRow("cpu", String(localized: "L’analyse tourne sur l’iPhone, avec Vision."))
+                        privacyRow("wifi.slash", String(localized: "Aucune image n’est envoyée à un serveur."))
+                        privacyRow("trash", String(localized: "Tu effaces le journal quand tu veux."))
                     }
                     .padding(.horizontal, 24)
                     .staggeredAppear(2)
@@ -699,9 +699,9 @@ struct OnboardingCameraView: View {
     }
 
     private var primaryTitle: String {
-        if isBlocked { return "Ouvrir les Réglages" }
-        if status == .authorized { return "Continuer" }
-        return "Autoriser la caméra"
+        if isBlocked { return String(localized: "Ouvrir les Réglages") }
+        if status == .authorized { return String(localized: "Continuer") }
+        return String(localized: "Autoriser la caméra")
     }
 
     private func request() async {
@@ -726,21 +726,21 @@ struct OnboardingRecapView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             OnboardingHeader(
-                title: "Tout est réglé.",
-                detail: "Tu peux changer chaque ligne plus tard, dans Réglages."
+                title: String(localized: "Tout est réglé."),
+                detail: String(localized: "Tu peux changer chaque ligne plus tard, dans Réglages.")
             )
             .staggeredAppear(0)
 
             VStack(spacing: 0) {
                 if let goal {
-                    recapRow("Objectif", goal.displayName)
+                    recapRow(String(localized: "Objectif"), goal.displayName)
                     Divider().overlay(Theme.hairline)
                 }
-                recapRow("Pack", pack.displayName)
+                recapRow(String(localized: "Pack"), pack.displayName)
                 Divider().overlay(Theme.hairline)
-                recapRow("Pose du jour", pack.defaultPoseID.displayName)
+                recapRow(String(localized: "Pose du jour"), pack.defaultPoseID.displayName)
                 Divider().overlay(Theme.hairline)
-                recapRow("Seuil de lock", "\(Int(ScoringConstants.lockScore)) sur 100")
+                recapRow(String(localized: "Seuil de lock"), String(localized: "\(Int(ScoringConstants.lockScore)) sur 100"))
             }
             .background(Theme.elevated)
             .clipShape(RoundedRectangle(cornerRadius: Theme.continuousCorner, style: .continuous))

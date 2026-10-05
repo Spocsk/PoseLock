@@ -58,7 +58,7 @@ struct ShareDestinationBar: View {
                     if SocialShare.openInstagramStories(image: image) {
                         missingApp = nil
                     } else {
-                        missingApp = "Instagram n’est pas installé."
+                        missingApp = String(localized: "Instagram n’est pas installé.")
                         showActivity = true
                     }
                 }
@@ -69,7 +69,7 @@ struct ShareDestinationBar: View {
                     if SocialShare.isTikTokAvailable() {
                         missingApp = nil
                     } else {
-                        missingApp = "TikTok n’est pas installé."
+                        missingApp = String(localized: "TikTok n’est pas installé.")
                     }
                     showActivity = true
                 }

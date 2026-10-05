@@ -32,8 +32,8 @@ enum TrialReminder {
         else { return }
 
         let content = UNMutableNotificationContent()
-        content.title = "Ton essai devient payant demain"
-        content.body = "Sans renouvellement : \(ScoringConstants.freeLocksPerDay) locks/jour, ton pack d’origine et pas de comparaison J-30."
+        content.title = String(localized: "Ton essai devient payant demain")
+        content.body = String(localized: "Sans renouvellement : \(ScoringConstants.freeLocksPerDay) locks/jour, ton pack d’origine et pas de comparaison J-30.")
         content.sound = .default
 
         let components = Calendar.current.dateComponents(

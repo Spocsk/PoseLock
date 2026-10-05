@@ -6,7 +6,7 @@ import UIKit
 /// une photo ni un score — la session caméra ne quitte pas l’iPhone.
 enum FeedbackMail {
     static let supportAddress = "apps@dylan-cdo.fr"
-    static let subject = "PoseLock — un problème"
+    static var subject: String { String(localized: "PoseLock — un problème") }
 
     static func body(
         message: String,

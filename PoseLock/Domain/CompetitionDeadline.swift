@@ -40,16 +40,16 @@ struct CompetitionDeadline: Equatable, Sendable {
         place: String?,
         hasLock: Bool
     ) -> NotificationCopy {
-        let dayWord = daysRemaining == 1 ? "jour" : "jours"
-        let title = "Il reste \(daysRemaining) \(dayWord)"
+        // Le pluriel (« 1 jour » / « 3 jours ») vient des variantes du catalogue.
+        let title = String(localized: "Il reste \(daysRemaining) jours")
         let location = place.flatMap { $0.isEmpty ? nil : $0 }
         let whereAt = location.map { " · \($0)" } ?? ""
         let poseName = pose.displayName
         let body: String
         if hasLock {
-            body = "Entraîne-toi sur \(poseName)\(whereAt) : ce n’est pas encore locké."
+            body = String(localized: "Entraîne-toi sur \(poseName)\(whereAt) : ce n’est pas encore locké.")
         } else {
-            body = "Entraîne-toi sur \(poseName)\(whereAt) : pas encore de lock."
+            body = String(localized: "Entraîne-toi sur \(poseName)\(whereAt) : pas encore de lock.")
         }
         return NotificationCopy(title: title, body: body)
     }

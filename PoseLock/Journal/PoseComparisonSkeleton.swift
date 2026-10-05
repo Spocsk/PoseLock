@@ -68,9 +68,9 @@ struct PoseComparisonSkeleton: View {
     @ViewBuilder
     private var legend: some View {
         HStack(spacing: 14) {
-            legendItem(color: Theme.goldMuted, label: "Référence")
+            legendItem(color: Theme.goldMuted, label: String(localized: "Référence"))
             if snapshot != nil {
-                legendItem(color: Theme.lockGreen, label: "Ta pose")
+                legendItem(color: Theme.lockGreen, label: String(localized: "Ta pose"))
             } else {
                 Text("Skeleton non enregistré pour cette prise.")
                     .font(Theme.captionFont)

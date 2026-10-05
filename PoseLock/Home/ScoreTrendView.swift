@@ -66,7 +66,7 @@ struct ScoreTrendView: View {
     private var caption: String? {
         var parts: [String] = []
         if let average {
-            parts.append("moyenne \(average)")
+            parts.append(String(localized: "moyenne \(average)"))
         }
         if let lastLockDuration {
             parts.append(Self.durationLabel(lastLockDuration))
@@ -77,10 +77,10 @@ struct ScoreTrendView: View {
     private static func durationLabel(_ duration: TimeInterval) -> String {
         let seconds = max(0, Int(duration.rounded()))
         if seconds < 60 {
-            return "dernier lock en \(seconds) s"
+            return String(localized: "dernier lock en \(seconds) s")
         }
         let minutes = seconds / 60
         let rest = seconds % 60
-        return "dernier lock en \(minutes) min \(rest) s"
+        return String(localized: "dernier lock en \(minutes) min \(rest) s")
     }
 }

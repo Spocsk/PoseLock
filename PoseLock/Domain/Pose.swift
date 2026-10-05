@@ -45,32 +45,32 @@ enum PoseID: String, Codable, CaseIterable, Identifiable, Sendable {
 
     var displayName: String {
         switch self {
-        case .quarterTurnFace: return "Quarter turn face"
-        case .quarterTurnProfile: return "Quarter turn profil"
-        case .quarterTurnBack: return "Quarter turn dos"
-        case .frontDoubleBiceps: return "Front double biceps"
-        case .frontLatSpread: return "Front lat spread"
-        case .sideChest: return "Side chest"
-        case .backDoubleBiceps: return "Back double biceps"
-        case .backLatSpread: return "Back lat spread"
-        case .sideTriceps: return "Side triceps"
-        case .absAndThigh: return "Abs and thigh"
-        case .mostMuscular: return "Most muscular"
-        case .threeQuarterLat: return "¾ lat"
-        case .sideChestMirror: return "Side chest miroir"
-        case .mostMuscularCrop: return "Most muscular crop"
-        case .vacuum: return "Vacuum"
-        case .backDoubleThreeQuarter: return "Back double ¾"
-        case .handsOnHips: return "Hands-on-hips"
-        case .frontPosture: return "Posture face"
-        case .profilePosture: return "Posture profil"
-        case .shoulderToWaist: return "Shoulder-to-waist"
-        case .clavicleOpen: return "Ouverture cage"
-        case .shoulderSymmetry: return "Symétrie épaules"
-        case .twistThreeQuarter: return "Twist ¾"
-        case .zyzzClassic: return "Pose Zyzz"
-        case .zyzzVacuum: return "Vacuum face"
-        case .zyzzTwist: return "Twist esthétique"
+        case .quarterTurnFace: return String(localized: "Quarter turn face")
+        case .quarterTurnProfile: return String(localized: "Quarter turn profil")
+        case .quarterTurnBack: return String(localized: "Quarter turn dos")
+        case .frontDoubleBiceps: return String(localized: "Front double biceps")
+        case .frontLatSpread: return String(localized: "Front lat spread")
+        case .sideChest: return String(localized: "Side chest")
+        case .backDoubleBiceps: return String(localized: "Back double biceps")
+        case .backLatSpread: return String(localized: "Back lat spread")
+        case .sideTriceps: return String(localized: "Side triceps")
+        case .absAndThigh: return String(localized: "Abs and thigh")
+        case .mostMuscular: return String(localized: "Most muscular")
+        case .threeQuarterLat: return String(localized: "¾ lat")
+        case .sideChestMirror: return String(localized: "Side chest miroir")
+        case .mostMuscularCrop: return String(localized: "Most muscular crop")
+        case .vacuum: return String(localized: "Vacuum")
+        case .backDoubleThreeQuarter: return String(localized: "Back double ¾")
+        case .handsOnHips: return String(localized: "Hands-on-hips")
+        case .frontPosture: return String(localized: "Posture face")
+        case .profilePosture: return String(localized: "Posture profil")
+        case .shoulderToWaist: return String(localized: "Shoulder-to-waist")
+        case .clavicleOpen: return String(localized: "Ouverture cage")
+        case .shoulderSymmetry: return String(localized: "Symétrie épaules")
+        case .twistThreeQuarter: return String(localized: "Twist ¾")
+        case .zyzzClassic: return String(localized: "Pose Zyzz")
+        case .zyzzVacuum: return String(localized: "Vacuum face")
+        case .zyzzTwist: return String(localized: "Twist esthétique")
         }
     }
 

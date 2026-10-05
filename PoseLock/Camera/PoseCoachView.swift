@@ -10,15 +10,13 @@ struct PoseCoachStep: Equatable {
 
 enum PoseCoachCopy {
     static func steps(for poseID: PoseID) -> [PoseCoachStep] {
-        let cues = setupCues(for: poseID)
-        let hold = ScoringConstants.lockHoldSeconds
-        let holdText = hold.truncatingRemainder(dividingBy: 1) == 0
-            ? "\(Int(hold))"
-            : String(format: "%.1f", hold).replacingOccurrences(of: ".", with: ",")
+        let cues = setupCues(for: poseID).map { CueText.localized($0) }
+        let holdText = ScoringConstants.lockHoldSeconds
+            .formatted(.number.precision(.fractionLength(0...1)))
         return [
             PoseCoachStep(
-                title: "Corps entier",
-                detail: "Recule. Chevilles et mains dans l’image.",
+                title: String(localized: "Corps entier"),
+                detail: String(localized: "Recule. Chevilles et mains dans l’image."),
                 symbolName: "figure.stand",
                 referenceVariant: .plain
             ),
@@ -30,8 +28,8 @@ enum PoseCoachCopy {
                 cues: cues
             ),
             PoseCoachStep(
-                title: "Tiens la ligne",
-                detail: "Garde la pose \(holdText) s jusqu’au vert. Score ≥ \(Int(ScoringConstants.lockScore)).",
+                title: String(localized: "Tiens la ligne"),
+                detail: String(localized: "Garde la pose \(holdText) s jusqu’au vert. Score ≥ \(Int(ScoringConstants.lockScore))."),
                 symbolName: "checkmark.circle",
                 referenceVariant: .guided
             )

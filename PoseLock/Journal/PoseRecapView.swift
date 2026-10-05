@@ -97,11 +97,11 @@ struct PoseRecapCard: View {
             }
 
             HStack(spacing: 0) {
-                stat("Prises", "\(recap.takeCount)")
+                stat(String(localized: "Prises"), "\(recap.takeCount)")
                 Divider().overlay(Theme.hairline).frame(height: 28)
-                stat("Moyenne", "\(Int(recap.averageScore.rounded()))")
+                stat(String(localized: "Moyenne"), "\(Int(recap.averageScore.rounded()))")
                 Divider().overlay(Theme.hairline).frame(height: 28)
-                stat("Meilleure", dateText)
+                stat(String(localized: "Meilleure"), dateText)
             }
 
             Button {
@@ -131,7 +131,7 @@ struct PoseRecapCard: View {
 
     private var dateText: String {
         recap.bestDate.formatted(
-            .dateTime.day().month(.abbreviated).locale(Locale(identifier: "fr_FR"))
+            .dateTime.day().month(.abbreviated)
         )
     }
 

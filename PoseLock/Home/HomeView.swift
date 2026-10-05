@@ -100,7 +100,7 @@ struct DailyRecapView: View {
     var recap: DayRecap
 
     private var dateText: String {
-        recap.date.formatted(.dateTime.weekday(.wide).day().month(.wide).locale(Locale(identifier: "fr_FR")))
+        recap.date.formatted(.dateTime.weekday(.wide).day().month(.wide))
     }
 
     var body: some View {
@@ -115,7 +115,7 @@ struct DailyRecapView: View {
                         .foregroundStyle(Theme.goldMuted)
                 }
             }
-            Text(recap.lockCount == 0 ? "Ta prochaine pose commence ici." : "\(recap.lockCount) lock\(recap.lockCount == 1 ? "" : "s") aujourd’hui")
+            Text(recap.lockCount == 0 ? String(localized: "Ta prochaine pose commence ici.") : String(localized: "\(recap.lockCount) locks aujourd’hui"))
                 .font(Theme.titleFont)
                 .foregroundStyle(Theme.ivory)
             if let best = recap.bestScore {
@@ -152,7 +152,7 @@ struct PoseCardView: View {
                         Text(pose.displayName)
                             .font(Theme.bodyFont)
                             .foregroundStyle(Theme.ivory)
-                        Text(lastScore.map { "Dernier score · \($0) / 100" } ?? "Première séance")
+                        Text(lastScore.map { String(localized: "Dernier score · \($0) / 100") } ?? String(localized: "Première séance"))
                             .font(Theme.bodyFont)
                             .foregroundStyle(Theme.goldMuted)
                     }
@@ -183,9 +183,9 @@ struct StatsRowView: View {
     var body: some View {
         let layout = dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 20)) : AnyLayout(HStackLayout(spacing: 16))
         layout {
-            stat("Cette semaine", "\(week.weekLockCount) lock\(week.weekLockCount == 1 ? "" : "s")")
-            stat("Meilleure pose", week.bestPoseName.map { "\($0) \(week.bestPoseScore ?? 0)" } ?? "—")
-            stat("Moyenne", week.averageScore.map(String.init) ?? "—")
+            stat(String(localized: "Cette semaine"), String(localized: "\(week.weekLockCount) locks"))
+            stat(String(localized: "Meilleure pose"), week.bestPoseName.map { "\($0) \(week.bestPoseScore ?? 0)" } ?? "—")
+            stat(String(localized: "Moyenne"), week.averageScore.map(String.init) ?? "—")
         }
         .padding(.vertical, 8)
     }
@@ -275,20 +275,20 @@ struct DeadlineCard: View {
     }
 
     private var emptyTitle: String {
-        goal == .competition ? "Ajoute ta date de scène." : "Ajoute une échéance."
+        goal == .competition ? String(localized: "Ajoute ta date de scène.") : String(localized: "Ajoute une échéance.")
     }
 
     private var emptyDetail: String {
-        "Une date, un lieu. Les rappels suivent."
+        String(localized: "Une date, un lieu. Les rappels suivent.")
     }
 
     private func headline(for date: Date) -> String {
         let days = daysRemaining(from: date)
         let countdown: String
         if days == 0 {
-            countdown = "Aujourd’hui"
+            countdown = String(localized: "Aujourd’hui")
         } else {
-            countdown = "J-\(days)"
+            countdown = String(localized: "J-\(days)")
         }
         if let place, !place.isEmpty {
             return "\(countdown) · \(place)"

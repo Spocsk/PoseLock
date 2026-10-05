@@ -97,14 +97,14 @@ struct FeedbackSheet: View {
             build: versions.build,
             systemVersion: system
         ) else {
-            error = "Mail n’est pas configuré."
+            error = String(localized: "Mail n’est pas configuré.")
             return
         }
         UIApplication.shared.open(url) { success in
             if success {
                 dismiss()
             } else {
-                error = "Mail n’est pas configuré."
+                error = String(localized: "Mail n’est pas configuré.")
             }
         }
     }

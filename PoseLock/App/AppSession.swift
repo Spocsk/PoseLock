@@ -109,11 +109,11 @@ enum PaywallReason: Sendable {
 
     var title: String {
         switch self {
-        case .dailyLimit: return "3 locks aujourd’hui"
-        case .otherPack: return "Les 3 packs, avec Pro"
-        case .deadline: return "Rappels d’échéance"
-        case .zyzz: return "Catégorie Zyzz"
-        case .onboarding: return "Passe en Pro"
+        case .dailyLimit: return String(localized: "3 locks aujourd’hui")
+        case .otherPack: return String(localized: "Les 3 packs, avec Pro")
+        case .deadline: return String(localized: "Rappels d’échéance")
+        case .zyzz: return String(localized: "Catégorie Zyzz")
+        case .onboarding: return String(localized: "Passe en Pro")
         case .generic: return "PoseLock Pro"
         }
     }
@@ -121,17 +121,17 @@ enum PaywallReason: Sendable {
     var message: String {
         switch self {
         case .dailyLimit:
-            return "Le plafond free, c’est trois photos lockées par jour."
+            return String(localized: "Le plafond free, c’est trois photos lockées par jour.")
         case .otherPack:
-            return "Free garde le pack choisi à l’onboarding. Pro ouvre les trois."
+            return String(localized: "Free garde le pack choisi à l’onboarding. Pro ouvre les trois.")
         case .deadline:
-            return "J-7, J-3, J-1. La pose à retravailler, pas un calendrier vide."
+            return String(localized: "J-7, J-3, J-1. La pose à retravailler, pas un calendrier vide.")
         case .zyzz:
-            return "La pose esthétique. Vacuum, twist, V-taper."
+            return String(localized: "La pose esthétique. Vacuum, twist, V-taper.")
         case .onboarding:
-            return "Le mode caméra, les catalogues, Zyzz et le journal, sans plafond, dès la première séance."
+            return String(localized: "Le mode caméra, les catalogues, Zyzz et le journal, sans plafond, dès la première séance.")
         case .generic:
-            return "Le même mode caméra. Plus de plafond, plus de packs, le recul d’un mois."
+            return String(localized: "Le même mode caméra. Plus de plafond, plus de packs, le recul d’un mois.")
         }
     }
 }
@@ -170,26 +170,26 @@ enum ProBenefit: CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .unlimited: return "Locks illimités"
-        case .packs: return "Scène, Contenu, Physique"
-        case .compare: return "Comparatif J-30"
-        case .deadline: return "Rappels d’échéance"
-        case .zyzz: return "Catégorie Zyzz"
+        case .unlimited: return String(localized: "Locks illimités")
+        case .packs: return String(localized: "Scène, Contenu, Physique")
+        case .compare: return String(localized: "Comparatif J-30")
+        case .deadline: return String(localized: "Rappels d’échéance")
+        case .zyzz: return String(localized: "Catégorie Zyzz")
         }
     }
 
     var detail: String {
         switch self {
         case .unlimited:
-            return "Plus de plafond 3 / jour. Tu lockes autant que la séance le demande."
+            return String(localized: "Plus de plafond 3 / jour. Tu lockes autant que la séance le demande.")
         case .packs:
-            return "Les mandatories, l’angle contenu, la posture. Les trois catalogues, pas un seul."
+            return String(localized: "Les mandatories, l’angle contenu, la posture. Les trois catalogues, pas un seul.")
         case .compare:
-            return "La même pose, un mois plus tôt, à côté de la prise du jour."
+            return String(localized: "La même pose, un mois plus tôt, à côté de la prise du jour.")
         case .deadline:
-            return "J-7, J-3, J-1. La pose à retravailler, pas un calendrier vide."
+            return String(localized: "J-7, J-3, J-1. La pose à retravailler, pas un calendrier vide.")
         case .zyzz:
-            return "La pose esthétique. Vacuum, twist, V-taper."
+            return String(localized: "La pose esthétique. Vacuum, twist, V-taper.")
         }
     }
 }

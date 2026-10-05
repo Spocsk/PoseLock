@@ -167,7 +167,7 @@ struct CameraHUD: View {
                     Text("\(Int(score.rounded()))")
                         .font(Theme.scoreFont)
                         .foregroundStyle(evaluation.isGloballyGreen ? Theme.lockGreen : Theme.ivory)
-                    Text(evaluation.worstCue)
+                    Text(CueText.localized(evaluation.worstCue))
                         .font(Theme.distanceCueFont)
                         .foregroundStyle(Theme.ivory)
                         .multilineTextAlignment(.center)

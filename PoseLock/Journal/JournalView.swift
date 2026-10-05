@@ -10,8 +10,8 @@ enum JournalTab: String, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .takes: return "Prises"
-        case .poses: return "Poses"
+        case .takes: return String(localized: "Prises")
+        case .poses: return String(localized: "Poses")
         }
     }
 }
@@ -150,7 +150,7 @@ struct JournalCell: View {
                 .font(Theme.captionFont)
                 .foregroundStyle(Theme.ivoryMuted)
                 .lineLimit(2)
-            Text(entry.date.formatted(.dateTime.day().month(.abbreviated).locale(Locale(identifier: "fr_FR"))))
+            Text(entry.date.formatted(.dateTime.day().month(.abbreviated)))
                 .font(Theme.captionFont)
                 .foregroundStyle(Theme.ivoryFaint)
         }
@@ -187,9 +187,9 @@ struct JournalDetailView: View {
                     .foregroundStyle(Theme.ivoryMuted)
                     .font(Theme.captionFont)
 
-                compareRow(title: "J-7", days: 7)
+                compareRow(title: String(localized: "J-7"), days: 7)
                 if isPro {
-                    compareRow(title: "J-30", days: 30)
+                    compareRow(title: String(localized: "J-30"), days: 30)
                 } else {
                     Text("J-30 avec Pro.")
                         .font(Theme.captionFont)

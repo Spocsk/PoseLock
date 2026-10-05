@@ -21,20 +21,20 @@ struct OnboardingPersonalizationView: View {
 
     private var lines: [(threshold: Int, label: String, value: String)] {
         [
-            (17, "Objectif", goal?.displayName ?? "Libre"),
-            (45, "Pack", pack.displayName),
-            (73, "Pose du jour", pack.defaultPoseID.displayName),
-            (92, "Seuil de lock", "\(Int(ScoringConstants.lockScore)) sur 100")
+            (17, String(localized: "Objectif"), goal?.displayName ?? String(localized: "Libre")),
+            (45, String(localized: "Pack"), pack.displayName),
+            (73, String(localized: "Pose du jour"), pack.defaultPoseID.displayName),
+            (92, String(localized: "Seuil de lock"), String(localized: "\(Int(ScoringConstants.lockScore)) sur 100"))
         ]
     }
 
     var body: some View {
         VStack(spacing: 0) {
             OnboardingHeader(
-                title: isDone ? "Ton plan est prêt." : "On règle PoseLock sur toi.",
+                title: isDone ? String(localized: "Ton plan est prêt.") : String(localized: "On règle PoseLock sur toi."),
                 detail: isDone
-                    ? "Voilà ce sur quoi PoseLock va te noter dès la première séance."
-                    : "Quelques secondes, rien à faire."
+                    ? String(localized: "Voilà ce sur quoi PoseLock va te noter dès la première séance.")
+                    : String(localized: "Quelques secondes, rien à faire.")
             )
             .staggeredAppear(0)
 
@@ -56,9 +56,9 @@ struct OnboardingPersonalizationView: View {
             // ce qu'il ne fait pas. Pas d'avis, pas de compteur d'utilisateurs.
             if percent >= 45 {
                 VStack(alignment: .leading, spacing: 10) {
-                    trustRow("cpu", "L’analyse tourne sur l’iPhone, avec Vision.")
-                    trustRow("wifi.slash", "La vidéo de séance n’en sort jamais.")
-                    trustRow("person.crop.circle.badge.xmark", "Aucun compte pour commencer.")
+                    trustRow("cpu", String(localized: "L’analyse tourne sur l’iPhone, avec Vision."))
+                    trustRow("wifi.slash", String(localized: "La vidéo de séance n’en sort jamais."))
+                    trustRow("person.crop.circle.badge.xmark", String(localized: "Aucun compte pour commencer."))
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 24)

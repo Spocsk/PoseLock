@@ -78,7 +78,7 @@ struct SettingsView: View {
 
                 Section("Abonnement") {
                     LabeledContent("État") {
-                        Text(store.isPro ? "PoseLock Pro" : "Gratuit · \(ScoringConstants.freeLocksPerDay) locks/jour")
+                        Text(store.isPro ? "PoseLock Pro" : String(localized: "Gratuit · \(ScoringConstants.freeLocksPerDay) locks/jour"))
                             .foregroundStyle(Theme.ivoryMuted)
                     }
                     Button("PoseLock Pro") { showPaywall = true }
@@ -259,7 +259,7 @@ struct PrivacyView: View {
 }
 
 enum PrivacyCopy {
-    static let body = """
+    static var body: String { String(localized: """
     La vidéo de session ne quitte pas l’iPhone.
 
     PoseLock note l’exécution d’une pose sur l’appareil (Vision, on-device). Les photos lockées restent dans l’app, dans le stockage local. Aucune image, aucune vidéo, aucun score n’est envoyé ailleurs.
@@ -273,5 +273,5 @@ enum PrivacyCopy {
     Si tu actives les statistiques dans Réglages, PoseLock transmet à Mixpanel EU quelques événements d’usage sans compte (étapes du parcours, caméra démarrée, photo lockée, partage commencé). Un identifiant technique aléatoire distingue les installations consentantes. Sans ton accord, aucune statistique Mixpanel n’est envoyée. Tu peux retirer l’accord dans Réglages ; les envois en cours sont annulés et l’identifiant local effacé. Aucun nom, identifiant Apple, objectif, image, vidéo, pose ou score n’est transmis. Pas de suivi publicitaire ni d’enregistrement de session.
 
     Tu peux effacer le journal dans Réglages.
-    """
+    """) }
 }
