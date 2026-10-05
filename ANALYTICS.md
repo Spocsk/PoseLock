@@ -1,23 +1,23 @@
-# Mesure PoseLock : Mixpanel EU + RevenueCat
+# Mesure PoseLock : TelemetryDeck + RevenueCat
 
-Le catalogue, les achats et les abonnements restent chez RevenueCat. Mixpanel mesure uniquement les usages auxquels la personne a consenti. Il n'y a **pas de liaison d'identité** entre le visiteur web, l'installation iOS et l'abonné RevenueCat. Les chiffres d'acquisition App Store restent à lire dans App Store Connect.
+Le catalogue, les achats et les abonnements restent chez RevenueCat. TelemetryDeck mesure uniquement les usages auxquels la personne a consenti. Il n'y a **pas de liaison d'identité** entre l'installation iOS et l'abonné RevenueCat. Les chiffres d'acquisition (impressions, téléchargements, rétention) restent à lire dans App Store Connect.
+
+Mixpanel EU a été utilisé en septembre 2026 puis remplacé par TelemetryDeck en octobre 2026 (interface plus simple, hébergement UE). Le site `docs/` n'envoie aucun événement.
 
 ## Activation
 
-1. Projet Mixpanel **PoseLock** créé en région EU (ID `4066589`, fuseau `Europe/Paris`) et son *project token public* configuré dans `docs/analytics.js` (`PROJECT_TOKEN`) et `PoseLock/Info.plist` (`MixpanelProjectToken`). Ne jamais placer une clé secrète ou de service dans ces fichiers. La validation locale du token accepte 16 à 64 caractères alphanumériques.
-2. Vérifier que l'endpoint du projet est `https://api-eu.mixpanel.com`. Les transports web/iOS utilisent `POST /track?ip=0` avec `distinct_id` aléatoire, uniquement après accord. La propriété `environment` distingue `development` (localhost et build DEBUG) de `production`. Ils n'utilisent ni SDK de collecte, ni autocapture, ni session replay, ni file hors ligne. Le refus n'émet aucune requête ; le retrait annule les requêtes en cours et efface l'identifiant local. Une requête déjà reçue par Mixpanel ne peut pas être rétractée par ce mécanisme.
-3. Dans le navigateur et sur simulateur, contrôler le trafic réseau en refusant, acceptant et retirant l'accord. Examiner aussi les propriétés réellement ingérées dans Mixpanel, puis actualiser si nécessaire les déclarations App Privacy / la politique de confidentialité avant publication.
-4. Le tableau [PoseLock — lancement](https://eu.mixpanel.com/project/4066589/view/4563038/app/boards#id=11543857) est créé. Son premier rapport, `Visiteurs landing — production`, compte les visiteurs uniques de `page_viewed` sur 30 jours avec `environment=production`. Les visites locales de vérification restent donc exclues. Ajouter ensuite trafic par UTM, lecture vidéo, clic App Store, tunnel d'onboarding iOS, vues paywall → achats consentis, démarrages caméra, locks et partages lorsque ces événements seront réellement reçus. Séparer web/iOS : leurs identifiants ne sont pas reliés. L'événement `purchase_completed` ne constitue pas un bilan de revenus exhaustif : les achats sans consentement ne remontent pas.
+1. Organisation TelemetryDeck **Tech Master**, namespace `fr.dylan-cdo`. App **PoseLock**, App ID `72790DE8-2D17-4687-A8CD-321CF82831A3`, renseigné dans `PoseLock/Info.plist` (`TelemetryDeckAppID`). L'App ID est public par nature (il voyage dans chaque build). `PoseLockAnalytics.isConfigured` exige un UUID valide ; sinon le réglage reste grisé.
+2. `PoseLockAnalytics` envoie directement à l'Ingest API v2 (`POST https://nom.telemetrydeck.com/v2/namespace/fr.dylan-cdo/`), sans SwiftSDK, sans autocapture ni file hors ligne. `clientUser` est le SHA-256 d'un identifiant aléatoire local ; `sessionID` change à chaque lancement. Les builds DEBUG envoient `isTestMode: true` : activer le *Test Mode* du tableau de bord pour les voir. Le refus n'émet aucune requête ; le retrait annule les requêtes en cours et efface l'identifiant local. Un signal déjà reçu ne peut pas être rétracté par ce mécanisme.
+3. Les clés de consentement s'appellent `poselock.analyticsConsent` / `poselock.analyticsChoiceMade`. Les anciennes clés `poselock.mixpanel*` sont effacées au premier choix ; un appareil qui avait accepté Mixpanel repart donc sans accord (réactivable dans Réglages).
+4. Le MCP TelemetryDeck permet de lister l'app et d'interroger les signaux (TQL). Il ne crée ni app ni tableau de bord : ceux-ci se configurent dans le dashboard TelemetryDeck.
 
-Le MCP personnalisé `mixpanel-eu` est enregistré et authentifié dans Codex (`https://mcp-eu.mixpanel.com/mcp`). Le plugin Mixpanel standard pointe vers la région globale et ne peut pas interroger ce projet EU ; une nouvelle tâche Codex peut être nécessaire pour charger les outils du MCP personnalisé. Le projet a été validé dans l'interface Mixpanel EU : l'API d'ingestion a répondu avec succès et `page_viewed` est visible dans les événements de développement. Le flux iOS reste à contrôler sur simulateur avec accord explicite.
+Événements iOS (champ `type`) : `Onboarding.started`, `Onboarding.stepCompleted` (paramètre `Onboarding.step`, nom d'étape uniquement), `Paywall.viewed`, `Purchase.completed`, `Camera.sessionStarted`, `Lock.saved`, `Share.started`. Jamais de champ libre, image, vidéo, pose, score, objectif ni identifiant Apple. `Purchase.completed` ne constitue pas un bilan de revenus exhaustif : les achats sans consentement ne remontent pas, RevenueCat reste la source de vérité.
 
-Le MCP officiel RevenueCat est enregistré (`https://mcp.revenuecat.ai/mcp`), mais son OAuth n'est pas encore autorisé. Sa connexion demande un accès RevenueCat de lecture/écriture ; le contrôle de l'offering et une éventuelle maquette du paywall dans l'éditeur attendent cette autorisation.
+Le MCP officiel RevenueCat est enregistré (`https://mcp.revenuecat.ai/mcp`), mais son OAuth n'est pas encore autorisé.
 
-Événements web : `page_viewed`, `launch_video_played`, `waitlist_requested`, `app_store_clicked` (seulement quand le lien App Store sera actif). Propriétés web : chemin et UTM `source`, `medium`, `campaign` si leurs valeurs passent la liste autorisée. Événements iOS : `onboarding_started`, `onboarding_step_completed` (nom d'étape uniquement), `paywall_viewed`, `purchase_completed`, `camera_session_started`, `lock_saved`, `share_started`. Jamais de champ libre, image, vidéo, pose, score, objectif ni identifiant Apple.
+## Intégration RevenueCat ↔ TelemetryDeck
 
-## Intégration RevenueCat ↔ Mixpanel
-
-Ne pas activer l'intégration serveur RevenueCat → Mixpanel par défaut : elle transmettrait les événements d'achat des personnes ayant refusé la mesure Mixpanel, car le consentement local ne contrôle pas ce flux serveur. Pour l'instant, RevenueCat reste la source de vérité du revenu/abonnement ; Mixpanel reçoit uniquement `purchase_completed` depuis l'app après consentement. Évaluer ultérieurement une liaison consentie et documentée si un besoin de cohorte revenu individualisée apparaît.
+Ne pas activer d'intégration serveur RevenueCat → outil d'analytics : elle transmettrait les achats des personnes ayant refusé la mesure, car le consentement local ne contrôle pas ce flux serveur.
 
 ## Paywall RevenueCat
 
@@ -26,7 +26,6 @@ Le paywall iOS reste natif SwiftUI. `StoreManager.refreshOffers()` lit l'offerin
 ## Vérification rapide
 
 ```bash
-node --test docs/tests/analytics.test.js
 xcodebuild -scheme PoseLock -destination 'generic/platform=iOS Simulator' build
 ```
 

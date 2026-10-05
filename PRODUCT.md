@@ -32,7 +32,7 @@ Séance caméra plein écran (hors tab bar). Accueil, journal, réglages. Packs 
 - Seuil de lock : 85 / 100, hold 1,5 s.
 - Gratuit : 3 locks par jour, un pack parmi Scène / Contenu / Physique.
 - Pro (entitlement RevenueCat `pro`) : locks illimités, les trois packs, comparatif J-30, rappels d’échéance, catalogue Zyzz.
-- Aucun serveur applicatif. RevenueCat traite l’état de l’abonnement. Mixpanel EU est prévu pour quelques événements d’usage sans compte, uniquement après accord explicite et configuration d’un projet PoseLock dédié ; aucun média, pose ou score ne lui est envoyé. Pas de crash reporter.
+- Aucun serveur applicatif. RevenueCat traite l’état de l’abonnement. TelemetryDeck (UE) reçoit quelques événements d’usage sans compte, uniquement après accord explicite ; aucun média, pose ou score ne lui est envoyé. Pas de crash reporter.
 - Overlay caméra = stickman. Previews de poses = silhouette capsule 2D (`PoseFigure`), jamais une photo d’autrui ni un perso 3D.
 - Vacuum : consigne coach, Vision ne le score pas.
 - Compte Apple skippable ; entitlement Sign in with Apple absent tant qu’il n’y a pas d’équipe payante.

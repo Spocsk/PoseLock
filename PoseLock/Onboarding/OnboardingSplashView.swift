@@ -11,7 +11,7 @@ struct OnboardingSplashView: View {
     @State private var breathing = false
     @State private var revealed = false
     @State private var showAnalyticsChoice = false
-    @AppStorage("poselock.mixpanelChoiceMade") private var analyticsChoiceMade = false
+    @AppStorage("poselock.analyticsChoiceMade") private var analyticsChoiceMade = false
 
     var body: some View {
         ZStack {

@@ -8,17 +8,6 @@
 	<string>PoseLock</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
-	<key>UIApplicationShortcutItems</key>
-	<array>
-		<dict>
-			<key>UIApplicationShortcutItemIconType</key>
-			<string>UIApplicationShortcutIconTypeMessage</string>
-			<key>UIApplicationShortcutItemTitle</key>
-			<string>Signaler un problème</string>
-			<key>UIApplicationShortcutItemType</key>
-			<string>com.spocsk.PoseLock.reportProblem</string>
-		</dict>
-	</array>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>instagram-stories</string>
@@ -31,18 +20,29 @@
 	<string>PoseLock peut enregistrer une copie des photos lockées dans l’album Photos, uniquement si tu l’actives dans Réglages.</string>
 	<key>RCPublicAPIKey</key>
 	<string>appl_mZoElowsCrudoOGDpTqKGZkgaRf</string>
-	<key>MixpanelProjectToken</key>
-	<string>03ed0cec87dc4b14df0bc46af678fa4d</string>
+	<key>TelemetryDeckAppID</key>
+	<string>72790DE8-2D17-4687-A8CD-321CF82831A3</string>
+	<key>UIApplicationShortcutItems</key>
+	<array>
+		<dict>
+			<key>UIApplicationShortcutItemIconType</key>
+			<string>UIApplicationShortcutIconTypeMessage</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>Signaler un problème</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>com.spocsk.PoseLock.reportProblem</string>
+		</dict>
+	</array>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>
 		<string>LaunchBackground</string>
 	</dict>
+	<key>UIStatusBarStyle</key>
+	<string>UIStatusBarStyleLightContent</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
-	<key>UIStatusBarStyle</key>
-	<string>UIStatusBarStyleLightContent</string>
 </dict>
 </plist>

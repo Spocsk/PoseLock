@@ -1,42 +1,48 @@
+import CryptoKit
 import Foundation
 
-/// Transport Mixpanel minimal : seuls les événements explicitement listés sont envoyés.
+/// Transport TelemetryDeck minimal : seuls les événements explicitement listés sont envoyés.
 /// Aucun SDK ne collecte de propriétés, d'écrans ou de fichiers automatiquement.
 @MainActor
 enum PoseLockAnalytics {
     enum Event: String {
-        case onboardingStarted = "onboarding_started"
-        case onboardingStepCompleted = "onboarding_step_completed"
-        case paywallViewed = "paywall_viewed"
-        case purchaseCompleted = "purchase_completed"
-        case cameraSessionStarted = "camera_session_started"
-        case lockSaved = "lock_saved"
-        case shareStarted = "share_started"
+        case onboardingStarted = "Onboarding.started"
+        case onboardingStepCompleted = "Onboarding.stepCompleted"
+        case paywallViewed = "Paywall.viewed"
+        case purchaseCompleted = "Purchase.completed"
+        case cameraSessionStarted = "Camera.sessionStarted"
+        case lockSaved = "Lock.saved"
+        case shareStarted = "Share.started"
     }
 
-    private static let consentKey = "poselock.mixpanelConsent"
-    private static let visitorKey = "poselock.mixpanelAnonymousID"
-    private static let endpoint = URL(string: "https://api-eu.mixpanel.com/track?ip=0")!
+    private static let consentKey = "poselock.analyticsConsent"
+    private static let visitorKey = "poselock.analyticsAnonymousID"
+    /// Clés laissées par l'ancien adaptateur Mixpanel, effacées au prochain choix.
+    private static let legacyKeys = ["poselock.mixpanelConsent", "poselock.mixpanelAnonymousID", "poselock.mixpanelChoiceMade"]
+    private static let endpoint = URL(string: "https://nom.telemetrydeck.com/v2/namespace/fr.dylan-cdo/")!
     private static let session: URLSession = {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.httpCookieStorage = nil
         configuration.urlCache = nil
         return URLSession(configuration: configuration)
     }()
+    /// Une session TelemetryDeck par lancement de l'app.
+    private static let sessionID = UUID().uuidString
     private static var tasks: [UUID: URLSessionDataTask] = [:]
 
-    private static var projectToken: String? {
-        guard let token = Bundle.main.object(forInfoDictionaryKey: "MixpanelProjectToken") as? String,
-              token.range(of: "^[A-Za-z0-9]{16,64}$", options: .regularExpression) != nil
+    private static var appID: String? {
+        guard let id = Bundle.main.object(forInfoDictionaryKey: "TelemetryDeckAppID") as? String,
+              UUID(uuidString: id) != nil
         else { return nil }
-        return token
+        return id
     }
 
-    static var isConfigured: Bool { projectToken != nil }
+    static var isConfigured: Bool { appID != nil }
     static var hasConsent: Bool { UserDefaults.standard.bool(forKey: consentKey) }
 
     static func setConsent(_ granted: Bool) {
         UserDefaults.standard.set(granted, forKey: consentKey)
+        for key in legacyKeys { UserDefaults.standard.removeObject(forKey: key) }
         if !granted {
             for task in tasks.values { task.cancel() }
             tasks.removeAll()
@@ -53,7 +59,7 @@ enum PoseLockAnalytics {
     }
 
     private static func send(_ event: Event, step: String? = nil) {
-        guard hasConsent, let token = projectToken else { return }
+        guard hasConsent, let appID else { return }
         let anonymousID: String
         if let existing = UserDefaults.standard.string(forKey: visitorKey) {
             anonymousID = existing
@@ -61,19 +67,27 @@ enum PoseLockAnalytics {
             anonymousID = UUID().uuidString
             UserDefaults.standard.set(anonymousID, forKey: visitorKey)
         }
+        // TelemetryDeck attend un hash : l'identifiant aléatoire local ne part jamais en clair.
+        let clientUser = SHA256.hash(data: Data(anonymousID.utf8))
+            .map { String(format: "%02x", $0) }
+            .joined()
 
-        var properties: [String: String] = ["token": token, "distinct_id": anonymousID]
+        var signal: [String: Any] = [
+            "appID": appID,
+            "clientUser": clientUser,
+            "sessionID": sessionID,
+            "type": event.rawValue,
+        ]
         #if DEBUG
-        properties["environment"] = "development"
+        signal["isTestMode"] = true
         #else
-        properties["environment"] = "production"
+        signal["isTestMode"] = false
         #endif
-        if let step { properties["step"] = step }
-        let payload: [[String: Any]] = [["event": event.rawValue, "properties": properties]]
-        guard let body = try? JSONSerialization.data(withJSONObject: payload) else { return }
+        if let step { signal["payload"] = ["Onboarding.step": step] }
+        guard let body = try? JSONSerialization.data(withJSONObject: [signal]) else { return }
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
         request.httpBody = body
         let taskID = UUID()
         let task = session.dataTask(with: request) { _, _, _ in
