@@ -270,7 +270,7 @@ enum PrivacyCopy {
 
     L’abonnement est géré par Apple et RevenueCat. RevenueCat reçoit l’historique d’achat nécessaire à l’état de Pro, jamais tes photos ni tes poses.
 
-    Si tu actives les statistiques dans Réglages, PoseLock transmet à TelemetryDeck (UE) quelques événements d’usage sans compte (étapes du parcours, caméra démarrée, photo lockée, partage commencé). Un identifiant technique aléatoire distingue les installations consentantes. Sans ton accord, aucune statistique n’est envoyée. Tu peux retirer l’accord dans Réglages ; les envois en cours sont annulés et l’identifiant local effacé. Aucun nom, identifiant Apple, objectif, image, vidéo, pose ou score n’est transmis. Pas de suivi publicitaire ni d’enregistrement de session.
+    Si tu actives les statistiques dans Réglages, PoseLock transmet à TelemetryDeck (UE) quelques événements d’usage sans compte (ouverture de l’app, étapes du parcours, caméra démarrée, photo lockée, partage commencé), avec la version de l’app, le modèle d’iPhone, la version d’iOS et la langue. Un identifiant technique aléatoire distingue les installations consentantes. Sans ton accord, aucune statistique n’est envoyée. Tu peux retirer l’accord dans Réglages ; les envois en cours sont annulés et l’identifiant local effacé. Aucun nom, identifiant Apple, objectif, image, vidéo, pose ou score n’est transmis. Pas de suivi publicitaire ni d’enregistrement de session.
 
     Tu peux effacer le journal dans Réglages.
     """) }

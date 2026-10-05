@@ -90,6 +90,7 @@ struct PoseLockApp: App {
     @UIApplicationDelegateAdaptor(PoseLockAppDelegate.self) private var appDelegate
     @State private var store = StoreManager()
     @State private var session = AppSession()
+    @Environment(\.scenePhase) private var scenePhase
 
     init() {
         StoreManager.configure()
@@ -104,5 +105,12 @@ struct PoseLockApp: App {
                 .onAppear { HomeScreenQuickActionRouter.shared.connect(to: session) }
         }
         .modelContainer(for: [AppSettings.self, LockEntry.self])
+        .onChange(of: scenePhase) { _, phase in
+            switch phase {
+            case .active: PoseLockAnalytics.appBecameActive()
+            case .background: PoseLockAnalytics.appEnteredBackground()
+            default: break
+            }
+        }
     }
 }
