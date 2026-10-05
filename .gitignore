@@ -43,8 +43,13 @@ fastlane/test_output
 *~.nib
 
 # Secrets
+.vercel/
+.playwright-cli/
 .env
 .env.*
 *.p12
 *.mobileprovision
 Secrets.xcconfig
+
+# Local App Store captures and editable exports
+/app-store-screenshots/

@@ -5,7 +5,14 @@
   var header = document.querySelector("[data-header]");
   var story = document.querySelector("[data-story]");
   var prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  var storyLabels = ["CADRE TA POSE", "93 · TIENS LA LIGNE", "LOCK · PHOTO GARDÉE"];
+  var STORY_LABELS = {
+    fr: ["PRÉPARE TA POSE", "93 · TIENS LA LIGNE", "LOCK · PHOTO GARDÉE"],
+    en: ["SET UP YOUR POSE", "93 · HOLD THE LINE", "LOCK · PHOTO KEPT"],
+    es: ["PREPARA TU POSE", "93 · MANTÉN LA LÍNEA", "LOCK · FOTO GUARDADA"],
+    de: ["POSE VORBEREITEN", "93 · HALTE DIE LINIE", "LOCK · FOTO GESICHERT"],
+    "pt-BR": ["PREPARE SUA POSE", "93 · SEGURE A LINHA", "LOCK · FOTO SALVA"]
+  };
+  var storyLabels = STORY_LABELS[root.lang] || STORY_LABELS.fr;
   var ticking = false;
   var lastStoryIndex = -1;
 

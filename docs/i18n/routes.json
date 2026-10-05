@@ -1,0 +1,21 @@
+{
+  "origin": "https://poselock.app",
+  "defaultLocale": "fr",
+  "xDefault": "en",
+  "locales": {
+    "fr": { "hreflang": "fr", "og": "fr_FR", "label": "Français", "prefix": "/" },
+    "en": { "hreflang": "en", "og": "en_US", "label": "English", "prefix": "/en/" },
+    "es": { "hreflang": "es", "og": "es_ES", "label": "Español", "prefix": "/es/" },
+    "de": { "hreflang": "de", "og": "de_DE", "label": "Deutsch", "prefix": "/de/" },
+    "pt-BR": { "hreflang": "pt-BR", "og": "pt_BR", "label": "Português (Brasil)", "prefix": "/pt-br/" }
+  },
+  "pages": {
+    "home": { "fr": "/", "en": "/en/", "es": "/es/", "de": "/de/", "pt-BR": "/pt-br/" },
+    "privacy": { "fr": "/confidentialite/", "en": "/en/privacy/", "es": "/es/privacidad/", "de": "/de/datenschutz/", "pt-BR": "/pt-br/privacidade/" },
+    "support": { "fr": "/support/", "en": "/en/support/", "es": "/es/soporte/", "de": "/de/hilfe/", "pt-BR": "/pt-br/suporte/" },
+    "guide-posing": { "fr": "/guides/posing-bodybuilding/", "en": "/en/guides/bodybuilding-posing/", "es": "/es/guias/posing-culturismo/", "de": "/de/ratgeber/bodybuilding-posing/", "pt-BR": "/pt-br/guias/posing-fisiculturismo/" },
+    "guide-fdb": { "fr": "/guides/front-double-biceps/", "en": "/en/guides/front-double-biceps/", "es": "/es/guias/front-double-biceps/", "de": "/de/ratgeber/front-double-biceps/", "pt-BR": "/pt-br/guias/front-double-biceps/" },
+    "guide-alone": { "fr": "/guides/poser-seul/", "en": "/en/guides/posing-alone/", "es": "/es/guias/posar-solo/", "de": "/de/ratgeber/allein-posen/", "pt-BR": "/pt-br/guias/posar-sozinho/" },
+    "confirmation": { "fr": "/confirmation/", "en": "/en/confirm/", "es": "/es/confirmar/", "de": "/de/bestaetigen/", "pt-BR": "/pt-br/confirmar/", "noindex": true }
+  }
+}

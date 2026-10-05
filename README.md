@@ -33,9 +33,9 @@ Le score juge la ligne, jamais la personne. Templates gold `v1`, une variante pa
 
 ## Landing
 
-Site statique dans `docs/`, prévu pour GitHub Pages (`main` / dossier `/docs`).
+Site statique dans `docs/`, publié sur Vercel avec deux fonctions pour la liste d’attente. Le projet Vercel `poselock` pointe sur ce dossier avec le preset `Other`.
 
-URL projet : [https://spocsk.github.io/PoseLock/](https://spocsk.github.io/PoseLock/)
+URL : [https://poselock.app/](https://poselock.app/)
 
 En local :
 
@@ -43,6 +43,6 @@ En local :
 python3 -m http.server 8080 --directory docs
 ```
 
-Puis ouvrir `http://127.0.0.1:8080`. Le bouton App Store est volontairement inactif (pas de fiche pour l’instant).
+Puis ouvrir `http://127.0.0.1:8080`. Le bouton App Store du héros est volontairement inactif (pas de fiche pour l’instant). Le formulaire demande une fonction Vercel et ne fonctionne pas avec ce serveur statique.
 
-GitHub Pages est branché sur `main` / `/docs`. L’URL se met à jour au prochain push de `docs/` sur `main`.
+En production, configurer `RESEND_API_KEY`, `RESEND_SEGMENT_ID`, `WAITLIST_TOKEN_SECRET` (32 octets en base64url) et `PUBLIC_ORIGIN=https://poselock.app` dans Vercel. Le segment Resend reçoit uniquement les adresses confirmées. Les futurs Broadcasts doivent inclure la désinscription et attendre la sortie effective de l’app.
